@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#1E88E5</color> <!-- Azul Ventilación -->
+    <color name="primary_dark">#1565C0</color>
+    <color name="accent">#00ACC1</color> <!-- Cyan para Humedad -->
+    <color name="background">#F5F7FA</color> <!-- Gris claro de fondo -->
+    <color name="card_bg">#FFFFFF</color> <!-- Blanco para las tarjetas -->
+    <color name="text_dark">#263238</color> <!-- Gris oscuro para texto -->
+    <color name="alert_red">#E53935</color> <!-- Rojo para el sensor PIR -->
+</resources>

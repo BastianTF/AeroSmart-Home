@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">AeroSmart Home</string>
+    <string name="app_subtitle">Sistema de Control de Ventilación</string>
+    <string name="status_disconnected">Estado: Desconectado</string>
+    <string name="connect">Conectar</string>
+    <string name="environmental_monitoring">Monitoreo Ambiental (DHT11)</string>
+    <string name="temperature">Temperatura</string>
+    <string name="default_temperature">-- °C</string>
+    <string name="humidity">Humedad</string>
+    <string name="default_humidity">-- %</string>
+    <string name="user_presence">Presencia de Usuarios (PIR)</string>
+    <string name="status_no_movement">Estado: Sin movimiento</string>
+    <string name="ventilation_opening">Apertura de Ventilación (Servo SG90)</string>
+    <string name="default_servo_angle">Ángulo: 0°</string>
+    <string name="lcd_replica">Réplica de Monitor LCD</string>
+    <string name="lcd_default_text">[ LCD 16x2 ]\nSin Datos</string>
+    <string name="ventilation_hatch">Compuerta de Ventilación</string>
+    <string name="status_closed">Estado: Cerrado</string>
+</resources>
