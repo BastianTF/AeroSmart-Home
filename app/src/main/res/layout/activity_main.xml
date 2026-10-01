@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background"
     android:padding="16dp"
+    android:paddingTop="28dp"
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -13,13 +14,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- HEADER CON LOGO DE LA APP -->
+        <!-- HEADER CON LOGO DE LA APP Y BOTÓN PERFIL -->
         <LinearLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginTop="44dp"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:paddingBottom="8dp"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -31,10 +33,11 @@
                 android:src="@drawable/logo_ventilador" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginStart="16dp">
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -51,6 +54,15 @@
                     android:textColor="@color/text_dark"
                     android:textSize="14sp" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/btnProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary"
+                android:text="Perfil"
+                android:textSize="12sp"
+                app:cornerRadius="8dp" />
         </LinearLayout>
 
         <!-- CARD 1: CONEXIÓN -->
@@ -58,7 +70,7 @@
             android:id="@+id/cardConnection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/card_bg"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
@@ -96,7 +108,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/card_bg"
+            app:cardBackgroundColor="@color/background"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
             app:layout_constraintTop_toBottomOf="@id/cardConnection">
@@ -111,9 +123,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/environmental_monitoring"
-                    android:textSize="14sp"
                     android:textColor="@color/primary"
-                    android:textStyle="bold"/>
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -219,6 +231,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
             app:cardBackgroundColor="@color/card_bg"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
@@ -227,28 +240,30 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
+                android:padding="16dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/ventilation_hatch"
                         android:textColor="@color/text_dark"
-                        android:textStyle="bold"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/txtServoStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/status_closed"
-                        android:textSize="14sp"/>
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <com.google.android.material.switchmaterial.SwitchMaterial

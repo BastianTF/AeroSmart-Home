@@ -16,4 +16,6 @@
     <string name="lcd_default_text">[ LCD 16x2 ]\nSin Datos</string>
     <string name="ventilation_hatch">Compuerta de Ventilación</string>
     <string name="status_closed">Estado: Cerrado</string>
+    <string name="status_open">Estado: Abierto</string>
+    <string name="status_connected">Estado: Conectado</string>
 </resources>
