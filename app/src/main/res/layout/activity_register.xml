@@ -77,23 +77,23 @@
                 android:textColor="@color/text_dark" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Dirección -->
+        <!-- Campo Teléfono -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilAddress"
+            android:id="@+id/tilPhone"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Dirección"
+            android:hint="Número de Teléfono (Celular)"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilLastName">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etAddress"
+                android:id="@+id/etPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPostalAddress"
+                android:inputType="phone"
                 android:textColor="@color/text_dark" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -107,7 +107,7 @@
             android:hint="Correo electrónico"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilAddress">
+            app:layout_constraintTop_toBottomOf="@id/tilPhone">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etRegEmail"
@@ -138,6 +138,27 @@
                 android:textColor="@color/text_dark" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Campo Confirmar Contraseña -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilConfirmPassword"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Confirmar Contraseña"
+            app:endIconMode="password_toggle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tilRegPassword">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etConfirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/text_dark" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- Botón Registrarse -->
         <Button
             android:id="@+id/btnRegister"
@@ -150,7 +171,7 @@
             app:cornerRadius="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilRegPassword" />
+            app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword" />
 
         <!-- Separador O regístrate con -->
         <TextView
@@ -165,7 +186,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnRegister" />
 
-        <!-- Botones de Redes Sociales (Google, Facebook, Apple) -->
+        <!-- Botones de Redes Sociales (Google, Facebook, Apple) con iconos circulares -->
         <LinearLayout
             android:id="@+id/layoutSocialRegister"
             android:layout_width="0dp"
@@ -177,41 +198,59 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtRegOr">
 
-            <Button
+            <!-- Botón Google -->
+            <androidx.cardview.widget.CardView
                 android:id="@+id/btnRegGoogle"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                android:backgroundTint="#DB4437"
-                android:text="Google"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                app:cornerRadius="8dp" />
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="30dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_google"
+                    android:contentDescription="Google" />
+            </androidx.cardview.widget.CardView>
 
-            <Button
+            <!-- Botón Facebook -->
+            <androidx.cardview.widget.CardView
                 android:id="@+id/btnRegFacebook"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="3dp"
-                android:backgroundTint="#4267B2"
-                android:text="Facebook"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                app:cornerRadius="8dp" />
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="30dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_facebook"
+                    android:contentDescription="Facebook" />
+            </androidx.cardview.widget.CardView>
 
-            <Button
+            <!-- Botón Apple -->
+            <androidx.cardview.widget.CardView
                 android:id="@+id/btnRegApple"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:backgroundTint="#000000"
-                android:text="Apple"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                app:cornerRadius="8dp" />
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="30dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_apple"
+                    android:contentDescription="Apple" />
+            </androidx.cardview.widget.CardView>
         </LinearLayout>
 
         <!-- Botón Volver al Login -->

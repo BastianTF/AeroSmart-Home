@@ -22,16 +22,30 @@ class RegisterActivity : AppCompatActivity() {
         binding.btnRegister.setOnClickListener {
             val firstName = binding.etFirstName.text.toString().trim()
             val lastName = binding.etLastName.text.toString().trim()
-            val address = binding.etAddress.text.toString().trim()
+            val phone = binding.etPhone.text.toString().trim()
             val email = binding.etRegEmail.text.toString().trim()
             val password = binding.etRegPassword.text.toString().trim()
+            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
 
-            if (firstName.isNotEmpty() && lastName.isNotEmpty() && address.isNotEmpty() &&
-                Patterns.EMAIL_ADDRESS.matcher(email).matches() && password.length >= 6
-            ) {
-                showVerificationCodeDialog(email)
-            } else {
-                Toast.makeText(this, "Por favor completa todos los campos (Contraseña >= 6 chars)", Toast.LENGTH_LONG).show()
+            when {
+                firstName.isEmpty() || lastName.isEmpty() -> {
+                    Toast.makeText(this, "Ingresa tu nombre y apellido", Toast.LENGTH_SHORT).show()
+                }
+                phone.length < 7 -> {
+                    Toast.makeText(this, "Ingresa un número de celular válido para alertas de emergencia", Toast.LENGTH_LONG).show()
+                }
+                !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                    Toast.makeText(this, "Ingresa un correo electrónico válido", Toast.LENGTH_SHORT).show()
+                }
+                password.length < 6 -> {
+                    Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show()
+                }
+                password != confirmPassword -> {
+                    Toast.makeText(this, "Las contraseñas no coinciden. Verifícala.", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    showVerificationCodeDialog(email)
+                }
             }
         }
 
@@ -50,7 +64,7 @@ class RegisterActivity : AppCompatActivity() {
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Verificación de Correo Oficial")
-        builder.setMessage("Hemos enviado un código de verificación de 4 dígitos a $email.\n\n(Código de prueba: 1234)")
+        builder.setMessage("Hemos enviado un código de verificación de 4 dígitos a $email para activar las alertas y confirmar tu cuenta.\n\n(Código de prueba: 1234)")
 
         val input = EditText(this)
         input.hint = "Ingresa el código (1234)"
@@ -60,7 +74,7 @@ class RegisterActivity : AppCompatActivity() {
         builder.setPositiveButton("Verificar y Registrar") { _, _ ->
             val enteredCode = input.text.toString().trim()
             if (enteredCode == simulatedCode) {
-                Toast.makeText(this, "¡Correo verificado con éxito! Cuenta creada.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "¡Correo verificado y cuenta creada con éxito!", Toast.LENGTH_LONG).show()
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
                 finishAffinity()

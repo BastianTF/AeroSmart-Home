@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
@@ -11,6 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- TÍTULO -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,13 +23,23 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
-        <ImageView
+        <!-- 3. CABECERA DEL PERFIL: AVATAR REDONDO -->
+        <androidx.cardview.widget.CardView
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/logo_ventilador" />
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="40dp"
+            app:cardElevation="2dp"
+            android:backgroundTint="@color/card_bg">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_placeholder"
+                android:contentDescription="Avatar de perfil" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/txtProfileEmail"
@@ -50,36 +62,47 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etProfileName"
+        <!-- Campo Nombre -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:hint="Nombre completo"
-            android:padding="12dp"
-            android:textColor="@color/text_dark"
-            android:textSize="14sp" />
+            android:layout_marginTop="12dp"
+            android:hint="Nombre completo">
 
-        <EditText
-            android:id="@+id/etProfileAddress"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etProfileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="@color/text_dark" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Campo Teléfono (Reemplaza a Dirección) -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:hint="Dirección del hogar"
-            android:padding="12dp"
-            android:textColor="@color/text_dark"
-            android:textSize="14sp" />
+            android:layout_marginTop="12dp"
+            android:hint="Número de Teléfono (Celular)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etProfilePhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textColor="@color/text_dark" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/btnSaveProfile"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/primary"
             android:text="Guardar Cambios"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            app:cornerRadius="8dp" />
 
         <!-- SECCIÓN: PREFERENCIAS Y NOTIFICACIONES -->
         <TextView
@@ -91,44 +114,61 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
+        <!-- Notificaciones de Alerta -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_popup_reminder"
+                android:contentDescription="Notificaciones"
+                app:tint="@color/primary" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="12dp"
                 android:text="Notificaciones de Alerta"
                 android:textColor="@color/text_dark"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
-            <Switch
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchNotifications"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true" />
         </LinearLayout>
 
+        <!-- Modo de Ventilación Automática -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_auto"
+                android:contentDescription="Modo Automático" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="12dp"
                 android:text="Modo de Ventilación Automática"
                 android:textColor="@color/text_dark"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
-            <Switch
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchAutoVent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -146,6 +186,7 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
+        <!-- CERRAR SESIÓN -->
         <Button
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
@@ -156,7 +197,8 @@
             android:text="Cerrar Sesión"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:cornerRadius="12dp" />
 
     </LinearLayout>
 </ScrollView>

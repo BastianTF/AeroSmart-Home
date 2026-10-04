@@ -16,15 +16,15 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Simulación de carga de datos iniciales guardados
+        // Carga de datos de perfil
         binding.etProfileName.setText("Usuario AeroSmart")
-        binding.etProfileAddress.setText("Calle Principal #123, Smart City")
+        binding.etProfilePhone.setText("+56 9 1234 5678")
 
         binding.btnSaveProfile.setOnClickListener {
             val name = binding.etProfileName.text.toString().trim()
-            val address = binding.etProfileAddress.text.toString().trim()
-            if (name.isNotEmpty() && address.isNotEmpty()) {
-                Toast.makeText(this, "Información personal actualizada con éxito", Toast.LENGTH_SHORT).show()
+            val phone = binding.etProfilePhone.text.toString().trim()
+            if (name.isNotEmpty() && phone.isNotEmpty()) {
+                Toast.makeText(this, "Información personal y teléfono actualizados con éxito", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Por favor completa los campos", Toast.LENGTH_SHORT).show()
             }
@@ -55,7 +55,7 @@ class ProfileActivity : AppCompatActivity() {
     private fun showTermsDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Términos de Servicio y Privacidad")
-        builder.setMessage("AeroSmart Home recopila datos de sensores ambientales (DHT11, PIR) exclusivamente para el control inteligente de ventilación y confort en su hogar. Sus datos están protegidos bajo estándares de privacidad y cifrado.")
+        builder.setMessage("AeroSmart Home recopila datos de sensores ambientales y números de celular exclusivamente para el envío de alertas críticas de temperatura o intrusión (PIR) y el control inteligente de ventilación. Sus datos están protegidos bajo estrictos estándares de privacidad y cifrado.")
         builder.setPositiveButton("Aceptar", null)
         builder.show()
     }
