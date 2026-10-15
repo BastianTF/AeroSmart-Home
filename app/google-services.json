@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "237695332072",
+    "project_id": "aerosmart-99678",
+    "storage_bucket": "aerosmart-99678.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237695332072:android:5a8644c6718e65c57fe35d",
+        "android_client_info": {
+          "package_name": "com.example.ventiladorambiental"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0awcRbL43jP_gIl6pgP26l4UCH37pd9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
