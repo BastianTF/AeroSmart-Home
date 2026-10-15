@@ -44,6 +44,11 @@ class MainActivity : AppCompatActivity() {
             viewModel.toggleVentilation(isChecked)
             val statusText = if (isChecked) getString(R.string.status_open) else getString(R.string.status_closed)
             binding.txtServoStatus.text = statusText
+            binding.txtServoAngleDisplay.text = if (isChecked) "90°" else "0°"
+            binding.txtFanRPMDisplay.text = if (isChecked) "1850 RPM • Flujo Activo" else "0 RPM • En Reposo"
+            if (isChecked) {
+                binding.imgTurbineFan.animate().rotationBy(360f).setDuration(600).start()
+            }
         }
     }
 
@@ -107,6 +112,11 @@ class MainActivity : AppCompatActivity() {
 
                         binding.switchVentilation.isChecked = state.isVentOpen
                         binding.txtServoStatus.text = if (state.isVentOpen) "Abierto" else "Cerrado"
+                        binding.txtServoAngleDisplay.text = if (state.isVentOpen) "90°" else "0°"
+                        binding.txtFanRPMDisplay.text = if (state.isVentOpen) "1850 RPM • Flujo Activo" else "0 RPM • En Reposo"
+                        if (state.isVentOpen) {
+                            binding.imgTurbineFan.animate().rotationBy(360f).setDuration(600).start()
+                        }
                     }
                     is MainUiState.Error -> {
                         binding.btnConnect.isEnabled = true

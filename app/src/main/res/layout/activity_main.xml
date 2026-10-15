@@ -5,28 +5,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:padding="0dp"
+    android:fillViewport="true"
+    android:overScrollMode="never"
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="24dp">
+        android:paddingBottom="32dp">
 
-        <!-- ENCABEZADO DE LA APLICACIÓN -->
+        <!-- 1. ENCABEZADO DE LA APLICACIÓN -->
         <RelativeLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="16dp"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteX="0dp">
+            android:paddingStart="20dp"
+            android:paddingTop="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="12dp"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <!-- CONTENEDOR DE LOGO Y TÍTULOS (ALINEADO A LA IZQUIERDA) -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -35,12 +34,21 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/imgLogo"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:contentDescription="@string/app_name"
-                    android:src="@drawable/logo_ventilador" />
+                <androidx.cardview.widget.CardView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
+
+                    <ImageView
+                        android:id="@+id/imgLogo"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/app_name"
+                        android:src="@drawable/logo_ventilador" />
+                </androidx.cardview.widget.CardView>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -59,13 +67,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sistema de Control de Ventilación"
-                        android:textColor="#757575"
+                        android:text="Sistema de Climatización IoT • OT"
+                        android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- AVATAR CIRCULAR DE PERFIL (ALINEADO A LA DERECHA) -->
+            <!-- AVATAR DE PERFIL -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/profileAvatarCard"
                 android:layout_width="40dp"
@@ -86,194 +94,407 @@
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_profile_placeholder" />
             </androidx.cardview.widget.CardView>
-
         </RelativeLayout>
 
-        <!-- 2. TARJETA DE ESTADO Y CONEXIÓN DINÁMICA -->
-        <androidx.cardview.widget.CardView
+        <!-- 2. TARJETA DE CONEXIÓN INALÁMBRICA BLE -->
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardConnection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             app:cardBackgroundColor="@color/card_bg"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintTop_toBottomOf="@id/headerLayout">
+            app:cardElevation="1dp"
+            app:layout_constraintTop_toBottomOf="@id/headerLayout"
+            app:strokeColor="@color/card_stroke"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="14dp">
 
-                <!-- Indicador visual de estado (círculo) -->
                 <View
                     android:id="@+id/viewStatusDot"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
                     android:layout_marginEnd="10dp"
                     android:background="@drawable/circle_red" />
 
-                <TextView
-                    android:id="@+id/txtStatus"
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/status_disconnected"
-                    android:textColor="@color/text_dark"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:orientation="vertical">
 
-                <Button
+                    <TextView
+                        android:id="@+id/txtStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/status_disconnected"
+                        android:textColor="@color/text_dark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ESP32 BLE • RSSI: -48 dBm"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnConnect"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:backgroundTint="@color/primary"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="@string/connect"
-                    app:cornerRadius="8dp"
-                    tools:layout_editor_absoluteX="274dp"
-                    tools:layout_editor_absoluteY="56dp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="10dp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- 3. CONTENEDOR PRINCIPAL DE MONITOREO AMBIENTAL (DHT11) -->
+        <!-- 3. ACTUADOR PRINCIPAL: HERO CARD TURBINA Y SERVO SG90 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardActuators"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
+            app:layout_constraintTop_toBottomOf="@id/cardConnection"
+            app:strokeColor="#334155"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_hero_turbine"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Fila Superior: Título y Badge de Estado -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Compuerta &amp; Extractor"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Control de Ventilación Forzada (SG90)"
+                            android:textColor="#94A3B8"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtServoStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:background="@drawable/bg_pill_comfort_ideal"
+                        android:paddingStart="8dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="3dp"
+                        android:text="Cerrado"
+                        android:textColor="#15803D"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
+                <!-- Centro: Animación Turbina y Lectura de Ángulo Digital -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Turbina Visual SVG -->
+                    <ImageView
+                        android:id="@+id/imgTurbineFan"
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:contentDescription="Turbina Ventilador"
+                        android:src="@drawable/ic_turbine_fan" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ÁNGULO SERVO"
+                            android:textColor="#94A3B8"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtServoAngleDisplay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:text="90°"
+                            android:textColor="#38BDF8"
+                            android:textSize="26sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtFanRPMDisplay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1850 RPM • Flujo Activo"
+                            android:textColor="#38BDF8"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Fila Inferior: Conmutador de Apertura Manual -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#334155" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Apertura Manual Forzada"
+                        android:textColor="#F1F5F9"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchVentilation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 4. CONTENEDOR DE MONITOREO AMBIENTAL (DHT11) -->
         <LinearLayout
             android:id="@+id/containerDHT11"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="18dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/cardConnection">
+            app:layout_constraintTop_toBottomOf="@id/cardActuators">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="10dp"
                 android:text="Monitoreo Ambiental (DHT11)"
                 android:textColor="@color/text_dark"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <!-- CONTENEDOR HORIZONTAL PARA LAS DOS TARJETAS -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:baselineAligned="false"
                 android:orientation="horizontal">
 
                 <!-- TARJETA DE TEMPERATURA -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="4dp">
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
                         android:orientation="vertical"
                         android:padding="16dp">
 
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginBottom="8dp"
-                            android:src="@drawable/ic_temperature"
-                            android:contentDescription="Temperatura" />
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Temperatura"
-                            android:textColor="#757575"
-                            android:textSize="12sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="TEMPERATURA"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_alignParentEnd="true"
+                                android:contentDescription="Temperatura"
+                                android:src="@drawable/ic_temperature" />
+                        </RelativeLayout>
 
                         <TextView
                             android:id="@+id/txtTemperature"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="-- °C"
+                            android:layout_marginTop="6dp"
+                            android:text="27°C"
                             android:textColor="@color/text_dark"
-                            android:textSize="22sp"
+                            android:textSize="24sp"
                             android:textStyle="bold" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- TARJETA DE HUMEDAD -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@android:color/white"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginBottom="8dp"
-                            android:src="@drawable/ic_humidity"
-                            android:contentDescription="Humedad" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Humedad"
-                            android:textColor="#757575"
-                            android:textSize="12sp" />
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/bg_pill_comfort_hot"
+                            android:paddingStart="6dp"
+                            android:paddingTop="2dp"
+                            android:paddingEnd="6dp"
+                            android:paddingBottom="2dp"
+                            android:text="Sobre umbral (>26°)"
+                            android:textColor="#B91C1C"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- TARJETA DE HUMEDAD -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/card_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="HUMEDAD REL."
+                                android:textColor="@color/text_secondary"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_alignParentEnd="true"
+                                android:contentDescription="Humedad"
+                                android:src="@drawable/ic_humidity" />
+                        </RelativeLayout>
 
                         <TextView
                             android:id="@+id/txtHumidity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="-- %"
+                            android:layout_marginTop="6dp"
+                            android:text="55%"
                             android:textColor="@color/text_dark"
-                            android:textSize="22sp"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/bg_pill_comfort_ideal"
+                            android:paddingStart="6dp"
+                            android:paddingTop="2dp"
+                            android:paddingEnd="6dp"
+                            android:paddingBottom="2dp"
+                            android:text="Confort Óptimo"
+                            android:textColor="#15803D"
+                            android:textSize="10sp"
                             android:textStyle="bold" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 4. SENSOR PIR (PRESENCIA DE USUARIOS) -->
-        <androidx.cardview.widget.CardView
+        <!-- 5. SENSOR DE PRESENCIA PIR -->
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPIR"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             app:cardBackgroundColor="@color/card_bg"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintTop_toBottomOf="@id/containerDHT11">
+            app:cardElevation="1dp"
+            app:layout_constraintTop_toBottomOf="@id/containerDHT11"
+            app:strokeColor="@color/card_stroke"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="14dp">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="12dp"
+                    android:contentDescription="Radar PIR"
+                    android:src="@drawable/ic_radar_motion" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -284,139 +505,108 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🚶 Presencia de Usuarios (PIR)"
+                        android:text="Sensor de Presencia (PIR)"
                         android:textColor="@color/text_dark"
-                        android:textSize="15sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/txtPIRStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="2dp"
                         android:text="@string/status_no_movement"
-                        android:textColor="#607D8B"
-                        android:textSize="13sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <View
                     android:id="@+id/viewLedPIR"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@drawable/circle_gray" />
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:background="@drawable/circle_green" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- 5. SWITCH PARA ACTIVAR/DESACTIVAR EL MODO AUTOMÁTICO -->
-        <androidx.cardview.widget.CardView
+        <!-- 6. TARJETA DE REGLAS DE AUTOMATIZACIÓN INDUSTRIAL -->
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardAutoMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/card_bg"
+            android:layout_marginEnd="16dp"
+            app:cardBackgroundColor="#F0FDF4"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintTop_toBottomOf="@id/cardPIR">
+            app:cardElevation="1dp"
+            app:layout_constraintTop_toBottomOf="@id/cardPIR"
+            app:strokeColor="#BBF7D0"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:padding="16dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Modo Automático"
-                    android:src="@drawable/ic_auto" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="Modo Automático"
+                            android:src="@drawable/ic_auto" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Regla de Climatización Activa"
+                            android:textColor="#14532D"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchAutoMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:checked="true" />
+                </RelativeLayout>
+
+                <!-- Fórmula de automatización visible -->
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_rule_formula"
+                    android:fontFamily="monospace"
+                    android:padding="10dp"
+                    android:text="SI (T > 26°C &amp;&amp; Presencia) ➔ ABRIR ESCOTILLA (90°)\nSI (T &lt; 22°C || Sin Presencia) ➔ CERRAR (0°)"
+                    android:textColor="#166534"
+                    android:textSize="11sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Control Automático"
-                        android:textColor="@color/text_dark"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/txtAutoStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="El sistema decidirá cuándo encenderse"
-                        android:textColor="#757575"
-                        android:textSize="11sp" />
-                </LinearLayout>
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchAutoMode"
+                <TextView
+                    android:id="@+id/txtAutoStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true" />
+                    android:layout_marginTop="8dp"
+                    android:text="El sistema decide cuándo encenderse"
+                    android:textColor="#15803D"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 6. CONTROL DE VENTILACIÓN (SERVO SG90) -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardActuators"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintTop_toBottomOf="@id/cardAutoMode">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🪟 Compuerta de Ventilación"
-                        android:textColor="@color/text_dark"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/txtServoStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/status_closed"
-                        android:textColor="#607D8B"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchVentilation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
