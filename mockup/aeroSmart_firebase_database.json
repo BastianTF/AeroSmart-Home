@@ -1,0 +1,83 @@
+{
+  "aerosmart_home": {
+    "configuracion_sistema": {
+      "modo_automatico": true,
+      "umbral_temperatura_activacion": 26.0,
+      "umbral_temperatura_desactivacion": 22.0,
+      "intervalo_lectura_segundos": 2,
+      "norma_seguridad": "ISO/IEC 27400:2022",
+      "version_firmware": "v2.4-ESP32"
+    },
+    "telemetria_actual": {
+      "temperatura_dht11": 27.5,
+      "unidad_temperatura": "°C",
+      "humedad_relativa": 58,
+      "unidad_humedad": "%",
+      "presencia_pir": true,
+      "estado_presencia": "MOVIMIENTO DETECTADO",
+      "rssi_conexion": -48,
+      "estado_enlace": "CONECTADO_BLE",
+      "ultima_actualizacion": "2026-10-15T11:05:00Z"
+    },
+    "actuadores": {
+      "compuerta_sg90": {
+        "angulo_grados": 90,
+        "estado": "ABIERTO",
+        "pin_pwm": 18
+      },
+      "turbina_extractora": {
+        "estado": "ENCENDIDO",
+        "velocidad_rpm": 1850,
+        "flujo_aire_estimado": "ALTO"
+      }
+    },
+    "usuarios": {
+      "usr_01_bastian": {
+        "nombre_completo": "Bastián Flores",
+        "email": "bastian.tf@aerosmart.cl",
+        "telefono_emergencia": "+56 9 8765 4321",
+        "rol_acceso": "ADMINISTRADOR_OT",
+        "mfa_otp_activo": true,
+        "fecha_creacion": "2026-10-15"
+      },
+      "usr_02_operador": {
+        "nombre_completo": "Operador Sala de Servidores",
+        "email": "operador.sala@aerosmart.cl",
+        "telefono_emergencia": "+56 9 1234 5678",
+        "rol_acceso": "OPERADOR_MONITOR",
+        "mfa_otp_activo": false,
+        "fecha_creacion": "2026-10-15"
+      }
+    },
+    "dispositivos_interconectados_criterio_2_1_4": {
+      "dispositivo_01_master": {
+        "identificador": "Android-Master-Supervisor",
+        "rol": "Controlador y Emisor de Comandos",
+        "ip_local": "192.168.1.105",
+        "estado": "EN_LINEA"
+      },
+      "dispositivo_02_slave": {
+        "identificador": "Android-Client-Monitor",
+        "rol": "Receptor Remoto de Telemetría",
+        "ip_local": "192.168.1.112",
+        "estado": "EN_LINEA_SINCRONIZADO"
+      }
+    },
+    "historial_alertas_ot": [
+      {
+        "id_alerta": 101,
+        "tipo": "ALERTA_TERMICA_ALTA",
+        "descripcion": "Temperatura superó 26°C con presencia humana activa",
+        "accion_automatica": "Apertura forzada de escotilla SG90 a 90 grados y encendido de turbina",
+        "timestamp": "2026-10-15T10:45:12Z"
+      },
+      {
+        "id_alerta": 102,
+        "tipo": "DESPEJE_AREA",
+        "descripcion": "Sensor PIR no detectó movimiento durante 15 minutos",
+        "accion_automatica": "Cierre seguro de compuerta a 0 grados para ahorro de energía",
+        "timestamp": "2026-10-15T09:30:00Z"
+      }
+    ]
+  }
+}
