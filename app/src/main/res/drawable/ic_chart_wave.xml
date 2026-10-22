@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp"
+    android:height="120dp"
+    android:viewportWidth="300"
+    android:viewportHeight="120">
+  <!-- Grid Lines -->
+  <path android:strokeColor="#E0E0E0" android:strokeWidth="1" android:pathData="M0,30 L300,30 M0,60 L300,60 M0,90 L300,90" />
+  
+  <!-- Temperature Wave (Blue) -->
+  <path
+      android:strokeColor="#1A73E8"
+      android:strokeWidth="3"
+      android:pathData="M0,70 C50,40 80,75 120,40 C160,15 200,60 240,45 C270,30 290,50 300,45" />
+
+  <!-- Humidity Wave (Purple/Cyan) -->
+  <path
+      android:strokeColor="#7E57C2"
+      android:strokeWidth="3"
+      android:pathData="M0,90 C40,80 80,95 120,70 C160,60 200,90 240,75 C270,85 290,65 300,70" />
+</vector>

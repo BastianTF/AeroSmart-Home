@@ -1,6 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme forced to Light to ensure consistent dark text on light backgrounds. -->
+    <!-- Tema Base con barra de estado negra por defecto -->
     <style name="Base.Theme.VentiladorAmbiental" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <style name="Theme.VentiladorAmbiental" parent="Base.Theme.VentiladorAmbiental" />

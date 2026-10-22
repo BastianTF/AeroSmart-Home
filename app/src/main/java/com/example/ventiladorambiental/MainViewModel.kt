@@ -16,8 +16,9 @@ class MainViewModel : ViewModel() {
     private var isConnected = false
     private var isVentOpen = false
     private var isAutoMode = true
-    private var currentTempNum = 27 // Temperatura simulada inicial (>26°C para activar con movimiento)
-    private var isMovement = true
+    private var currentTempNum = 27
+    private var currentHumidityNum = 55
+    private var isMovement = false
 
     init {
         loadInitialData()
@@ -26,8 +27,33 @@ class MainViewModel : ViewModel() {
     fun connectDevice() {
         viewModelScope.launch {
             _uiState.value = MainUiState.Loading
-            delay(1500)
+            delay(1000)
             isConnected = true
+            isMovement = true
+            evaluateAutomation()
+            updateSuccessState()
+        }
+    }
+
+    fun disconnectDevice() {
+        isConnected = false
+        isVentOpen = false
+        isMovement = false
+        updateSuccessState()
+    }
+
+    fun togglePIRMovement() {
+        if (isConnected) {
+            isMovement = !isMovement
+            evaluateAutomation()
+            updateSuccessState()
+        }
+    }
+
+    fun refreshSensors() {
+        if (isConnected) {
+            currentTempNum = (24..28).random()
+            currentHumidityNum = (50..60).random()
             evaluateAutomation()
             updateSuccessState()
         }
@@ -42,7 +68,6 @@ class MainViewModel : ViewModel() {
     }
 
     fun toggleVentilation(isOpen: Boolean) {
-        // Al tocar manualmente, desactivamos el modo automático para respetar la decisión del usuario
         isAutoMode = false
         isVentOpen = isOpen
         updateSuccessState()
@@ -51,8 +76,6 @@ class MainViewModel : ViewModel() {
     private fun evaluateAutomation() {
         if (!isAutoMode || !isConnected) return
 
-        // Regla: SI (Presencia == Con movimiento Y Temperatura > 26°C) -> Encender
-        // O SI (Presencia == Sin movimiento O Temperatura < 22°C) -> Apagar
         if (isMovement && currentTempNum > 26) {
             isVentOpen = true
         } else if (!isMovement || currentTempNum < 22) {
@@ -65,15 +88,15 @@ class MainViewModel : ViewModel() {
             try {
                 updateSuccessState()
             } catch (e: Exception) {
-                _uiState.value = MainUiState.Error("No se pudo conectar con el módulo de ventilación. Revisa la conexión.")
+                _uiState.value = MainUiState.Error("No se pudo conectar con el módulo de ventilación.")
             }
         }
     }
 
     private fun updateSuccessState() {
         _uiState.value = MainUiState.Success(
-            temperature = if (isConnected) "${currentTempNum}°C" else "-- °C",
-            humidity = if (isConnected) "55%" else "-- %",
+            temperature = if (isConnected) "${currentTempNum} °C" else "-- °C",
+            humidity = if (isConnected) "${currentHumidityNum} %" else "-- %",
             isMovementDetected = if (isConnected) isMovement else false,
             isVentOpen = isVentOpen,
             isConnected = isConnected,
