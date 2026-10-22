@@ -1,24 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#1A73E8</color> <!-- Azul Ventilación / Prototipo -->
-    <color name="primary_dark">#1557B0</color>
-    <color name="accent">#00ACC1</color>
-    <color name="background">#F5F7FA</color> <!-- Gris claro de fondo -->
-    <color name="card_bg">#FFFFFF</color> <!-- Blanco para tarjetas -->
-    <color name="text_dark">#1F1F1F</color> <!-- Texto oscuro -->
-    <color name="text_gray">#757575</color> <!-- Texto secundario -->
-
-    <color name="circle_bg_temp">#E8F1FF</color>
-    <color name="circle_bg_humidity">#E0F7FA</color>
-    <color name="circle_bg_pir">#EDE7F6</color>
-    <color name="circle_bg_auto">#EDE7F6</color>
-    <color name="circle_bg_vent">#ECEFF1</color>
-
-    <color name="icon_temp">#1A73E8</color>
-    <color name="icon_humidity">#00ACC1</color>
-    <color name="icon_pir">#7E57C2</color>
-    <color name="icon_auto">#7E57C2</color>
-    <color name="icon_vent">#546E7A</color>
-
-    <color name="alert_red">#E53935</color>
+    <color name="primary">#1E88E5</color> <!-- Azul Ventilación -->
+    <color name="primary_dark">#1565C0</color>
+    <color name="accent">#00ACC1</color> <!-- Cyan para Humedad -->
+    <color name="background">#F8F9FA</color> <!-- Gris muy claro de fondo recomendación #5 -->
+    <color name="card_bg">#FFFFFF</color> <!-- Blanco para las tarjetas -->
+    <color name="text_dark">#263238</color> <!-- Gris oscuro para texto -->
+    <color name="alert_red">#E53935</color> <!-- Rojo para el sensor PIR -->
 </resources>

@@ -1,0 +1,3163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroSmart Home - Mockup Interactivo Oficial (TI3042 - Unidad 2)</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --border-card: #334155;
+      --primary: #0284c7;
+      --primary-light: #38bdf8;
+      --primary-dark: #0369a1;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --phone-bg: #f8fafc;
+      --phone-text: #0f172a;
+      --phone-card: #ffffff;
+      --phone-border: #e2e8f0;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-phone: 44px;
+      --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-elevated: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      --shadow-phone: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 12px #1e293b, 0 0 0 14px #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top right, #1e293b, #0f172a 60%, #020617);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* TOP GLOBAL HEADER */
+    header.workspace-header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon-box {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px rgba(2, 132, 199, 0.45);
+    }
+
+    .brand-icon-box svg {
+      width: 26px;
+      height: 26px;
+      fill: #ffffff;
+      animation: spin-slow 8s linear infinite;
+    }
+
+    .brand-titles h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-titles p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .academic-badge {
+      font-size: 0.68rem;
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      color: var(--primary-light);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-tab {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .btn-tab:hover {
+      background: #334155;
+      color: var(--text-main);
+    }
+
+    .btn-tab.active {
+      background: var(--primary);
+      border-color: var(--primary-light);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.35);
+    }
+
+    /* DOSSIER MODAL STYLES */
+    .dossier-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .dossier-modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .dossier-modal-container {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      color: #f8fafc;
+      overflow: hidden;
+    }
+
+    .dossier-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .dossier-header h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-close-dossier {
+      background: #334155;
+      border: none;
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+
+    .btn-close-dossier:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    .dossier-body {
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .dossier-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+
+    .dossier-card h4 {
+      font-size: 1.02rem;
+      color: #38bdf8;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dossier-card ul {
+      margin-left: 20px;
+      margin-top: 6px;
+    }
+
+    .dossier-card li {
+      margin-bottom: 6px;
+      color: #cbd5e1;
+    }
+
+    .dossier-card strong {
+      color: #ffffff;
+    }
+
+    /* MAIN CONTAINER LAYOUT */
+    .app-workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1700px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1280px) {
+      .app-workspace {
+        grid-template-columns: 280px 1fr;
+      }
+      .panel-hardware {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .app-workspace {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .panel-navigation, .panel-hardware {
+        width: 100%;
+        max-width: 420px;
+      }
+    }
+
+    /* LEFT PANEL: NAVIGATION & SPECS */
+    .panel-navigation {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      height: fit-content;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-card);
+      padding-bottom: 10px;
+    }
+
+    .panel-title span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .screen-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .screen-nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .screen-nav-item:hover {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      border-color: #475569;
+    }
+
+    .screen-nav-item.active {
+      background: rgba(2, 132, 199, 0.15);
+      border-color: var(--primary);
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .screen-nav-item .badge-step {
+      font-size: 0.7rem;
+      background: #334155;
+      color: #94a3b8;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .screen-nav-item.active .badge-step {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    /* CRITERIA MAPPING ACCORDION */
+    .criteria-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .criteria-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .criteria-item {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #334155;
+    }
+
+    .criteria-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .criteria-item strong {
+      color: #f1f5f9;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* CENTER PHONE STAGE */
+    .phone-stage-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .stage-mode-selector {
+      margin-bottom: 18px;
+      display: flex;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.7);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-card);
+    }
+
+    .stage-btn {
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .stage-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
+
+    /* SMARTPHONE CHASSIS */
+    .smartphone {
+      width: 380px;
+      height: 780px;
+      background: var(--phone-bg);
+      border-radius: var(--radius-phone);
+      box-shadow: var(--shadow-phone);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      border: 4px solid #334155;
+      transition: transform 0.3s ease;
+    }
+
+    /* MULTI-DEVICE VIEWPORT (SIDE-BY-SIDE) */
+    .dual-phone-container {
+      display: none;
+      gap: 32px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .dual-phone-container.active {
+      display: flex;
+    }
+
+    .dual-phone-container .smartphone {
+      width: 340px;
+      height: 700px;
+    }
+
+    .device-role-tag {
+      position: absolute;
+      top: -34px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0284c7;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4);
+      white-space: nowrap;
+      z-index: 20;
+    }
+
+    .device-role-tag.client {
+      background: #10b981;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+    }
+
+    /* PHONE STATUS BAR */
+    .phone-status-bar {
+      height: 38px;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #0f172a;
+      z-index: 50;
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .status-left {
+      letter-spacing: -0.01em;
+    }
+
+    .camera-punchhole {
+      width: 14px;
+      height: 14px;
+      background: #020617;
+      border-radius: 50%;
+      box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-right svg {
+      width: 14px;
+      height: 14px;
+      fill: #0f172a;
+    }
+
+    /* PHONE SCREEN CONTAINER */
+    .phone-screen-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      scroll-behavior: smooth;
+    }
+
+    .phone-screen-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .phone-screen-content::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    /* PHONE GESTURE BAR */
+    .phone-gesture-bar {
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .gesture-pill {
+      width: 80px;
+      height: 4px;
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+
+    /* SCREEN VIEWS */
+    .screen-view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      animation: fadeIn 0.25s ease-out;
+      min-height: 100%;
+    }
+
+    .screen-view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================
+       1. SCREEN: SPLASH
+       ========================================= */
+    .splash-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .splash-turbine-box {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .splash-turbine-box svg {
+      width: 65px;
+      height: 65px;
+      fill: #ffffff;
+      animation: spin-fast 4s linear infinite;
+    }
+
+    .splash-container h2 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .splash-container p {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 40px;
+    }
+
+    .splash-loading-bar {
+      width: 160px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .splash-loading-progress {
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 10px;
+      animation: progress-indeterminate 1.8s infinite ease-in-out;
+    }
+
+    @keyframes progress-indeterminate {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(0%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* =========================================
+       2. SCREEN: ONBOARDING
+       ========================================= */
+    .onboarding-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+      background: #ffffff;
+    }
+
+    .onboarding-top-bar {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-skip {
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .onboarding-carousel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .onboarding-slide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .onboarding-slide.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .onboarding-hero-art {
+      width: 160px;
+      height: 160px;
+      border-radius: 40px;
+      background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .onboarding-hero-art svg {
+      width: 80px;
+      height: 80px;
+      fill: #0284c7;
+    }
+
+    .onboarding-slide h3 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+
+    .onboarding-slide p {
+      font-size: 0.9rem;
+      color: #64748b;
+      line-height: 1.5;
+      max-width: 280px;
+    }
+
+    .onboarding-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .onboarding-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .onboard-dot {
+      width: 8px;
+      height: 8px;
+      background: #cbd5e1;
+      border-radius: 999px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .onboard-dot.active {
+      width: 28px;
+      background: #0284c7;
+    }
+
+    .btn-onboard-action {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      transition: background 0.2s;
+    }
+
+    .btn-onboard-action:hover {
+      background: #0369a1;
+    }
+
+    /* =========================================
+       3. SCREEN: LOGIN
+       ========================================= */
+    .login-container {
+      flex: 1;
+      padding: 24px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .auth-logo-badge {
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 16px rgba(2, 132, 199, 0.25);
+    }
+
+    .auth-logo-badge svg {
+      width: 32px;
+      height: 32px;
+      fill: #ffffff;
+    }
+
+    .auth-header h3 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .auth-header p {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* BACKEND SELECTION PILL (GUIDE REQ) */
+    .backend-selector-group {
+      background: #e2e8f0;
+      padding: 3px;
+      border-radius: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      margin-bottom: 20px;
+    }
+
+    .btn-backend-mode {
+      border: none;
+      background: transparent;
+      padding: 6px 2px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #475569;
+      border-radius: 7px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-backend-mode.active {
+      background: #ffffff;
+      color: #0284c7;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .input-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .input-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+
+    .input-box label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper svg.input-icon {
+      position: absolute;
+      left: 12px;
+      width: 18px;
+      height: 18px;
+      fill: #94a3b8;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px 0 40px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #0f172a;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrapper input:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .auth-link-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .auth-link-row a {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #0284c7;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-auth-primary {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      height: 48px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+      transition: background 0.2s;
+    }
+
+    .btn-auth-primary:hover {
+      background: #0369a1;
+    }
+
+    .social-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0 16px;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .social-divider::before, .social-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .social-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .btn-social {
+      flex: 1;
+      height: 42px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-social:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-social svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .auth-footer {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+
+    .auth-footer a {
+      color: #0284c7;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* =========================================
+       4. SCREEN: REGISTER + OTP VERIFICATION
+       ========================================= */
+    .register-container {
+      flex: 1;
+      padding: 24px;
+      background: #f8fafc;
+      overflow-y: auto;
+    }
+
+    .reg-top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn-back-round {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-back-round svg {
+      width: 18px;
+      height: 18px;
+      fill: #334155;
+    }
+
+    .reg-top-bar h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .form-two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* OTP MODAL DIALOG OVERLAY */
+    .otp-modal-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .otp-modal-backdrop.active {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .otp-modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 310px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .otp-icon-bubble {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #e0f2fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    .otp-icon-bubble svg {
+      width: 26px;
+      height: 26px;
+      fill: #0284c7;
+    }
+
+    .otp-modal-card h4 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .otp-modal-card p {
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .otp-pin-boxes {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .otp-input-digit {
+      width: 44px;
+      height: 50px;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0f172a;
+      outline: none;
+    }
+
+    .otp-input-digit:focus {
+      border-color: #0284c7;
+    }
+
+    .otp-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-verify-otp {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .btn-cancel-otp {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* =========================================
+       5. SCREEN: MAIN IOT DASHBOARD
+       ========================================= */
+    .dashboard-container {
+      flex: 1;
+      padding: 16px 16px 24px;
+      background: #f8fafc;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* APP HEADER */
+    .dash-app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dash-user-welcome {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dash-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
+      cursor: pointer;
+    }
+
+    .dash-welcome-text h4 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .dash-welcome-text p {
+      font-size: 0.72rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .live-dot-pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+      animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .btn-header-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .btn-header-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #475569;
+    }
+
+    /* HARDWARE LINK STATUS CARD */
+    .card-wireless-link {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .link-info-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .link-indicator-ring {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .link-indicator-ring svg {
+      width: 18px;
+      height: 18px;
+      fill: #0284c7;
+    }
+
+    .link-texts h5 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .link-texts p {
+      font-size: 0.7rem;
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .btn-link-action {
+      background: #e0f2fe;
+      color: #0284c7;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-link-action:hover {
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    /* VENTILATION TURBINE CARD (HERO ACTUATOR) */
+    .card-actuator-turbine {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      color: #ffffff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+    }
+
+    .turbine-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .turbine-titles h5 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .turbine-titles p {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    .actuator-status-pill {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .actuator-status-pill.closed {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+
+    .turbine-visual-stage {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    .turbine-fan-wheel {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .turbine-fan-wheel svg.fan-blades {
+      width: 76px;
+      height: 76px;
+      fill: #38bdf8;
+      transition: transform 0.5s ease;
+    }
+
+    .turbine-fan-wheel.spinning svg.fan-blades {
+      animation: spin-fast 0.6s linear infinite;
+    }
+
+    @keyframes spin-fast {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes spin-slow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .airflow-waves {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .air-particle {
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.8), transparent);
+      border-radius: 2px;
+      opacity: 0;
+    }
+
+    .turbine-fan-wheel.spinning ~ .airflow-waves .air-particle {
+      animation: blow-wind 1.2s infinite ease-out;
+    }
+
+    .turbine-fan-wheel.spinning ~ .airflow-waves .air-particle:nth-child(2) {
+      animation-delay: 0.3s;
+      width: 50px;
+    }
+
+    .turbine-fan-wheel.spinning ~ .airflow-waves .air-particle:nth-child(3) {
+      animation-delay: 0.6s;
+      width: 35px;
+    }
+
+    @keyframes blow-wind {
+      0% { opacity: 0; transform: translateX(-10px); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(30px); }
+    }
+
+    .servo-data-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .servo-angle-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #38bdf8;
+      font-family: monospace;
+    }
+
+    .servo-sublabel {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+
+    .turbine-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 14px;
+      margin-top: 10px;
+    }
+
+    .manual-toggle-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* CUSTOM SWITCH */
+    .switch-ui {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch-ui input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #475569;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    .switch-ui input:checked + .switch-slider {
+      background-color: #0284c7;
+    }
+
+    .switch-ui input:checked + .switch-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* SENSORS GRID (DHT11 & PIR) */
+    .sensors-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card-sensor-tile {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: var(--shadow-subtle);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .sensor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .sensor-icon-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sensor-icon-circle.temp {
+      background: #fee2e2;
+    }
+    .sensor-icon-circle.temp svg {
+      width: 18px;
+      height: 18px;
+      fill: #ef4444;
+    }
+
+    .sensor-icon-circle.hum {
+      background: #e0f2fe;
+    }
+    .sensor-icon-circle.hum svg {
+      width: 18px;
+      height: 18px;
+      fill: #0284c7;
+    }
+
+    .sensor-title-text {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .sensor-big-val {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .sensor-comfort-pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .sensor-comfort-pill.hot {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .sensor-comfort-pill.ideal {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .sensor-comfort-pill.cold {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    /* PIR SENSOR CARD */
+    .card-pir-presence {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: var(--shadow-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pir-left-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .radar-indicator-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .radar-indicator-box.active {
+      background: #dcfce7;
+    }
+
+    .radar-indicator-box.active svg {
+      fill: #16a34a;
+      animation: pulse-icon 1s infinite alternate;
+    }
+
+    .radar-indicator-box.inactive svg {
+      fill: #94a3b8;
+    }
+
+    @keyframes pulse-icon {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.15); }
+    }
+
+    .pir-labels h5 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .pir-labels p {
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+
+    .pir-status-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .pir-status-badge.motion {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .pir-status-badge.clear {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    /* AUTOMATION RULES CARD */
+    .card-auto-rules {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .rules-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .rules-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rules-title-group svg {
+      width: 18px;
+      height: 18px;
+      fill: #16a34a;
+    }
+
+    .rules-title-group h5 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #14532d;
+    }
+
+    .rule-formula-box {
+      background: #ffffff;
+      border: 1px dashed #86efac;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: #166534;
+      line-height: 1.4;
+    }
+
+    .rule-status-eval {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #15803d;
+    }
+
+    /* =========================================
+       6. SCREEN: PROFILE & ISO 27400 COMPLIANCE
+       ========================================= */
+    .profile-container {
+      flex: 1;
+      padding: 20px 16px;
+      background: #f8fafc;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .profile-card-user {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: center;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .profile-avatar-big {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    .profile-card-user h4 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .profile-card-user p {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    /* ISO 27400 SECURITY BOX (CRITERION 2.1.3) */
+    .card-iso-security {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .iso-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .iso-badge-tag {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .iso-features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .iso-feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.74rem;
+      color: #475569;
+      line-height: 1.35;
+    }
+
+    .iso-feature-item svg {
+      width: 16px;
+      height: 16px;
+      fill: #10b981;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .btn-logout {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    /* =========================================
+       RIGHT PANEL: HARDWARE SIMULATOR & TELEMETRY
+       ========================================= */
+    .panel-hardware {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      height: fit-content;
+    }
+
+    .sim-control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sim-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .sim-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 4px;
+      background: #334155;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .sim-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+    }
+
+    .btn-sim-trigger {
+      background: #334155;
+      color: var(--text-main);
+      border: 1px solid #475569;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-sim-trigger:hover {
+      background: #475569;
+    }
+
+    .btn-sim-trigger.active {
+      background: #10b981;
+      border-color: #34d399;
+      color: #ffffff;
+    }
+
+    /* CONSOLE LOG */
+    .telemetry-console-box {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 0.72rem;
+      color: #38bdf8;
+      height: 160px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .telemetry-console-box::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .telemetry-console-box::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+
+    .log-line {
+      line-height: 1.35;
+      word-break: break-all;
+    }
+
+    .log-line .timestamp {
+      color: #64748b;
+    }
+
+    .log-line .tag {
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .log-line .payload {
+      color: #f1f5f9;
+    }
+
+    /* FOOTER BAR */
+    footer.academic-footer {
+      background: #090d16;
+      border-top: 1px solid var(--border-card);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    footer a {
+      color: var(--primary-light);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER GLOBAL -->
+  <header class="workspace-header">
+    <div class="brand-group">
+      <div class="brand-icon-box">
+        <!-- SVG Ventilador -->
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1>AeroSmart Home <span class="academic-badge">TI3042 - Unidad 2</span></h1>
+        <p>Sistema de Control y Monitoreo Ambiental IoT • Mockup Interactivo Oficial</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-tab active" id="tabModeSingle" onclick="switchStageMode('single')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+        Vista Individual
+      </button>
+      <button class="btn-tab" id="tabModeDual" onclick="switchStageMode('dual')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 1H9c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H9V5h6v14zM4 6H2v14c0 1.1.9 2 2 2h12v-2H4V6zm18-4h-2v14c0 1.1.9 2 2 2h2V4c0-1.1-.9-2-2-2z"/></svg>
+        Interconexión 2 Dispositivos (Criterio 2.1.4)
+      </button>
+      <button class="btn-tab" id="tabModeDossier" onclick="openDossierModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        Dossier Unidad 2 (Pasos 1-4)
+      </button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <main class="app-workspace">
+
+    <!-- PANEL IZQUIERDO: NAVEGADOR DE PANTALLAS Y GUÍA -->
+    <aside class="panel-navigation">
+      <div class="panel-title">
+        Flujo de Pantallas
+        <span>Navegación</span>
+      </div>
+
+      <div class="screen-nav-list">
+        <div class="screen-nav-item" onclick="showScreen('screen-splash')">
+          <span>1. Splash Screen</span>
+          <span class="badge-step">Inicio</span>
+        </div>
+        <div class="screen-nav-item" onclick="showScreen('screen-onboarding')">
+          <span>2. Onboarding (3 Pasos)</span>
+          <span class="badge-step">Tutorial</span>
+        </div>
+        <div class="screen-nav-item" onclick="showScreen('screen-login')">
+          <span>3. Inicio de Sesión</span>
+          <span class="badge-step">Auth</span>
+        </div>
+        <div class="screen-nav-item" onclick="showScreen('screen-register')">
+          <span>4. Registro + Código OTP</span>
+          <span class="badge-step">Verif</span>
+        </div>
+        <div class="screen-nav-item active" onclick="showScreen('screen-dashboard')">
+          <span>5. Dashboard IoT Principal</span>
+          <span class="badge-step">Core</span>
+        </div>
+        <div class="screen-nav-item" onclick="showScreen('screen-profile')">
+          <span>6. Perfil & Seguridad ISO</span>
+          <span class="badge-step">Norma</span>
+        </div>
+      </div>
+
+      <!-- CRITERIA TI3042 -->
+      <div class="criteria-box">
+        <div class="criteria-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Criterios Evaluación TI3042
+        </div>
+        <div class="criteria-item">
+          <strong>2.1.1 Herramientas Móviles Android</strong>
+          Android Studio Ladybug/Hedgehog, Kotlin 2.0, Jetpack MVVM, StateFlow y Material Design 3.
+        </div>
+        <div class="criteria-item">
+          <strong>2.1.2 Conectividad Inalámbrica</strong>
+          Bluetooth BLE (ESP32), Bluetooth Classic (HC-05) y Wi-Fi / MQTT Broker.
+        </div>
+        <div class="criteria-item">
+          <strong>2.1.3 Estándar ISO 27400 OT</strong>
+          Cifrado AES-256 en reposo, Hashing Argon2/SHA-256 de credenciales, autenticación mutua y RBAC.
+        </div>
+        <div class="criteria-item">
+          <strong>2.1.4 Interconexión 2 Dispositivos</strong>
+          Sincronización en tiempo real entre Dispositivo Maestro (Control) y Dispositivo Esclavo (Telemetría).
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTRO: SIMULADOR SMARTPHONE ANDROID -->
+    <section class="phone-stage-wrapper">
+      
+      <!-- VISTA INDIVIDUAL -->
+      <div id="singlePhoneContainer" style="display: flex; flex-direction: column; align-items: center;">
+        
+        <div class="smartphone">
+          <!-- STATUS BAR ANDROID -->
+          <div class="phone-status-bar">
+            <span class="status-left" id="livePhoneTime">12:30</span>
+            <div class="camera-punchhole"></div>
+            <div class="status-right">
+              <!-- BLE Icon -->
+              <svg viewBox="0 0 24 24"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>
+              <!-- WiFi Icon -->
+              <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A16.88 16.88 0 0012 4zm0 4c3.34 0 6.37 1.37 8.56 3.57L12 19.82 3.44 11.57A12.05 12.05 0 0112 8z"/></svg>
+              <!-- Battery Icon -->
+              <svg viewBox="0 0 24 24"><path d="M17 5v16c0 .55-.45 1-1 1H8c-.55 0-1-.45-1-1V5c0-.55.45-1 1-1h2V2h4v2h2c.55 0 1 .45 1 1zm-2 1H9v14h6V6z"/></svg>
+            </div>
+          </div>
+
+          <!-- PHONE SCREEN CONTAINER -->
+          <div class="phone-screen-content" id="screenContentHost">
+
+            <!-- 1. PANTALLA: SPLASH -->
+            <div class="screen-view" id="screen-splash">
+              <div class="splash-container">
+                <div class="splash-turbine-box">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                  </svg>
+                </div>
+                <h2>AeroSmart Home</h2>
+                <p>Gestión y Ventilación Inteligente de Espacios</p>
+                <div class="splash-loading-bar">
+                  <div class="splash-loading-progress"></div>
+                </div>
+                <button class="btn-onboard-action" style="margin-top: 40px; background: rgba(255,255,255,0.2);" onclick="showScreen('screen-onboarding')">
+                  Ingresar a la App
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. PANTALLA: ONBOARDING -->
+            <div class="screen-view" id="screen-onboarding">
+              <div class="onboarding-container">
+                <div class="onboarding-top-bar">
+                  <button class="btn-skip" onclick="showScreen('screen-login')">Saltar</button>
+                </div>
+
+                <div class="onboarding-carousel">
+                  <!-- Slide 1 -->
+                  <div class="onboarding-slide active" id="onboard-slide-0">
+                    <div class="onboarding-hero-art">
+                      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    </div>
+                    <h3>Bienvenido a<br>AeroSmart Home</h3>
+                    <p>Monitorea temperatura, humedad relativa y presencia en tiempo real con hardware IoT de alta precisión.</p>
+                  </div>
+
+                  <!-- Slide 2 -->
+                  <div class="onboarding-slide" id="onboard-slide-1">
+                    <div class="onboarding-hero-art">
+                      <svg viewBox="0 0 24 24"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-4-8c0-.55.45-1 1-1s1 .45 1 1h-1v1h1v2h-1v1h1v2h-2V5z"/></svg>
+                    </div>
+                    <h3>Climatización<br>Autónoma Inteligente</h3>
+                    <p>El servomotor SG90 y el extractor se activan automáticamente si la temperatura supera 26°C y hay ocupantes.</p>
+                  </div>
+
+                  <!-- Slide 3 -->
+                  <div class="onboarding-slide" id="onboard-slide-2">
+                    <div class="onboarding-hero-art">
+                      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                    </div>
+                    <h3>Seguridad y Norma<br>ISO 27400 OT</h3>
+                    <p>Tus credenciales y datos ambientales viajan protegidos bajo cifrado de grado industrial y verificación en 2 pasos.</p>
+                  </div>
+                </div>
+
+                <div class="onboarding-controls">
+                  <div class="onboarding-dots">
+                    <div class="onboard-dot active" onclick="gotoOnboardSlide(0)"></div>
+                    <div class="onboard-dot" onclick="gotoOnboardSlide(1)"></div>
+                    <div class="onboard-dot" onclick="gotoOnboardSlide(2)"></div>
+                  </div>
+                  <button class="btn-onboard-action" id="btnOnboardNext" onclick="nextOnboardSlide()">
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. PANTALLA: LOGIN -->
+            <div class="screen-view" id="screen-login">
+              <div class="login-container">
+                <div class="auth-header">
+                  <div class="auth-logo-badge">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                  </div>
+                  <h3>¡Bienvenido de nuevo!</h3>
+                  <p>Inicia sesión para gestionar el confort de tu hogar</p>
+                </div>
+
+                <!-- SELECTOR DE BACKEND (GUIA PASO 2) -->
+                <div style="font-size:0.7rem; font-weight:700; color:#64748b; margin-bottom:4px; text-transform:uppercase;">Almacenamiento (Guía Paso 2):</div>
+                <div class="backend-selector-group">
+                  <button class="btn-backend-mode active" onclick="setBackendMode(this, 'SQLite')">SQLite</button>
+                  <button class="btn-backend-mode" onclick="setBackendMode(this, 'Firebase')">Firebase</button>
+                  <button class="btn-backend-mode" onclick="setBackendMode(this, 'API MySQL')">API MySQL</button>
+                </div>
+
+                <div class="input-field-group">
+                  <div class="input-box">
+                    <label>Correo Electrónico</label>
+                    <div class="input-wrapper">
+                      <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                      <input type="email" id="loginEmail" value="bastian.tf@aerosmart.cl" placeholder="ejemplo@correo.com">
+                    </div>
+                  </div>
+
+                  <div class="input-box">
+                    <label>Contraseña Cifrada (Argon2)</label>
+                    <div class="input-wrapper">
+                      <svg class="input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                      <input type="password" id="loginPass" value="••••••••" placeholder="Contraseña segura">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="auth-link-row">
+                  <a onclick="alert('Recuperación: Se enviará un enlace criptográfico a tu correo registrado.')">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button class="btn-auth-primary" onclick="doLogin()">Iniciar Sesión</button>
+
+                <div class="social-divider">O continúa con</div>
+
+                <div class="social-row">
+                  <button class="btn-social" onclick="alert('Autenticación federada Google OAuth2 (ISO 27400)')">Google</button>
+                  <button class="btn-social" onclick="alert('Autenticación federada Apple ID')">Apple</button>
+                </div>
+
+                <div class="auth-footer">
+                  ¿No tienes una cuenta? <a onclick="showScreen('screen-register')">Regístrate aquí</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. PANTALLA: REGISTRO + OTP -->
+            <div class="screen-view" id="screen-register">
+              <div class="register-container">
+                <div class="reg-top-bar">
+                  <div class="btn-back-round" onclick="showScreen('screen-login')">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                  </div>
+                  <h3>Crear Cuenta Nueva</h3>
+                </div>
+
+                <div class="input-field-group">
+                  <div class="form-two-cols">
+                    <div class="input-box">
+                      <label>Nombre</label>
+                      <div class="input-wrapper">
+                        <input type="text" id="regName" value="Bastián" placeholder="Nombre">
+                      </div>
+                    </div>
+                    <div class="input-box">
+                      <label>Apellido</label>
+                      <div class="input-wrapper">
+                        <input type="text" id="regLastName" value="Flores" placeholder="Apellido">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="input-box">
+                    <label>Teléfono de Emergencia (SMS Alertas)</label>
+                    <div class="input-wrapper">
+                      <svg class="input-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                      <input type="tel" id="regPhone" value="+56 9 8765 4321" placeholder="+56 9 ...">
+                    </div>
+                  </div>
+
+                  <div class="input-box">
+                    <label>Correo Electrónico</label>
+                    <div class="input-wrapper">
+                      <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                      <input type="email" id="regEmail" value="bastian.tf@aerosmart.cl" placeholder="correo@ejemplo.com">
+                    </div>
+                  </div>
+
+                  <div class="input-box">
+                    <label>Contraseña (Mín. 8 caracteres)</label>
+                    <div class="input-wrapper">
+                      <svg class="input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                      <input type="password" id="regPass" value="AeroSmart2026!" placeholder="••••••••">
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn-auth-primary" style="width:100%;" onclick="openOtpDialog()">
+                  Verificar y Continuar (OTP)
+                </button>
+              </div>
+
+              <!-- DIALOG MODAL OTP -->
+              <div class="otp-modal-backdrop" id="otpModalBackdrop">
+                <div class="otp-modal-card">
+                  <div class="otp-icon-bubble">
+                    <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                  </div>
+                  <h4>Verificación en 2 Pasos</h4>
+                  <p>Hemos enviado un código OTP de 4 dígitos a tu correo oficial.<br><strong style="color:#0284c7;">(Código simulado: 1234)</strong></p>
+                  
+                  <div class="otp-pin-boxes">
+                    <input type="text" maxlength="1" class="otp-input-digit" value="1">
+                    <input type="text" maxlength="1" class="otp-input-digit" value="2">
+                    <input type="text" maxlength="1" class="otp-input-digit" value="3">
+                    <input type="text" maxlength="1" class="otp-input-digit" value="4">
+                  </div>
+
+                  <div class="otp-actions">
+                    <button class="btn-verify-otp" onclick="verifyOtpAndProceed()">Verificar y Activar Cuenta</button>
+                    <button class="btn-cancel-otp" onclick="closeOtpDialog()">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. PANTALLA: DASHBOARD IOT (CORE) -->
+            <div class="screen-view active" id="screen-dashboard">
+              <div class="dashboard-container">
+                <!-- DASH HEADER -->
+                <div class="dash-app-header">
+                  <div class="dash-user-welcome">
+                    <div class="dash-avatar" onclick="showScreen('screen-profile')">BT</div>
+                    <div class="dash-welcome-text">
+                      <h4>AeroSmart Hub</h4>
+                      <p><span class="live-dot-pulse"></span> Sistema en línea • ESP32 BLE</p>
+                    </div>
+                  </div>
+                  <div class="btn-header-icon" onclick="showScreen('screen-profile')">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                  </div>
+                </div>
+
+                <!-- WIRELESS LINK CARD -->
+                <div class="card-wireless-link">
+                  <div class="link-info-left">
+                    <div class="link-indicator-ring">
+                      <svg viewBox="0 0 24 24"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>
+                    </div>
+                    <div class="link-texts">
+                      <h5 id="dashDeviceName">AeroSmart-ESP32</h5>
+                      <p id="dashLinkStatus">Conectado (RSSI: -48 dBm)</p>
+                    </div>
+                  </div>
+                  <button class="btn-link-action" onclick="toggleConnectMock()">Vincular</button>
+                </div>
+
+                <!-- VENTILATION ACTUATOR HERO CARD -->
+                <div class="card-actuator-turbine">
+                  <div class="turbine-card-header">
+                    <div class="turbine-titles">
+                      <h5>Compuerta & Extractor (SG90)</h5>
+                      <p>Control de Flujo de Ventilación Forzada</p>
+                    </div>
+                    <span class="actuator-status-pill" id="badgeActuatorStatus">ACTIVO • 90°</span>
+                  </div>
+
+                  <div class="turbine-visual-stage">
+                    <div class="turbine-fan-wheel spinning" id="fanTurbineWheel">
+                      <svg class="fan-blades" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                      </svg>
+                    </div>
+
+                    <div class="airflow-waves">
+                      <div class="air-particle"></div>
+                      <div class="air-particle"></div>
+                      <div class="air-particle"></div>
+                    </div>
+
+                    <div class="servo-data-badge">
+                      <span class="servo-angle-value" id="valServoAngle">90°</span>
+                      <span class="servo-sublabel">Ángulo Servomotor</span>
+                      <span class="servo-sublabel" id="valFanRPM" style="color:#38bdf8; font-weight:700;">1850 RPM</span>
+                    </div>
+                  </div>
+
+                  <div class="turbine-bottom-row">
+                    <span class="manual-toggle-title">Apertura Manual Forzada</span>
+                    <label class="switch-ui">
+                      <input type="checkbox" id="chkManualVent" checked onchange="onManualVentToggle(this.checked)">
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- SENSORS DHT11 GRID -->
+                <div class="sensors-grid-2col">
+                  <!-- TEMP TILE -->
+                  <div class="card-sensor-tile">
+                    <div class="sensor-header">
+                      <span class="sensor-title-text">TEMPERATURA</span>
+                      <div class="sensor-icon-circle temp">
+                        <svg viewBox="0 0 24 24"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-4-8c0-.55.45-1 1-1s1 .45 1 1h-1v1h1v2h-1v1h1v2h-2V5z"/></svg>
+                      </div>
+                    </div>
+                    <div class="sensor-big-val" id="dashTempVal">27.5 °C</div>
+                    <div class="sensor-comfort-pill hot" id="dashTempPill">Sobre umbral (>26°C)</div>
+                  </div>
+
+                  <!-- HUMIDITY TILE -->
+                  <div class="card-sensor-tile">
+                    <div class="sensor-header">
+                      <span class="sensor-title-text">HUMEDAD REL.</span>
+                      <div class="sensor-icon-circle hum">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+                      </div>
+                    </div>
+                    <div class="sensor-big-val" id="dashHumVal">58 %</div>
+                    <div class="sensor-comfort-pill ideal" id="dashHumPill">Confort Óptimo</div>
+                  </div>
+                </div>
+
+                <!-- PIR SENSOR TILE -->
+                <div class="card-pir-presence">
+                  <div class="pir-left-info">
+                    <div class="radar-indicator-box active" id="radarIndicator">
+                      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.22-3.22-7.51-7.51 3.22 3.22 7.51zm3.83-4.04l1.41.6-1.41 1.41-.6-1.41.6-.6z"/></svg>
+                    </div>
+                    <div class="pir-labels">
+                      <h5>Sensor Presencia (PIR)</h5>
+                      <p id="pirSubtext">Movimiento detectado en zona</p>
+                    </div>
+                  </div>
+                  <span class="pir-status-badge motion" id="badgePirStatus">EN MOVIMIENTO</span>
+                </div>
+
+                <!-- AUTO RULES EVALUATION CARD -->
+                <div class="card-auto-rules">
+                  <div class="rules-header">
+                    <div class="rules-title-group">
+                      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                      <h5>Regla de Automatización Activa</h5>
+                    </div>
+                    <label class="switch-ui">
+                      <input type="checkbox" id="chkAutoMode" checked onchange="onAutoModeToggle(this.checked)">
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                  <div class="rule-formula-box">
+                    SI (T &gt; 26°C &amp;&amp; Presencia) &rarr; ABRIR ESCOTILLA (90°)<br>
+                    SI (T &lt; 22°C || Sin Presencia) &rarr; CERRAR ESCOTILLA (0°)
+                  </div>
+                  <div class="rule-status-eval">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#16a34a"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span id="txtRuleEvaluation">Condición cumplida: Climatizando activamente</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- 6. PANTALLA: PERFIL Y SEGURIDAD ISO 27400 -->
+            <div class="screen-view" id="screen-profile">
+              <div class="profile-container">
+                <div class="reg-top-bar">
+                  <div class="btn-back-round" onclick="showScreen('screen-dashboard')">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                  </div>
+                  <h3>Perfil y Configuración</h3>
+                </div>
+
+                <div class="profile-card-user">
+                  <div class="profile-avatar-big">BT</div>
+                  <h4>Bastián Flores</h4>
+                  <p>Operador Administrador • ID #OT-2026-CHILE</p>
+                  <p style="margin-top: 4px; font-weight: 600; color:#0284c7;">+56 9 8765 4321</p>
+                </div>
+
+                <!-- ISO 27400 SECURITY BOX (CRITERION 2.1.3) -->
+                <div class="card-iso-security">
+                  <div class="iso-title-row">
+                    <h5 style="font-size:0.85rem; font-weight:800; color:#0f172a;">Estándar ISO 27400:2022</h5>
+                    <span class="iso-badge-tag">Seguridad OT IoT</span>
+                  </div>
+                  <div class="iso-features-list">
+                    <div class="iso-feature-item">
+                      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                      <div><strong>Cifrado en Reposo:</strong> Credenciales y tokens protegidos con AES-256 en Android Jetpack DataStore / EncryptedSharedPreferences.</div>
+                    </div>
+                    <div class="iso-feature-item">
+                      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                      <div><strong>Hashing Criptográfico:</strong> Algoritmo Argon2 / SHA-256 con salt dinámico para protección contra ataques de fuerza bruta.</div>
+                    </div>
+                    <div class="iso-feature-item">
+                      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                      <div><strong>Comunicaciones Seguras:</strong> Canales inalámbricos protegidos con TLS v1.3 y BLE Secure Connections (Passkey pairing).</div>
+                    </div>
+                    <div class="iso-feature-item">
+                      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                      <div><strong>Control de Acceso RBAC:</strong> Segmentación estricta de privilegios entre Administrador, Técnico de Mantenimiento y Operador.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-wireless-link" style="cursor:pointer;" onclick="alert('Políticas de Privacidad conformes a la normativa de protección de datos personales y seguridad IoT.')">
+                  <div class="link-info-left">
+                    <svg width="20" height="20" fill="#0284c7" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                    <div class="link-texts">
+                      <h5>Términos y Privacidad de Datos</h5>
+                      <p>Certificación de cumplimiento OT</p>
+                    </div>
+                  </div>
+                  <span style="font-size:1.1rem; color:#94a3b8;">&rsaquo;</span>
+                </div>
+
+                <button class="btn-logout" onclick="showScreen('screen-login')">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+                  Cerrar Sesión Segura
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- GESTURE BAR -->
+          <div class="phone-gesture-bar">
+            <div class="gesture-pill"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VISTA DUAL: INTERCONEXIÓN 2 DISPOSITIVOS (CRITERIO 2.1.4) -->
+      <div class="dual-phone-container" id="dualPhoneContainer">
+        
+        <!-- DISPOSITIVO 1: MASTER (ADMIN) -->
+        <div style="position: relative;">
+          <div class="device-role-tag">DISPOSITIVO 1: MASTER (SUPERVISOR)</div>
+          <div class="smartphone">
+            <div class="phone-status-bar">
+              <span class="status-left">Master A</span>
+              <div class="camera-punchhole"></div>
+              <div class="status-right"><span style="font-size:0.7rem; color:#0284c7; font-weight:700;">BLE HUB</span></div>
+            </div>
+            <div class="phone-screen-content">
+              <div class="dashboard-container" style="padding:14px; gap:12px;">
+                <div style="background:#0284c7; color:#fff; padding:10px 12px; border-radius:10px;">
+                  <div style="font-size:0.72rem; opacity:0.85;">MODO TRANSMISOR WIRELESS</div>
+                  <div style="font-size:0.92rem; font-weight:800;">Panel de Control Master</div>
+                </div>
+
+                <div class="card-actuator-turbine" style="padding:14px;">
+                  <div style="font-size:0.8rem; font-weight:700; margin-bottom:8px;">Actuador Escotilla: <span id="dualMasterAngle" style="color:#38bdf8;">90°</span></div>
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.75rem;">Control Transmitido:</span>
+                    <label class="switch-ui">
+                      <input type="checkbox" id="dualMasterSwitch" checked onchange="onDualMasterToggle(this.checked)">
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="sensors-grid-2col">
+                  <div class="card-sensor-tile" style="padding:10px;">
+                    <span class="sensor-title-text">TEMP (IN)</span>
+                    <div class="sensor-big-val" id="dualMasterTemp" style="font-size:1.3rem;">27.5°C</div>
+                  </div>
+                  <div class="card-sensor-tile" style="padding:10px;">
+                    <span class="sensor-title-text">PIR (IN)</span>
+                    <div class="sensor-big-val" id="dualMasterPir" style="font-size:1.1rem; color:#16a34a;">MOV</div>
+                  </div>
+                </div>
+
+                <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.75rem; color:#334155;">
+                  <strong>Transmisión Inalámbrica (Criterio 2.1.4):</strong>
+                  <div style="margin-top:4px; font-family:monospace; font-size:0.7rem; color:#0284c7;">
+                    TX &rarr; BLE Mesh / Local Broker<br>
+                    Payload: { "temp": 27.5, "servo": 90, "pir": 1 }
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-gesture-bar"><div class="gesture-pill"></div></div>
+          </div>
+        </div>
+
+        <!-- ENLACE WIRELESS VISUAL -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="background:rgba(2,132,199,0.2); border:1px dashed #0284c7; padding:8px 12px; border-radius:20px; font-size:0.72rem; color:#38bdf8; font-weight:700; text-align:center;">
+            &larr; Conexión Inalámbrica &rarr;<br>
+            <span style="font-size:0.65rem; color:#94a3b8;">Latencia: 14ms • Cifrado AES-CCM</span>
+          </div>
+        </div>
+
+        <!-- DISPOSITIVO 2: CLIENT (RECEIVER) -->
+        <div style="position: relative;">
+          <div class="device-role-tag client">DISPOSITIVO 2: ESCLAVO (CLIENTE MONITOR)</div>
+          <div class="smartphone">
+            <div class="phone-status-bar">
+              <span class="status-left">Client B</span>
+              <div class="camera-punchhole"></div>
+              <div class="status-right"><span style="font-size:0.7rem; color:#10b981; font-weight:700;">SINCRONIZADO</span></div>
+            </div>
+            <div class="phone-screen-content">
+              <div class="dashboard-container" style="padding:14px; gap:12px;">
+                <div style="background:#10b981; color:#fff; padding:10px 12px; border-radius:10px;">
+                  <div style="font-size:0.72rem; opacity:0.85;">RECEPTOR REMOTO EN TIEMPO REAL</div>
+                  <div style="font-size:0.92rem; font-weight:800;">Monitor de Habitación B</div>
+                </div>
+
+                <div class="card-actuator-turbine" style="padding:14px; background:linear-gradient(145deg, #064e3b, #0f172a);">
+                  <div style="font-size:0.8rem; font-weight:700; margin-bottom:8px;">Estado Reflejado: <span id="dualSlaveAngle" style="color:#34d399;">90° (ABIERTO)</span></div>
+                  <div style="font-size:0.72rem; color:#a7f3d0;">
+                    El actuador cambió remotamente por orden del Dispositivo 1.
+                  </div>
+                </div>
+
+                <div class="sensors-grid-2col">
+                  <div class="card-sensor-tile" style="padding:10px;">
+                    <span class="sensor-title-text">TEMP REMOTA</span>
+                    <div class="sensor-big-val" id="dualSlaveTemp" style="font-size:1.3rem;">27.5°C</div>
+                  </div>
+                  <div class="card-sensor-tile" style="padding:10px;">
+                    <span class="sensor-title-text">PRESENCIA REMOTA</span>
+                    <div class="sensor-big-val" id="dualSlavePir" style="font-size:1.1rem; color:#16a34a;">DETECTADA</div>
+                  </div>
+                </div>
+
+                <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:10px; font-size:0.75rem; color:#166534;">
+                  <strong>Recepción Confirmada (ACK):</strong>
+                  <div style="margin-top:4px; font-family:monospace; font-size:0.7rem;">
+                    RX &larr; Sincronización instantánea validada bajo estándar ISO 27400.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-gesture-bar"><div class="gesture-pill"></div></div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- PANEL DERECHO: SIMULADOR DE HARDWARE IOT & TELEMETRÍA -->
+    <aside class="panel-hardware">
+      <div class="panel-title">
+        Simulador de Hardware
+        <span>Inyección IoT</span>
+      </div>
+
+      <!-- SLIDER TEMPERATURA -->
+      <div class="sim-control-group">
+        <div class="sim-label-row">
+          <span>Temperatura DHT11:</span>
+          <strong id="simLabelTemp" style="color:var(--primary-light);">27.5 °C</strong>
+        </div>
+        <input type="range" class="sim-slider" id="sliderTemp" min="16" max="36" step="0.5" value="27.5" oninput="updateSimTemp(this.value)">
+        <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-dim);">
+          <span>16°C (Frío)</span>
+          <span>Umbral: 26°C</span>
+          <span>36°C (Calor)</span>
+        </div>
+      </div>
+
+      <!-- SLIDER HUMEDAD -->
+      <div class="sim-control-group">
+        <div class="sim-label-row">
+          <span>Humedad Relativa:</span>
+          <strong id="simLabelHum" style="color:var(--accent);">58 %</strong>
+        </div>
+        <input type="range" class="sim-slider" id="sliderHum" min="20" max="95" step="1" value="58" oninput="updateSimHum(this.value)">
+      </div>
+
+      <!-- SENSOR PIR BOTÓN -->
+      <div class="sim-control-group">
+        <div class="sim-label-row">
+          <span>Detección de Movimiento PIR:</span>
+        </div>
+        <button class="btn-sim-trigger active" id="btnSimPir" onclick="toggleSimPir()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.22-3.22-7.51-7.51 3.22 3.22 7.51zm3.83-4.04l1.41.6-1.41 1.41-.6-1.41.6-.6z"/></svg>
+          <span id="btnSimPirText">Presencia Detectada: SÍ</span>
+        </button>
+      </div>
+
+      <!-- BOTONES RÁPIDOS DE PRUEBA DE CASOS DE EVALUACIÓN -->
+      <div class="sim-control-group">
+        <div class="sim-label-row">
+          <span>Escenarios de Prueba (Guía):</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+          <button class="btn-sim-trigger" onclick="setPreset('alerta_calor')">
+            🔥 Calor &gt;26°C + PIR
+          </button>
+          <button class="btn-sim-trigger" onclick="setPreset('frio_apagado')">
+            ❄️ Frío &lt;22°C / No PIR
+          </button>
+        </div>
+      </div>
+
+      <!-- CONSOLA DE TELEMETRÍA SERIAL OT -->
+      <div class="sim-control-group" style="margin-top:4px;">
+        <div class="sim-label-row">
+          <span>Log Serial de Telemetría OT:</span>
+          <span style="font-size:0.68rem; color:#10b981;">115200 baud</span>
+        </div>
+        <div class="telemetry-console-box" id="telemetryConsole">
+          <div class="log-line"><span class="timestamp">[12:30:01]</span> <span class="tag">[BLE-INIT]</span> Conexión BLE establecida con ESP32</div>
+          <div class="log-line"><span class="timestamp">[12:30:02]</span> <span class="tag">[SEC-AUTH]</span> Token JWT verificado bajo ISO 27400</div>
+          <div class="log-line"><span class="timestamp">[12:30:03]</span> <span class="tag">[TELEMETRY]</span> T:27.5°C H:58% PIR:1 &rarr; SG90:90°</div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="academic-footer">
+    <div>
+      <strong>Proyecto AeroSmart Home</strong> • Evaluación Sumativa Unidad 2 (25%) • Asignatura: Aplicaciones Móviles para IoT (TI3042)
+    </div>
+    <div>
+      Estándares: <strong>Android Material 3 • ISO 27400:2022 • BLE &amp; MQTT</strong>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC & REACTIVE STATE -->
+  <script>
+    // ESTADO GLOBAL REACTIVO DE LA APLICACIÓN
+    const state = {
+      temperature: 27.5,
+      humidity: 58,
+      isMovement: true,
+      isAutoMode: true,
+      isVentOpen: true,
+      servoAngle: 90,
+      fanRPM: 1850,
+      isConnected: true,
+      backendType: 'SQLite',
+      onboardIndex: 0,
+      currentScreen: 'screen-dashboard',
+      stageMode: 'single'
+    };
+
+    // RELOJ EN LA BARRA DE ESTADO
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const timeStr = `${hours}:${minutes}`;
+      const elem = document.getElementById('livePhoneTime');
+      if (elem) elem.innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // NAVEGACIÓN ENTRE PANTALLAS
+    function showScreen(screenId) {
+      state.currentScreen = screenId;
+      document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+
+      // Actualizar nav items
+      document.querySelectorAll('.screen-nav-item').forEach(item => {
+        const text = item.innerText;
+        if (
+          (screenId === 'screen-splash' && text.includes('Splash')) ||
+          (screenId === 'screen-onboarding' && text.includes('Onboarding')) ||
+          (screenId === 'screen-login' && text.includes('Inicio de Sesión')) ||
+          (screenId === 'screen-register' && text.includes('Registro')) ||
+          (screenId === 'screen-dashboard' && text.includes('Dashboard')) ||
+          (screenId === 'screen-profile' && text.includes('Perfil'))
+        ) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // Scroll to top
+      const host = document.getElementById('screenContentHost');
+      if (host) host.scrollTop = 0;
+
+      addLog(`[NAV] Pantalla activa: ${screenId}`);
+    }
+
+    // ONBOARDING CAROUSEL
+    function gotoOnboardSlide(idx) {
+      state.onboardIndex = idx;
+      document.querySelectorAll('.onboarding-slide').forEach((slide, i) => {
+        slide.classList.toggle('active', i === idx);
+      });
+      document.querySelectorAll('.onboard-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === idx);
+      });
+
+      const btn = document.getElementById('btnOnboardNext');
+      if (btn) {
+        btn.innerText = (idx === 2) ? 'Comenzar Ahora' : 'Siguiente';
+      }
+    }
+
+    function nextOnboardSlide() {
+      if (state.onboardIndex < 2) {
+        gotoOnboardSlide(state.onboardIndex + 1);
+      } else {
+        showScreen('screen-login');
+      }
+    }
+
+    // BACKEND SELECTION (PASO 2 GUÍA)
+    function setBackendMode(btn, mode) {
+      document.querySelectorAll('.btn-backend-mode').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.backendType = mode;
+      addLog(`[CONFIG] Método de almacenamiento seleccionado: ${mode}`);
+    }
+
+    // AUTENTICACIÓN
+    function doLogin() {
+      const email = document.getElementById('loginEmail').value;
+      addLog(`[AUTH] Autenticando usuario: ${email} vía ${state.backendType} (Argon2 Hash Validado)`);
+      showScreen('screen-dashboard');
+    }
+
+    // OTP DIALOG
+    function openOtpDialog() {
+      const modal = document.getElementById('otpModalBackdrop');
+      if (modal) modal.classList.add('active');
+      addLog(`[SEC-OTP] Código OTP de 4 dígitos despachado a correo`);
+    }
+
+    function closeOtpDialog() {
+      const modal = document.getElementById('otpModalBackdrop');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function verifyOtpAndProceed() {
+      closeOtpDialog();
+      addLog(`[SEC-OTP] Verificación OTP exitosa. Creando sesión cifrada AES-256`);
+      showScreen('screen-dashboard');
+    }
+
+    // REGLA DE AUTOMATIZACIÓN CENTRAL (EVALUADOR IOT)
+    function evaluateAutomationLogic() {
+      if (!state.isAutoMode) {
+        // En modo manual, el usuario decide
+        return;
+      }
+
+      // REGLA DEL CURSO:
+      // SI (Presencia == Con movimiento Y Temperatura > 26°C) -> Encender (Abrir 90°)
+      // SI (Presencia == Sin movimiento O Temperatura < 22°C) -> Apagar (Cerrar 0°)
+      if (state.isMovement && state.temperature > 26) {
+        state.isVentOpen = true;
+        state.servoAngle = 90;
+        state.fanRPM = 1850;
+      } else if (!state.isMovement || state.temperature < 22) {
+        state.isVentOpen = false;
+        state.servoAngle = 0;
+        state.fanRPM = 0;
+      }
+
+      renderActuatorState();
+    }
+
+    // RENDERIZADO VISUAL DEL ACTUADOR (TURBINA Y SERVO)
+    function renderActuatorState() {
+      const fanWheel = document.getElementById('fanTurbineWheel');
+      const angleElem = document.getElementById('valServoAngle');
+      const rpmElem = document.getElementById('valFanRPM');
+      const badgeStatus = document.getElementById('badgeActuatorStatus');
+      const chkManual = document.getElementById('chkManualVent');
+      const txtRule = document.getElementById('txtRuleEvaluation');
+
+      if (state.isVentOpen) {
+        if (fanWheel) fanWheel.classList.add('spinning');
+        if (angleElem) angleElem.innerText = `${state.servoAngle}°`;
+        if (rpmElem) rpmElem.innerText = `${state.fanRPM} RPM`;
+        if (badgeStatus) {
+          badgeStatus.className = 'actuator-status-pill';
+          badgeStatus.innerText = `ACTIVO • ${state.servoAngle}°`;
+        }
+        if (chkManual) chkManual.checked = true;
+        if (txtRule) txtRule.innerText = 'Condición cumplida: Climatizando activamente';
+      } else {
+        if (fanWheel) fanWheel.classList.remove('spinning');
+        if (angleElem) angleElem.innerText = '0°';
+        if (rpmElem) rpmElem.innerText = '0 RPM';
+        if (badgeStatus) {
+          badgeStatus.className = 'actuator-status-pill closed';
+          badgeStatus.innerText = 'CERRADO • 0°';
+        }
+        if (chkManual) chkManual.checked = false;
+        if (txtRule) txtRule.innerText = 'Reposo: Temperatura óptima o sin ocupantes';
+      }
+
+      // Sincronizar vista dual (Criterio 2.1.4)
+      syncDualStage();
+    }
+
+    // CONTROLES DE LA UI
+    function onManualVentToggle(isChecked) {
+      state.isAutoMode = false;
+      state.isVentOpen = isChecked;
+      state.servoAngle = isChecked ? 90 : 0;
+      state.fanRPM = isChecked ? 1850 : 0;
+
+      const chkAuto = document.getElementById('chkAutoMode');
+      if (chkAuto) chkAuto.checked = false;
+
+      renderActuatorState();
+      addLog(`[MANUAL] Forzado de ventilador por usuario &rarr; ${isChecked ? 'ABIERTO (90°)' : 'CERRADO (0°)'}`);
+    }
+
+    function onAutoModeToggle(isChecked) {
+      state.isAutoMode = isChecked;
+      if (isChecked) {
+        evaluateAutomationLogic();
+        addLog(`[AUTO] Modo automático ACTIVADO: Evaluando reglas térmicas y PIR`);
+      } else {
+        addLog(`[AUTO] Modo automático DESACTIVADO: Esperando control manual`);
+      }
+    }
+
+    function toggleConnectMock() {
+      state.isConnected = !state.isConnected;
+      const statusText = document.getElementById('dashLinkStatus');
+      const btnLink = document.querySelector('.btn-link-action');
+      if (state.isConnected) {
+        if (statusText) statusText.innerText = 'Conectado (RSSI: -48 dBm)';
+        if (btnLink) btnLink.innerText = 'Desconectar';
+        addLog(`[BLE] Dispositivo AeroSmart-ESP32 conectado exitosamente`);
+      } else {
+        if (statusText) statusText.innerText = 'Desconectado';
+        if (btnLink) btnLink.innerText = 'Vincular';
+        addLog(`[BLE] Conexión finalizada por el usuario`);
+      }
+    }
+
+    // INYECCIÓN DE DATOS DESDE EL PANEL DE HARDWARE
+    function updateSimTemp(val) {
+      state.temperature = parseFloat(val);
+      document.getElementById('simLabelTemp').innerText = `${state.temperature.toFixed(1)} °C`;
+      document.getElementById('dashTempVal').innerText = `${state.temperature.toFixed(1)} °C`;
+
+      const pill = document.getElementById('dashTempPill');
+      if (pill) {
+        if (state.temperature > 26) {
+          pill.className = 'sensor-comfort-pill hot';
+          pill.innerText = 'Sobre umbral (>26°C)';
+        } else if (state.temperature >= 22) {
+          pill.className = 'sensor-comfort-pill ideal';
+          pill.innerText = 'Confort térmico (22-26°C)';
+        } else {
+          pill.className = 'sensor-comfort-pill cold';
+          pill.innerText = 'Temperatura fresca (<22°C)';
+        }
+      }
+
+      evaluateAutomationLogic();
+      addLog(`[DHT11-SIM] T: ${state.temperature.toFixed(1)}°C detectada por sensor`);
+    }
+
+    function updateSimHum(val) {
+      state.humidity = parseInt(val);
+      document.getElementById('simLabelHum').innerText = `${state.humidity} %`;
+      document.getElementById('dashHumVal').innerText = `${state.humidity} %`;
+      addLog(`[DHT11-SIM] H: ${state.humidity}% de humedad relativa`);
+    }
+
+    function toggleSimPir() {
+      state.isMovement = !state.isMovement;
+      const btn = document.getElementById('btnSimPir');
+      const btnText = document.getElementById('btnSimPirText');
+      const radar = document.getElementById('radarIndicator');
+      const badgePir = document.getElementById('badgePirStatus');
+      const subtext = document.getElementById('pirSubtext');
+
+      if (state.isMovement) {
+        btn.classList.add('active');
+        btnText.innerText = 'Presencia Detectada: SÍ';
+        if (radar) radar.className = 'radar-indicator-box active';
+        if (badgePir) {
+          badgePir.className = 'pir-status-badge motion';
+          badgePir.innerText = 'EN MOVIMIENTO';
+        }
+        if (subtext) subtext.innerText = 'Movimiento detectado en zona';
+        addLog(`[PIR-SIM] Alerta: Movimiento infrarrojo DETECTADO`);
+      } else {
+        btn.classList.remove('active');
+        btnText.innerText = 'Presencia Detectada: NO';
+        if (radar) radar.className = 'radar-indicator-box inactive';
+        if (badgePir) {
+          badgePir.className = 'pir-status-badge clear';
+          badgePir.innerText = 'SIN MOVIMIENTO';
+        }
+        if (subtext) subtext.innerText = 'Área despejada';
+        addLog(`[PIR-SIM] Área libre de ocupantes`);
+      }
+
+      evaluateAutomationLogic();
+    }
+
+    function setPreset(type) {
+      if (type === 'alerta_calor') {
+        document.getElementById('sliderTemp').value = 28.5;
+        updateSimTemp(28.5);
+        if (!state.isMovement) toggleSimPir();
+        state.isAutoMode = true;
+        document.getElementById('chkAutoMode').checked = true;
+        evaluateAutomationLogic();
+      } else if (type === 'frio_apagado') {
+        document.getElementById('sliderTemp').value = 20.0;
+        updateSimTemp(20.0);
+        if (state.isMovement) toggleSimPir();
+        state.isAutoMode = true;
+        document.getElementById('chkAutoMode').checked = true;
+        evaluateAutomationLogic();
+      }
+    }
+
+    // INTERCONEXIÓN 2 DISPOSITIVOS (CRITERIO 2.1.4)
+    function switchStageMode(mode) {
+      state.stageMode = mode;
+      document.getElementById('tabModeSingle').classList.toggle('active', mode === 'single');
+      document.getElementById('tabModeDual').classList.toggle('active', mode === 'dual');
+
+      const singlePhone = document.getElementById('singlePhoneContainer');
+      const dualPhone = document.getElementById('dualPhoneContainer');
+
+      if (mode === 'dual') {
+        singlePhone.style.display = 'none';
+        dualPhone.classList.add('active');
+        syncDualStage();
+        addLog(`[MODO-DUAL] Activando simulación Criterio 2.1.4: Dispositivo Master &rarr; Dispositivo Esclavo`);
+      } else {
+        singlePhone.style.display = 'flex';
+        dualPhone.classList.remove('active');
+      }
+    }
+
+    function syncDualStage() {
+      // Dispositivo 1 (Master)
+      const mAngle = document.getElementById('dualMasterAngle');
+      const mTemp = document.getElementById('dualMasterTemp');
+      const mPir = document.getElementById('dualMasterPir');
+      const mSwitch = document.getElementById('dualMasterSwitch');
+
+      if (mAngle) mAngle.innerText = `${state.servoAngle}°`;
+      if (mTemp) mTemp.innerText = `${state.temperature.toFixed(1)}°C`;
+      if (mPir) mPir.innerText = state.isMovement ? 'MOV' : 'QUIETO';
+      if (mSwitch) mSwitch.checked = state.isVentOpen;
+
+      // Dispositivo 2 (Slave)
+      const sAngle = document.getElementById('dualSlaveAngle');
+      const sTemp = document.getElementById('dualSlaveTemp');
+      const sPir = document.getElementById('dualSlavePir');
+
+      if (sAngle) sAngle.innerText = state.isVentOpen ? `${state.servoAngle}° (ABIERTO)` : '0° (CERRADO)';
+      if (sTemp) sTemp.innerText = `${state.temperature.toFixed(1)}°C`;
+      if (sPir) sPir.innerText = state.isMovement ? 'DETECTADA' : 'DESPEJADO';
+    }
+
+    function onDualMasterToggle(isChecked) {
+      onManualVentToggle(isChecked);
+      addLog(`[DUAL-TX] Dispositivo 1 transmitió comando servo: ${isChecked ? '90°' : '0°'} a Dispositivo 2`);
+    }
+
+    // CONSOLA SERIAL TELEMETRÍA
+    function addLog(text) {
+      const consoleBox = document.getElementById('telemetryConsole');
+      if (!consoleBox) return;
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = `<span class="timestamp">[${timeStr}]</span> ${text}`;
+      consoleBox.appendChild(line);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    // DOSSIER ACADÉMICO MODAL (PASOS 1 AL 4 TI3042)
+    function openDossierModal() {
+      const modal = document.getElementById('dossierModalOverlay');
+      if (modal) modal.classList.add('active');
+      addLog(`[DOCS] Abriendo Dossier Oficial de Cumplimiento TI3042 - Unidad 2`);
+    }
+
+    function closeDossierModal() {
+      const modal = document.getElementById('dossierModalOverlay');
+      if (modal) modal.classList.remove('active');
+    }
+
+    // INICIALIZACIÓN
+    window.addEventListener('DOMContentLoaded', () => {
+      evaluateAutomationLogic();
+      addLog(`[SISTEMA] Mockup interactivo inicializado correctamente`);
+    });
+  </script>
+
+  <!-- MODAL FLOTANTE: DOSSIER ACADÉMICO Y GUÍA PASO A PASO -->
+  <div class="dossier-modal-overlay" id="dossierModalOverlay" onclick="if(event.target===this) closeDossierModal()">
+    <div class="dossier-modal-container">
+      <div class="dossier-header">
+        <h3>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#38bdf8"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          Dossier Académico Oficial • Unidad 2 (TI3042)
+        </h3>
+        <button class="btn-close-dossier" onclick="closeDossierModal()">&times;</button>
+      </div>
+
+      <div class="dossier-body">
+        
+        <!-- RESUMEN DE CRITERIOS -->
+        <div class="dossier-card" style="border-left: 4px solid #0284c7;">
+          <h4>🎯 Mapeo de Criterios de Evaluación</h4>
+          <ul>
+            <li><strong>2.1.1 (Herramientas y Estándar Android):</strong> Android Studio, Kotlin 2.0, ViewBinding, StateFlow, Coroutines y Material Design 3.</li>
+            <li><strong>2.1.2 (Conexiones Inalámbricas Pertinentes):</strong> Bluetooth Low Energy (BLE) en ESP32 para bajo consumo; Bluetooth Classic (HC-05) y Wi-Fi/MQTT broker.</li>
+            <li><strong>2.1.3 (Estándar ISO 27400 OT):</strong> Cifrado en reposo AES-256 en Jetpack DataStore, Hashing Argon2/SHA-256 de credenciales, autenticación 2FA (OTP) y control de acceso RBAC.</li>
+            <li><strong>2.1.4 (Interconexión entre 2 Dispositivos Móviles):</strong> Demostración funcional en tiempo real de Dispositivo Master (Supervisor) transmitiendo telemetría y consignas de control a Dispositivo Esclavo (Cliente Monitor).</li>
+          </ul>
+        </div>
+
+        <!-- PASO 1 -->
+        <div class="dossier-card">
+          <h4>📌 Paso 1: Definir el Proyecto</h4>
+          <p><strong>Identificación de la Problemática:</strong> Necesidad de automatizar la climatización y renovación de aire en recintos cerrados ante elevaciones térmicas críticas y acumulación de calor metabólico humano, disminuyendo el gasto energético y garantizando confort higrotérmico y seguridad OT.</p>
+          <ul>
+            <li><strong>Dispositivos a Conectar:</strong> Estación sensora DHT11 (temperatura/humedad), sensor infrarrojo pasivo PIR (presencia humana), servomotor SG90 (apertura de compuerta 0° a 90°) y turbina extractora.</li>
+            <li><strong>Selección de Herramientas:</strong> Kotlin sobre Android Studio con arquitectura MVVM desacoplada. Manejo de estado reactivo mediante <code>StateFlow</code>.</li>
+            <li><strong>Justificación del Almacenamiento:</strong> Soporte híbrido: SQLite local (para funcionamiento continuo industrial sin red), Firebase Auth (para sincronización nube) y API REST MySQL (para integración en planta industrial).</li>
+          </ul>
+        </div>
+
+        <!-- PASO 2 -->
+        <div class="dossier-card">
+          <h4>🎨 Paso 2: Diseñar la Solución</h4>
+          <ul>
+            <li><strong>Método Inalámbrico Seleccionado:</strong> Bluetooth Low Energy (BLE) para comunicación de corto-medio alcance (&lt;15m) con consumo inferior a 15 mA; y Wi-Fi/MQTT para telemetría distribuida.</li>
+            <li><strong>Sistema de Autenticación:</strong> Pantalla de acceso con validación estricta de credenciales, protección contra inyección y módulo de recuperación de contraseña con token temporal criptográfico.</li>
+            <li><strong>Diseño de Interfaz de Usuario (UI):</strong> Mockup interactivo con chasis de smartphone de alta fidelidad, widgets vectoriales animados, radar PIR con pulso y visualización de telemetría OT.</li>
+          </ul>
+        </div>
+
+        <!-- PASO 3 -->
+        <div class="dossier-card">
+          <h4>⚙️ Paso 3: Construir la Aplicación</h4>
+          <ul>
+            <li><strong>Regla de Automatización:</strong>
+              <div style="background:#0f172a; border-radius:6px; padding:8px 12px; margin:6px 0; font-family:monospace; color:#38bdf8; font-size:0.8rem;">
+                SI (Temp &gt; 26°C &amp;&amp; Presencia == 1) &rarr; ABRIR ESCOTILLA (90°) + TURBINA 1850 RPM<br>
+                SI (Temp &lt; 22°C || Presencia == 0) &rarr; CERRAR ESCOTILLA (0°) + TURBINA 0 RPM
+              </div>
+            </li>
+            <li><strong>Seguridad ISO 27400:</strong> Almacenamiento cifrado AES-256 en Jetpack DataStore / EncryptedSharedPreferences, verificación en 2 pasos con OTP de 4 dígitos y canales seguros TLS/AES-CCM.</li>
+            <li><strong>Pruebas de Funcionamiento:</strong> Verificación de 100% de escenarios: login seguro, sincronización serial con microcontrolador y conmutación forzada manual vs automática.</li>
+          </ul>
+        </div>
+
+        <!-- PASO 4 -->
+        <div class="dossier-card">
+          <h4>🚀 Paso 4: Presentación y Validación</h4>
+          <p>Para la defensa en clase, se cuenta con:</p>
+          <ul>
+            <li>Simulador de hardware integrado en el panel lateral derecho con inyección de datos de temperatura, humedad y presencia en tiempo real.</li>
+            <li>Modo de interconexión inalámbrica multi-dispositivo (botón superior) para comprobar el Criterio 2.1.4 en vivo.</li>
+            <li>Archivo de texto preparado para entrega en AAI: <code>entrega_AAI_AeroSmart.txt</code> con enlace a GitHub.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
