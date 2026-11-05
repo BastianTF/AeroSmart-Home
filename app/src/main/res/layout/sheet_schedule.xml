@@ -136,21 +136,21 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <com.google.android.material.chip.ChipGroup
+    <LinearLayout
         android:id="@+id/chipGroupDays"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        app:chipSpacingHorizontal="6dp">
+        android:orientation="horizontal">
 
-        <com.google.android.material.chip.Chip android:id="@+id/chipDay1" style="@style/Widget.AeroSmart.DayChip" android:text="L" android:checked="true" />
-        <com.google.android.material.chip.Chip android:id="@+id/chipDay2" style="@style/Widget.AeroSmart.DayChip" android:text="M" android:checked="true" />
-        <com.google.android.material.chip.Chip android:id="@+id/chipDay3" style="@style/Widget.AeroSmart.DayChip" android:text="X" android:checked="true" />
-        <com.google.android.material.chip.Chip android:id="@+id/chipDay4" style="@style/Widget.AeroSmart.DayChip" android:text="J" android:checked="true" />
-        <com.google.android.material.chip.Chip android:id="@+id/chipDay5" style="@style/Widget.AeroSmart.DayChip" android:text="V" android:checked="true" />
-        <com.google.android.material.chip.Chip android:id="@+id/chipDay6" style="@style/Widget.AeroSmart.DayChip" android:text="S" android:checked="true" />
-        <com.google.android.material.chip.Chip android:id="@+id/chipDay7" style="@style/Widget.AeroSmart.DayChip" android:text="D" android:checked="true" />
-    </com.google.android.material.chip.ChipGroup>
+        <com.google.android.material.chip.Chip android:id="@+id/chipDay1" android:layout_marginEnd="4dp" style="@style/Widget.AeroSmart.DayChip" android:layout_width="0dp" android:layout_weight="1" android:text="L" android:checked="true" />
+        <com.google.android.material.chip.Chip android:id="@+id/chipDay2" android:layout_marginEnd="4dp" style="@style/Widget.AeroSmart.DayChip" android:layout_width="0dp" android:layout_weight="1" android:text="M" android:checked="true" />
+        <com.google.android.material.chip.Chip android:id="@+id/chipDay3" android:layout_marginEnd="4dp" style="@style/Widget.AeroSmart.DayChip" android:layout_width="0dp" android:layout_weight="1" android:text="X" android:checked="true" />
+        <com.google.android.material.chip.Chip android:id="@+id/chipDay4" android:layout_marginEnd="4dp" style="@style/Widget.AeroSmart.DayChip" android:layout_width="0dp" android:layout_weight="1" android:text="J" android:checked="true" />
+        <com.google.android.material.chip.Chip android:id="@+id/chipDay5" android:layout_marginEnd="4dp" style="@style/Widget.AeroSmart.DayChip" android:layout_width="0dp" android:layout_weight="1" android:text="V" android:checked="true" />
+        <com.google.android.material.chip.Chip android:id="@+id/chipDay6" android:layout_marginEnd="4dp" style="@style/Widget.AeroSmart.DayChip" android:layout_width="0dp" android:layout_weight="1" android:text="S" android:checked="true" />
+        <com.google.android.material.chip.Chip android:id="@+id/chipDay7" style="@style/Widget.AeroSmart.DayChip" android:layout_width="0dp" android:layout_weight="1" android:text="D" android:checked="true" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txtScheduleError"

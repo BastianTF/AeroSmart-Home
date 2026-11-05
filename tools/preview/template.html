@@ -30,9 +30,9 @@ header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1
 .stage { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: start; }
 @media (max-width: 760px) { .stage { grid-template-columns: minmax(0,1fr); } }
 .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
-.phone-scale { width: 380px; max-width: 100%; }
-.phone { width: 380px; height: 800px; transform-origin: top left; border-radius: 40px; background: #111; padding: 10px; box-shadow: 0 20px 50px rgba(15,23,42,.25); }
-.screen { position: relative; width: 360px; height: 780px; border-radius: 30px; overflow: hidden; background: #F3F7F9; display: flex; flex-direction: column; font-family: var(--body); -webkit-font-smoothing: antialiased; }
+.phone-scale { width: calc(var(--sw, 360px) + 20px); max-width: 100%; }
+.phone { --sw: 360px; --sh: 780px; width: calc(var(--sw) + 20px); height: calc(var(--sh) + 20px); box-sizing: border-box; transform-origin: top left; border-radius: 40px; background: #111; padding: 10px; box-shadow: 0 20px 50px rgba(15,23,42,.25); }
+.screen { position: relative; width: var(--sw); height: var(--sh); border-radius: 30px; overflow: hidden; background: #F3F7F9; display: flex; flex-direction: column; font-family: var(--body); -webkit-font-smoothing: antialiased; }
 .statusbar { position: absolute; inset: 0 0 auto; height: 28px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font: 500 13px var(--body); color: #16252E; z-index: 5; pointer-events: none; }
 .statusbar.classic { position: relative; background: #000; flex: none; }
 .statusbar .icons { display: flex; gap: 5px; align-items: center; }
@@ -93,13 +93,13 @@ aside { display: grid; gap: 12px; min-width: 0; }
 .splash { flex: 1; display: flex; align-items: center; justify-content: center; background: #F3F7F9; }
 .splash img { width: 160px; height: 160px; object-fit: contain; }
 .outline .v { outline: 1px dashed rgba(229,57,53,.55); outline-offset: -1px; }
-.sim-toast { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); max-width: 300px; background: #2B3A42; color: #fff; font: 14px var(--body); padding: 10px 16px; border-radius: 20px; z-index: 20; text-align: center; animation: toastIn .2s ease-out; transition: opacity .3s; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+.sim-toast { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); max-width: calc(100% - 48px); width: max-content; background: #2B3A42; color: #fff; font: 14px var(--body); padding: 10px 16px; border-radius: 20px; z-index: 20; text-align: center; animation: toastIn .2s ease-out; transition: opacity .3s; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
 .sim-toast.out { opacity: 0; }
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } }
 .sim-scrim { position: absolute; inset: 0; background: rgba(22,37,46,.42); display: flex; align-items: center; justify-content: center; z-index: 30; animation: fadeIn .15s; transition: opacity .15s; }
 .sim-scrim.out { opacity: 0; }
 @keyframes fadeIn { from { opacity: 0; } }
-.sim-dialog { width: 296px; background: #fff; border-radius: 26px; padding: 24px 24px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: popIn .2s cubic-bezier(.34,1.56,.64,1); font-family: var(--body); }
+.sim-dialog { width: min(312px, calc(100% - 48px)); box-sizing: border-box; background: #fff; border-radius: 26px; padding: 24px 24px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: popIn .2s cubic-bezier(.34,1.56,.64,1); font-family: var(--body); }
 @keyframes popIn { from { transform: scale(.9); opacity: 0; } }
 .sim-dialog h3 { margin: 0 0 12px; font: 500 22px/1.25 var(--body); color: #16252E; }
 .sim-dialog p { margin: 0 0 16px; font-size: 14px; line-height: 1.45; color: #5B6B74; }
@@ -107,7 +107,7 @@ aside { display: grid; gap: 12px; min-width: 0; }
 .sim-items button { text-align: left; border: 0; background: none; padding: 14px 24px; font: 15px var(--body); color: #16252E; cursor: pointer; }
 .sim-items button:active { background: #D8F1F8; }
 .sim-content { margin: 0 -24px 12px; }
-.screen .chip-v { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px; border-radius: 10px; box-sizing: border-box; font-family: var(--body); user-select: none; }
+.screen .chip-v { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 36px; padding: 0 12px; border-radius: 10px; box-sizing: border-box; font-family: var(--body); user-select: none; }
 .screen .time-overlay { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; margin: 0; font-size: 16px; }
 .screen .time-overlay::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
 .sim-dialog { max-height: 90%; overflow-y: auto; }
@@ -115,6 +115,62 @@ aside { display: grid; gap: 12px; min-width: 0; }
 .sim-actions button { border: 0; background: none; color: #0E7C9B; font: 600 14px var(--body); padding: 10px 14px; border-radius: 20px; cursor: pointer; }
 .sim-actions button:active { background: #D8F1F8; }
 @media (prefers-reduced-motion: reduce) { .sim-dialog, .sim-toast, .sim-scrim { animation: none; } }
+
+/* ---- Material 3: interruptor, deslizador, ripple, ayuda de campos ---- */
+.screen .sw-input.m3 { width: 52px; height: 32px; border-radius: 16px; background: #E2EEF2; box-shadow: inset 0 0 0 2px #8A9AA3; margin: 0; transition: background-color .2s, box-shadow .2s; }
+.screen .sw-input.m3::after { top: 8px; left: 8px; width: 16px; height: 16px; background: #8A9AA3; box-shadow: none; transition: transform .22s cubic-bezier(.34,1.56,.64,1), width .2s, height .2s, top .2s, left .2s, background-color .2s; }
+.screen .sw-input.m3:checked { background: var(--tp); box-shadow: none; }
+.screen .sw-input.m3:checked::after { top: 4px; left: 4px; width: 24px; height: 24px; transform: translateX(20px); background: #fff; }
+.screen .sw-input.m3:active::after { width: 28px; height: 28px; top: 2px; left: 2px; }
+.screen .slider { -webkit-appearance: none; appearance: none; height: 44px; background: transparent; cursor: pointer; margin: 0; }
+.screen .slider::-webkit-slider-runnable-track { height: 16px; border-radius: 8px; background: linear-gradient(to right, var(--tp) var(--pct, 50%), #D8F1F8 var(--pct, 50%)); }
+.screen .slider::-moz-range-track { height: 16px; border-radius: 8px; background: #D8F1F8; }
+.screen .slider::-moz-range-progress { height: 16px; border-radius: 8px; background: var(--tp); }
+.screen .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 4px; height: 40px; margin-top: -12px; border-radius: 2px; background: var(--tp); box-shadow: 0 0 0 4px #fff; }
+.screen .slider::-moz-range-thumb { width: 4px; height: 40px; border: 0; border-radius: 2px; background: var(--tp); box-shadow: 0 0 0 4px #fff; }
+.screen .ripple { transition: background-color .15s; }
+.screen .ripple.pressed { background-color: rgba(14,124,155,.08) !important; }
+.screen .til-helper { font-size: 12px; color: #5B6B74; margin: 4px 16px 0; line-height: 1.3; }
+.screen .til-helper.error, .screen .til-box.error .til-label { color: #D64541 !important; }
+.screen .til-box.error { border: 2px solid #D64541 !important; }
+.screen .til-box { border-radius: 14px; border-color: #D3DEE3; }
+.screen .btn[aria-pressed] { transition: background-color .2s, color .2s, transform .18s cubic-bezier(.34,1.56,.64,1); }
+.screen .spark svg { display: block; width: 100%; height: 100%; }
+.screen .cpi { transition: stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1); }
+/* Entrada de tarjetas y cambio de pestaña (UiFx.animateChildrenIn y PageTransformer) */
+.screen .enter > * { animation: cardIn .38s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(14px); } }
+.screen .fan-spin { animation: spin var(--spin, 1.2s) linear infinite; }
+@media (prefers-reduced-motion: reduce) { .screen .enter > * { animation: none; } .screen .fan-spin { animation: none; } }
+/* Panel inferior (BottomSheetDialog) */
+.sim-sheet-scrim { position: absolute; inset: 0; background: rgba(22,37,46,.42); z-index: 30; display: flex; align-items: flex-end; animation: fadeIn .2s; transition: opacity .2s; }
+.sim-sheet-scrim.out { opacity: 0; }
+.sim-sheet { width: 100%; max-height: 88%; overflow-y: auto; background: #fff; border-radius: 28px 28px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,.18); animation: sheetUp .32s cubic-bezier(.2,.8,.2,1); transition: transform .22s ease-in; padding-bottom: 16px; }
+.sim-sheet-scrim.out .sim-sheet { transform: translateY(100%); }
+@keyframes sheetUp { from { transform: translateY(100%); } }
+.sim-sheet > .v { --til-bg: #fff; }
+/* Selector de hora tipo rueda */
+.wheel-wrap { display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; height: 200px; margin: 4px 0 8px; }
+.wheel-wrap::before { content: ""; position: absolute; left: 24px; right: 24px; top: 50%; height: 48px; margin-top: -24px; border-radius: 14px; background: #D8F1F8; z-index: 0; }
+.wheel { position: relative; z-index: 1; width: 84px; height: 200px; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; -webkit-mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); overscroll-behavior: contain; }
+.wheel::-webkit-scrollbar { display: none; }
+.wheel div { height: 48px; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; font: 500 28px var(--body); color: #8A9AA3; font-variant-numeric: tabular-nums; transition: color .15s, transform .15s; }
+.wheel div.sel { color: #075E76; transform: scale(1.12); font-weight: 700; }
+.wheel .pad { height: 76px; scroll-snap-align: none; }
+.wheel-colon { position: relative; z-index: 1; font: 700 28px var(--body); color: #075E76; }
+.sim-dialog .sim-sub { font-size: 13px; color: #5B6B74; margin: -6px 0 6px; text-align: center; }
+/* Tamaños de teléfono */
+.sizes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+.sim-notif { position: absolute; left: 8px; right: 8px; top: 34px; z-index: 40; display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,.97); border-radius: 20px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.18); font-family: var(--body); animation: notifIn .35s cubic-bezier(.2,.8,.2,1); transition: transform .3s, opacity .3s; }
+.sim-notif.out { transform: translateY(-120%); opacity: 0; }
+@keyframes notifIn { from { transform: translateY(-120%); } }
+.sim-notif-ic { width: 36px; height: 36px; border-radius: 50%; background: #0E7C9B; display: flex; align-items: center; justify-content: center; flex: none; }
+.sim-notif-ic svg { width: 20px; height: 20px; }
+.sim-notif b { display: block; font-size: 13px; color: #16252E; }
+.sim-notif small { display: block; font-size: 12.5px; color: #5B6B74; line-height: 1.3; }
+.sim-actions button.danger { color: #D64541; }
+.sim-content .til-box { margin-bottom: 4px; }
 .err { padding: 16px; color: #B71C1C; font: 12px var(--mono); white-space: pre-wrap; }
 </style>
 
@@ -127,6 +183,7 @@ aside { display: grid; gap: 12px; min-width: 0; }
   <div class="stage">
     <div class="phone-wrap">
       <div class="phone-scale" id="phoneScale"><div class="phone" id="phone"><div class="screen" id="screen"></div></div></div>
+      <div class="sizes" id="sizes" role="group" aria-label="Tamaño de teléfono"></div>
       <div class="tools">
         <button class="tool" id="tBack" type="button">← Atrás</button>
         <button class="tool" id="tOutline" type="button" aria-pressed="false">Ver bordes de vistas</button>
@@ -140,7 +197,8 @@ aside { display: grid; gap: 12px; min-width: 0; }
         <ul>
           <li>Toca los botones de la app: Saltar, Siguiente, Iniciar sesión, Regístrate, el avatar de perfil y Cerrar sesión navegan como en la app.</li>
           <li>Los campos de texto y los interruptores funcionan.</li>
-          <li>Conectar, refrescar, modo automático/manual, compuerta y las reglas funcionan igual que en la app: copian la lógica de <code>MainViewModel.kt</code> (datos simulados).</li>
+          <li>Conectar, refrescar, modo automático/manual, compuerta, velocidad, reglas y horario funcionan igual que en la app: copian la lógica de <code>MainViewModel.kt</code>. Al conectar llega una lectura simulada cada 5 segundos.</li>
+          <li>Prueba los 3 tamaños de teléfono bajo la pantalla para revisar que nada se corte.</li>
           <li>Desliza por las 4 pestañas con la barra inferior.</li>
           <li>Mantén el dedo o el mouse sobre una vista para ver su <code>id</code>.</li>
         </ul>
@@ -181,16 +239,17 @@ aside { display: grid; gap: 12px; min-width: 0; }
   const NAV = {
     btnSkip: () => go('login'),
     btnSiguiente: (s) => go(s.ob < OB.length - 1 ? 'onboarding-' + (s.ob + 2) : 'login'),
-    btnLogin: () => go('tab-1'),
+    btnLogin: () => window.AndroidSim.login(() => go('tab-1')),
     txtRegisterLink: () => go('register'),
-    btnRegister: () => go('login'),
+    btnRegister: () => window.AndroidSim.register(() => go('tab-1')),
     profileAvatarCard: () => go('profile'),
     imgProfile: () => go('profile'),
-    btnSaveProfile: () => back(),
-    btnLogout: () => go('login'),
+
+    btnLogout: () => window.AndroidSim.logout(() => go('login')),
     btnBack: () => back(),
     txtBackToLogin: () => go('login'),
     btnRefresh: (s, n) => { const r = (+n.dataset.rot || 0) + 360; n.dataset.rot = r; n.style.transition = 'transform .5s cubic-bezier(.45,0,.55,1)'; n.style.transform = `rotate(${r}deg)`; },
+    txtRegOr: null,
   };
 
   const picker = document.getElementById('picker');
@@ -258,6 +317,7 @@ aside { display: grid; gap: 12px; min-width: 0; }
       const fn = NAV[n.dataset.id];
       if (fn) { n.classList.add('clickable'); n.addEventListener('click', (ev) => { ev.stopPropagation(); fn(s, n); }); }
     });
+    const cl = screenEl.querySelector('[data-id="contentLayout"]'); if (cl) cl.classList.add('enter');
     window.AndroidSim && window.AndroidSim.attach(screenEl);
     document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.screen === s.id)));
     document.getElementById('info').textContent = s.layout ? `res/layout/${s.layout}.xml` : 'Theme.App.Starting (themes.xml)';
@@ -284,15 +344,35 @@ aside { display: grid; gap: 12px; min-width: 0; }
   document.getElementById('tBack').onclick = back;
   document.getElementById('tOutline').onclick = (e) => { outline = !outline; e.currentTarget.setAttribute('aria-pressed', String(outline)); draw(); };
 
+  // Tamaños de pantalla en dp: celular chico, estándar y grande
+  const SIZES = [['Chico', 320, 640, 'iPhone SE / Android compacto'], ['Normal', 360, 780, 'Android típico'], ['Grande', 412, 915, 'Pixel Pro / Galaxy Plus']];
+  let size = 1;
+  try { const v = localStorage.getItem('aero-size'); if (v !== null && SIZES[+v]) size = +v; } catch (e) {}
+  const sizesEl = document.getElementById('sizes');
+  SIZES.forEach(([n, w, h, hint], i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tool'; b.title = hint;
+    b.textContent = `${n} · ${w}×${h}`;
+    b.onclick = () => { size = i; try { localStorage.setItem('aero-size', String(i)); } catch (e) {} setSize(); draw(); };
+    sizesEl.append(b);
+  });
+  function setSize() {
+    const [, w, h] = SIZES[size];
+    const ph = document.getElementById('phone');
+    ph.style.setProperty('--sw', w + 'px'); ph.style.setProperty('--sh', h + 'px');
+    document.getElementById('phoneScale').style.setProperty('--sw', w + 'px');
+    sizesEl.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-pressed', String(i === size)));
+    fit();
+  }
   function fit() {
+    const [, w, h] = SIZES[size];
     const wrap = document.getElementById('phoneScale');
-    const scale = Math.min(1, wrap.parentElement.clientWidth / 380);
+    const scale = Math.min(1, wrap.parentElement.clientWidth / (w + 20));
     document.getElementById('phone').style.transform = `scale(${scale})`;
-    wrap.style.height = 800 * scale + 'px';
+    wrap.style.height = (h + 20) * scale + 'px';
   }
   window.addEventListener('resize', fit);
   window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (id && id !== current) go(id); });
-  fit();
+  setSize();
   const start = location.hash.slice(1);
   go(SCREENS.some((s) => s.id === start) ? start : 'login', false);
 })();

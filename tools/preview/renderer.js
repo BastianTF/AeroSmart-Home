@@ -226,7 +226,7 @@
   }
 
   // ---------- vistas ----------
-  const GROUPS = new Set(['LinearLayout', 'FrameLayout', 'RelativeLayout', 'ConstraintLayout', 'ScrollView', 'NestedScrollView', 'CardView', 'MaterialCardView', 'HorizontalScrollView', 'CoordinatorLayout']);
+  const GROUPS = new Set(['MaterialButtonToggleGroup', 'LinearLayout', 'FrameLayout', 'RelativeLayout', 'ConstraintLayout', 'ScrollView', 'NestedScrollView', 'CardView', 'MaterialCardView', 'HorizontalScrollView', 'CoordinatorLayout']);
 
   function gravityOf(v) { return new Set((v || '').split('|').map((s) => s.trim()).filter(Boolean)); }
   function hAlign(g) {
@@ -347,10 +347,12 @@
     const elev = dim(a(el, 'elevation'));
     if (elev) div.style.boxShadow = shadow(elev);
     if (a(el, 'clickable') === 'true' || a(el, 'onClick')) div.classList.add('clickable');
+    if (!isButtonTag(tag) && dim(a(el, 'minHeight'))) div.style.minHeight = dim(a(el, 'minHeight')) + 'px';
 
     let childKind = null;
     const isButton = tag === 'Button' || tag === 'MaterialButton' || tag === 'AppCompatButton';
 
+    if ((a(el, 'background') || '').includes('selectableItemBackground')) div.classList.add('clickable', 'ripple');
     if (!isButton && a(el, 'background')) {
       const d = applyBackground(div, a(el, 'background'), bgTint);
       if (d && d.kind === 'shape' && W === 'wrap_content' && d.w) div.style.width = d.w + 'px';
@@ -384,6 +386,7 @@
         childKind = 'frame';
         div.style.display = 'grid'; div.style.gridTemplate = 'minmax(0,1fr) / minmax(0,1fr)';
         div.style.backgroundColor = color(app(el, 'cardBackgroundColor')) || (tag === 'MaterialCardView' ? '#FEF7FF' : '#FFFFFF');
+        div.style.setProperty('--til-bg', div.style.backgroundColor);
         div.style.borderRadius = (dim(app(el, 'cardCornerRadius')) ?? (tag === 'MaterialCardView' ? 12 : 2)) + 'px';
         const e = dim(app(el, 'cardElevation')) ?? (tag === 'MaterialCardView' ? 1 : 2);
         if (e) div.style.boxShadow = shadow(e);
@@ -416,13 +419,26 @@
         div.style.marginTop = `${mT + inset}px`; div.style.marginBottom = `${mB + inset}px`;
         div.style.gap = (dim(app(el, 'iconPadding')) ?? 8) + 'px';
         div.append(textSpan(str(a(el, 'text'))));
+        const bgRef = app(el, 'backgroundTint'), tcRef = a(el, 'textColor');
+        const isList = (r) => r && r.startsWith('@color/') && R.colorLists[r.slice(7)];
+        const stateful = isList(bgRef) || isList(tcRef);
+        if (stateful) {
+          div._paint = (on) => {
+            div.dataset.checked = on ? '1' : '0';
+            div.setAttribute('aria-pressed', String(!!on));
+            if (isList(bgRef)) div.style.backgroundColor = colorFor(bgRef, on);
+            if (isList(tcRef)) div.style.color = colorFor(tcRef, on);
+            div.style.boxShadow = on ? 'none' : (sc ? `inset 0 0 0 ${dim(app(el, 'strokeWidth')) || 1}px ${sc}` : '');
+          };
+          div._paint(false);
+        }
         const icon = app(el, 'icon');
         if (icon) {
           const d = drawable(icon);
           if (d && d.kind === 'vector') {
             const ic = document.createElement('span'); ic.className = 'btn-icon';
             const sz = dim(app(el, 'iconSize')) || 18; ic.style.width = ic.style.height = sz + 'px';
-            ic.innerHTML = d.svg(color(app(el, 'iconTint')) || div.style.color);
+            ic.innerHTML = d.svg(isList(app(el, 'iconTint')) ? 'currentColor' : (color(app(el, 'iconTint')) || div.style.color));
             if ((app(el, 'iconGravity') || '').includes('End')) div.append(ic); else div.prepend(ic);
           }
         }
@@ -457,13 +473,37 @@
       case 'View':
         if (W === 'wrap_content' && !div.style.width) div.style.width = '0px';
         break;
+      case 'Space':
+        break;
+      case 'MaterialButtonToggleGroup':
+        childKind = 'linear-h'; div.style.display = 'flex'; div.style.alignItems = 'stretch';
+        div.dataset.toggle = (app(el, 'checkedButton') || '').replace(/^@\+?id\//, '') || '-';
+        div.setAttribute('role', 'group');
+        break;
+      case 'CircularProgressIndicator': {
+        const size = dim(app(el, 'indicatorSize')) || 40, th = dim(app(el, 'trackThickness')) || 4;
+        div.style.width = div.style.height = size + 'px'; div.style.flexShrink = '0';
+        const ic = color(app(el, 'indicatorColor')) || THEME.colorPrimary, tc = color(app(el, 'trackColor')) || 'rgba(0,0,0,.1)';
+        const r = (size - th) / 2, C = 2 * Math.PI * r, max = +a(el, 'max') || 100;
+        div.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg);display:block"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${tc}" stroke-width="${th}"/><circle class="cpi" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${ic}" stroke-width="${th}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>`;
+        div._setProgress = (v) => { const c = div.querySelector('.cpi'); if (c) c.setAttribute('stroke-dashoffset', String(C * (1 - Math.max(0, Math.min(max, v)) / max))); };
+        div._setProgress(+a(el, 'progress') || 0);
+        break;
+      }
+      case 'SparklineView':
+        div.classList.add('spark');
+        break;
       case 'TextInputLayout':
         return textInput(el, div, pad, ctx);
       case 'SwitchMaterial': case 'Switch': case 'SwitchCompat': case 'MaterialSwitch':
-        return switchView(el, div, pad);
+        return switchView(el, div, pad, tag === 'MaterialSwitch');
       case 'SeekBar': case 'Slider': {
-        const r = document.createElement('input'); r.type = 'range';
-        r.max = a(el, 'max') || 100; r.value = a(el, 'progress') || 0;
+        const r = document.createElement('input'); r.type = 'range'; r.className = 'slider';
+        r.min = a(el, 'valueFrom') || 0; r.max = a(el, 'valueTo') || a(el, 'max') || 100;
+        if (a(el, 'stepSize')) r.step = a(el, 'stepSize');
+        r.value = a(el, 'value') || a(el, 'progress') || 0;
+        r.setAttribute('aria-label', a(el, 'contentDescription') || id || 'deslizador');
+        if (!hDp) div.style.minHeight = '44px';
         r.style.accentColor = color(a(el, 'progressTint')) || color(a(el, 'thumbTint')) || THEME.colorPrimary;
         r.style.width = '100%';
         div.append(r); div.style.display = 'flex'; div.style.alignItems = 'center';
@@ -501,6 +541,8 @@
         break;
       case 'Chip': {
         div.classList.add('chip-v', 'clickable', 'press');
+        const cp = weight ? 0 : (dim(app(el, 'chipStartPadding')) ?? 12);
+        if (pad.s == null) pad = { ...pad, s: cp, e: cp };
         const paint = () => {
           const on = div.dataset.checked === '1';
           div.style.backgroundColor = colorFor(app(el, 'chipBackgroundColor'), on) || (on ? THEME.container : 'transparent');
@@ -542,10 +584,25 @@
         if (c) div.append(c);
       }
       if (childKind === 'scroll' && div.dataset.fill && div.firstElementChild) div.firstElementChild.style.minHeight = '100%';
+      if (div.dataset.toggle) setupToggleGroup(div);
     }
     return div;
   }
 
+  // MaterialButtonToggleGroup: botones unidos, esquinas solo en los extremos, selección única
+  function setupToggleGroup(g) {
+    const btns = Array.from(g.children).filter((c) => c.classList.contains('btn'));
+    btns.forEach((b, i) => {
+      const r = b.style.borderRadius || '14px';
+      b.style.borderRadius = i === 0 ? `${r} 0 0 ${r}` : i === btns.length - 1 ? `0 ${r} ${r} 0` : '0';
+      if (i > 0) b.style.marginLeft = '-1px';
+      b.addEventListener('click', () => g._check(b.dataset.id));
+    });
+    g._check = (bid) => btns.forEach((b) => b._paint && b._paint(b.dataset.id === bid));
+    g._check(g.dataset.toggle);
+  }
+
+  function isButtonTag(t) { return t === 'Button' || t === 'MaterialButton' || t === 'AppCompatButton'; }
   function shadow(e) {
     return `0 ${Math.min(e, 12) * 0.5}px ${Math.min(e, 12) * 1.5}px rgba(0,0,0,${0.08 + Math.min(e, 12) * 0.012}), 0 0.5px 1px rgba(0,0,0,0.06)`;
   }
@@ -592,6 +649,8 @@
     input.placeholder = ' ';
     input.id = 'in-' + ctx.screen + '-' + ((edit && (a(edit, 'id') || '').replace(/^@\+?id\//, '')) || Math.random().toString(36).slice(2, 7));
     if (edit && a(edit, 'text')) input.value = str(a(edit, 'text'));
+    if (edit && a(edit, 'id')) input.dataset.edit = a(edit, 'id').replace(/^@\+?id\//, '');
+    if (edit && a(edit, 'maxLength')) input.maxLength = +a(edit, 'maxLength');
     const lab = document.createElement('span'); lab.className = 'til-label'; lab.textContent = hint;
     field.append(input, lab);
     const endMode = app(el, 'endIconMode') || (app(el, 'passwordToggleEnabled') === 'true' ? 'password_toggle' : null);
@@ -602,16 +661,21 @@
       field.append(eye); field.classList.add('has-end');
     } else if (endMode === 'clear_text') field.classList.add('has-end');
     div.append(field);
+    const helper = str(app(el, 'helperText') || '');
+    const hp = document.createElement('div'); hp.className = 'til-helper'; hp.textContent = helper; hp.dataset.helper = helper;
+    if (!helper) hp.style.display = 'none';
+    div.append(hp);
+    div._setError = (msg) => { field.classList.toggle('error', !!msg); hp.textContent = msg || hp.dataset.helper; hp.classList.toggle('error', !!msg); hp.style.display = (msg || hp.dataset.helper) ? '' : 'none'; };
     div.style.padding = `${pad.t || 0}px ${pad.e || 0}px ${pad.b || 0}px ${pad.s || 0}px`;
     return div;
   }
 
-  function switchView(el, div, pad) {
+  function switchView(el, div, pad, m3) {
     div.classList.add('sw', 'clickable');
     div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.gap = '12px';
     const txt = str(a(el, 'text'));
     if (txt) { const t = textSpan(txt); t.style.flex = '1'; t.style.fontSize = (dim(a(el, 'textSize')) || 14) + 'px'; t.style.color = color(a(el, 'textColor')) || THEME.text; div.append(t); }
-    const inp = document.createElement('input'); inp.type = 'checkbox'; inp.className = 'sw-input';
+    const inp = document.createElement('input'); inp.type = 'checkbox'; inp.className = 'sw-input' + (m3 ? ' m3' : '');
     inp.checked = a(el, 'checked') === 'true';
     inp.setAttribute('aria-label', txt || (a(el, 'id') || 'interruptor'));
     const c = color(a(el, 'thumbTint')) || color(app(el, 'thumbTint')) || THEME.colorSecondary || THEME.colorPrimary;
