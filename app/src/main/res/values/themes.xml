@@ -19,6 +19,7 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="materialButtonStyle">@style/Widget.AeroSmart.Button</item>
         <item name="textInputStyle">@style/Widget.AeroSmart.TextInput</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.AeroSmart.BottomSheet</item>
     </style>
 
     <style name="Theme.VentiladorAmbiental" parent="Base.Theme.VentiladorAmbiental" />

@@ -1,17 +1,15 @@
 package com.example.ventiladorambiental
 
-import androidx.core.content.ContextCompat
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.ventiladorambiental.R
 import com.example.ventiladorambiental.databinding.FragmentVentilationBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -22,9 +20,10 @@ class VentilationFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    private var fanAnimator: ObjectAnimator? = null
+    private var fanAnimSpeed = -1
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentVentilationBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -33,39 +32,24 @@ class VentilationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
         observeUiState()
+        UiFx.animateChildrenIn(binding.contentLayout)
     }
 
     private fun setupListeners() {
         binding.btnOpenVent.setOnClickListener {
             viewModel.toggleVentilation(true)
-            Toast.makeText(requireContext(), "Compuerta Abierta", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Compuerta abierta (modo manual)", Toast.LENGTH_SHORT).show()
         }
-
         binding.btnCloseVent.setOnClickListener {
             viewModel.toggleVentilation(false)
-            Toast.makeText(requireContext(), "Compuerta Cerrada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Compuerta cerrada (modo manual)", Toast.LENGTH_SHORT).show()
         }
+        binding.btnModeAuto.setOnClickListener { viewModel.setAutoMode(true) }
+        binding.btnModeManual.setOnClickListener { viewModel.setAutoMode(false) }
 
-        binding.btnModeAuto.setOnClickListener {
-            viewModel.setAutoMode(true)
-            Toast.makeText(requireContext(), "Modo de Operación: Automático", Toast.LENGTH_SHORT).show()
+        binding.seekFanSpeed.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) viewModel.setFanSpeed(value.toInt())
         }
-
-        binding.btnModeManual.setOnClickListener {
-            viewModel.setAutoMode(false)
-            Toast.makeText(requireContext(), "Modo de Operación: Manual", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.seekFanSpeed.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    val speedLevel = progress + 1
-                    Toast.makeText(requireContext(), "Velocidad del Ventilador: Nivel " + speedLevel, Toast.LENGTH_SHORT).show()
-                }
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
 
         binding.profileAvatarCard.setOnClickListener {
             startActivity(Intent(requireContext(), ProfileActivity::class.java))
@@ -75,32 +59,39 @@ class VentilationFragment : Fragment() {
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
-                if (state is MainUiState.Success) {
-                    if (state.isVentOpen) {
-                        binding.txtServoStatus.text = "Estado: Abierto"
-                        binding.txtServoStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
-                        binding.btnOpenVent.setBackgroundResource(R.drawable.bg_segmented_selected)
-                        binding.btnCloseVent.setBackgroundResource(R.drawable.bg_segmented_unselected)
-                    } else {
-                        binding.txtServoStatus.text = "Estado: Cerrado"
-                        binding.txtServoStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary))
-                        binding.btnOpenVent.setBackgroundResource(R.drawable.bg_segmented_unselected)
-                        binding.btnCloseVent.setBackgroundResource(R.drawable.bg_segmented_selected)
-                    }
+                if (state !is MainUiState.Success) return@collectLatest
 
-                    if (state.isAutoMode) {
-                        binding.btnModeAuto.setBackgroundResource(R.drawable.bg_segmented_selected)
-                        binding.btnModeManual.setBackgroundResource(R.drawable.bg_segmented_unselected)
-                    } else {
-                        binding.btnModeAuto.setBackgroundResource(R.drawable.bg_segmented_unselected)
-                        binding.btnModeManual.setBackgroundResource(R.drawable.bg_segmented_selected)
-                    }
+                binding.txtServoStatus.text = if (state.isVentOpen) "Compuerta abierta" else "Compuerta cerrada"
+                binding.txtVentSub.text = if (state.isVentOpen) "Ventilando al ${state.fanSpeed} %" else "La turbina está detenida"
+                binding.toggleVent.check(if (state.isVentOpen) R.id.btnOpenVent else R.id.btnCloseVent)
+                binding.toggleOpMode.check(if (state.isAutoMode) R.id.btnModeAuto else R.id.btnModeManual)
+
+                binding.txtFanSpeed.text = "${state.fanSpeed} %"
+                if (binding.seekFanSpeed.value.toInt() != state.fanSpeed) binding.seekFanSpeed.value = state.fanSpeed.toFloat()
+                val bars = listOf(binding.bar1, binding.bar2, binding.bar3, binding.bar4, binding.bar5)
+                val lit = state.fanSpeed / 20
+                bars.forEachIndexed { i, bar ->
+                    bar.setBackgroundResource(if (i < lit) R.drawable.bg_bar_on else R.drawable.bg_bar_off)
                 }
+
+                updateFan(state.isVentOpen, state.fanSpeed)
             }
         }
     }
 
+    /** La turbina gira cuando la compuerta está abierta; más rápido a mayor velocidad. */
+    private fun updateFan(open: Boolean, speed: Int) {
+        val wanted = if (open) speed else 0
+        if (wanted == fanAnimSpeed) return
+        fanAnimSpeed = wanted
+        fanAnimator?.cancel()
+        fanAnimator = if (open) UiFx.spin(binding.imgFan, (2400L * 20 / speed).coerceAtLeast(350L)) else null
+    }
+
     override fun onDestroyView() {
+        fanAnimator?.cancel()
+        fanAnimator = null
+        fanAnimSpeed = -1
         super.onDestroyView()
         _binding = null
     }

@@ -29,6 +29,12 @@
     <color name="success_container">#DDF3E8</color>
     <color name="neutral_dot">#A7B4BB</color>
 
+    <!-- Sobre la tarjeta oscura (hero) -->
+    <color name="white_90">#E6FFFFFF</color>
+    <color name="white_70">#B3FFFFFF</color>
+    <color name="white_20">#33FFFFFF</color>
+    <color name="white_12">#1FFFFFFF</color>
+
     <!-- Círculos de íconos (antes faltaban y la app no compilaba) -->
     <color name="circle_bg_temp">#FFF4CC</color>
     <color name="circle_bg_humidity">#D8F1F8</color>
