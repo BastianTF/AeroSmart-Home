@@ -91,4 +91,19 @@
         <item name="android:elevation">1dp</item>
         <item name="android:stateListAnimator">@animator/press_scale</item>
     </style>
+
+    <!-- Chip de día (L, M, X...) para el horario: relleno cuando está elegido -->
+    <style name="Widget.AeroSmart.DayChip" parent="Widget.Material3.Chip.Filter">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:checkable">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="chipMinTouchTargetSize">44dp</item>
+        <item name="chipBackgroundColor">@color/chip_day_bg</item>
+        <item name="android:textColor">@color/chip_day_text</item>
+        <item name="chipStrokeColor">@color/outline</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+    </style>
 </resources>

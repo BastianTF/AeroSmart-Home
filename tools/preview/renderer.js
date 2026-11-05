@@ -69,6 +69,15 @@
     const r = parseInt(h.slice(2, 4), 16), g = parseInt(h.slice(4, 6), 16), b = parseInt(h.slice(6, 8), 16);
     return al >= 1 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${+al.toFixed(3)})`;
   }
+  // Color según estado (para selectores de color con state_checked)
+  function colorFor(v, checked) {
+    if (v && v.startsWith('@color/') && R.colorLists[v.slice(7)]) {
+      const items = kids(parseXml(R.colorLists[v.slice(7)]));
+      const hit = items.find((i) => (i.getAttributeNS(NS_A, 'state_checked') === 'true') === !!checked && (checked || !i.hasAttributeNS(NS_A, 'state_checked'))) || items[items.length - 1];
+      return color(a(hit, 'color'));
+    }
+    return color(v);
+  }
   function dim(v) {
     if (v == null) return null;
     const m = String(v).match(/^(-?[\d.]+)(dp|dip|sp|px|pt)?$/);
@@ -486,6 +495,29 @@
           div.classList.add('placeholder'); div.append(textSpan(`${tag}: contenido por código`));
         }
         break;
+      case 'ChipGroup':
+        childKind = 'linear-h'; div.style.display = 'flex'; div.style.flexWrap = 'wrap';
+        div.style.gap = `${dim(app(el, 'chipSpacingVertical')) ?? 4}px ${dim(app(el, 'chipSpacingHorizontal')) ?? 8}px`;
+        break;
+      case 'Chip': {
+        div.classList.add('chip-v', 'clickable', 'press');
+        const paint = () => {
+          const on = div.dataset.checked === '1';
+          div.style.backgroundColor = colorFor(app(el, 'chipBackgroundColor'), on) || (on ? THEME.container : 'transparent');
+          div.style.color = colorFor(a(el, 'textColor'), on) || THEME.text;
+          div.style.boxShadow = on ? 'none' : `inset 0 0 0 1px ${color(app(el, 'chipStrokeColor')) || '#79747E'}`;
+          div.setAttribute('aria-pressed', String(on));
+        };
+        div.dataset.checked = a(el, 'checked') === 'true' ? '1' : '0';
+        div.style.fontSize = (dim(a(el, 'textSize')) || 14) + 'px';
+        div.style.fontWeight = (a(el, 'textStyle') || '').includes('bold') ? '700' : '500';
+        div.append(textSpan(str(a(el, 'text'))));
+        if (a(el, 'checkable') === 'true' || (el.getAttribute('style') || '').includes('Filter')) {
+          div.addEventListener('click', () => { div.dataset.checked = div.dataset.checked === '1' ? '0' : '1'; paint(); });
+        }
+        div._paint = paint; paint();
+        break;
+      }
       case 'BottomNavigationView':
         return bottomNav(el, div, ctx);
       case 'ProgressBar': {
@@ -502,6 +534,7 @@
     }
 
     div.style.padding = `${pad.t || 0}px ${pad.e || 0}px ${pad.b || 0}px ${pad.s || 0}px`;
+    if (vis === 'gone') div.style.display = 'none';
 
     if (childKind) {
       for (const k of kids(el)) {
@@ -669,5 +702,5 @@
     return node;
   }
 
-  window.AndroidPreview = { THEME, renderLayout, navBar, fixRelative, drawable, color, warnings, parseXml };
+  window.AndroidPreview = { THEME, renderLayout, renderNode: (name, ctx) => render(parseXml(R.layouts[name]), { kind: 'root' }, ctx || {}), navBar, fixRelative, drawable, color, warnings, parseXml };
 })();

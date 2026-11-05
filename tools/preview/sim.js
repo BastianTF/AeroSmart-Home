@@ -4,7 +4,7 @@
 (function () {
   const P = window.AndroidPreview;
   const KT = (window.RES.kotlin) || { dialogs: {}, toasts: {} };
-  const S = { connected: false, loading: false, auto: true, ventOpen: false, movement: false, temp: 27, hum: 55 };
+  const S = { schedule: { start: 8 * 60, end: 22 * 60, days: [1, 2, 3, 4, 5, 6, 7] }, connected: false, loading: false, auto: true, ventOpen: false, movement: false, temp: 27, hum: 55 };
   let root = null;
 
   // ---- MainViewModel ----
@@ -65,6 +65,7 @@
     setBg('btnOpenVent', S.ventOpen ? '@drawable/bg_segmented_selected' : '@drawable/bg_segmented_unselected');
     setBg('btnCloseVent', S.ventOpen ? '@drawable/bg_segmented_unselected' : '@drawable/bg_segmented_selected');
     setCardBg('btnVentToggle', S.ventOpen ? '@color/primary_container' : '@color/surface_variant');
+    setText('txtScheduleDesc', describe(S.schedule));
   }
 
   // ---- diálogos y toasts (como AlertDialog y Toast de Android) ----
@@ -74,20 +75,21 @@
     const t = document.createElement('div'); t.className = 'sim-toast'; t.textContent = msg;
     root.append(t); setTimeout(() => t.classList.add('out'), 1800); setTimeout(() => t.remove(), 2200);
   }
-  function dialog(title, msg, buttons, items) {
+  function dialog(title, msg, buttons, items, content) {
     if (!root) return;
     const wrap = document.createElement('div'); wrap.className = 'sim-scrim';
     const box = document.createElement('div'); box.className = 'sim-dialog'; box.setAttribute('role', 'dialog');
     const h = document.createElement('h3'); h.textContent = title; box.append(h);
     if (msg) { const p = document.createElement('p'); p.textContent = msg; box.append(p); }
     const close = () => { wrap.classList.add('out'); setTimeout(() => wrap.remove(), 150); };
+    if (content) { content.classList.add('sim-content'); box.append(content); }
     if (items) {
       const ul = document.createElement('div'); ul.className = 'sim-items';
       items.forEach(([label, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = () => { close(); fn(); }; ul.append(b); });
       box.append(ul);
     }
     const row = document.createElement('div'); row.className = 'sim-actions';
-    buttons.forEach(([label, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = () => { close(); fn && fn(); }; row.append(b); });
+    buttons.forEach(([label, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = () => { if (fn && fn() === false) return; close(); }; row.append(b); });
     box.append(row); wrap.append(box);
     wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
     root.append(wrap);
@@ -97,9 +99,46 @@
     dialog('Vincular con Hardware Arduino', null, [['Cancelar']], devices.map((d) => [d, () => { toast(`Vinculando con ${d}...`); VM.connect(); }]));
   }
 
+  // ---- Programación horaria (AutomationFragment.showScheduleDialog) ----
+  const fmt = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  function describe(s) {
+    const names = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const d = [...s.days].sort();
+    const days = d.length === 7 ? 'Todos los días' : d.join() === '1,2,3,4,5' ? 'Lun a Vie' : d.join() === '6,7' ? 'Fines de semana' : d.map((i) => names[i - 1]).join(', ');
+    return `${fmt(s.start)} – ${fmt(s.end)}${s.end < s.start ? ' (al día siguiente)' : ''} · ${days}`;
+  }
+  function scheduleDialog() {
+    if (!window.RES.layouts.dialog_schedule) return;
+    let start = S.schedule.start, end = S.schedule.end;
+    const body = P.renderNode('dialog_schedule', { screen: 'dlg' });
+    body.style.padding = '0';
+    const btnS = body.querySelector('[data-id="btnStartTime"]'), btnE = body.querySelector('[data-id="btnEndTime"]');
+    const label = (b, t) => { const s = b && b.querySelector('.txt'); if (s) s.textContent = t; };
+    const refresh = () => { label(btnS, 'Desde ' + fmt(start)); label(btnE, 'Hasta ' + fmt(end)); };
+    // Selector de hora: un <input type=time> invisible encima del botón abre el reloj del teléfono
+    [[btnS, () => start, (v) => (start = v)], [btnE, () => end, (v) => (end = v)]].forEach(([b, get, set]) => {
+      if (!b) return;
+      const inp = document.createElement('input'); inp.type = 'time'; inp.className = 'time-overlay'; inp.value = fmt(get());
+      inp.setAttribute('aria-label', b === btnS ? 'Hora de inicio' : 'Hora de término');
+      inp.addEventListener('input', () => { if (!inp.value) return; const [h, m] = inp.value.split(':').map(Number); set(h * 60 + m); refresh(); });
+      b.append(inp);
+    });
+    for (let i = 1; i <= 7; i++) { const c = body.querySelector(`[data-id="chipDay${i}"]`); if (c) { c.dataset.checked = S.schedule.days.includes(i) ? '1' : '0'; c._paint && c._paint(); } }
+    refresh();
+    dialog('Programación Horaria', null, [['Cancelar'], ['Guardar', () => {
+      const days = []; for (let i = 1; i <= 7; i++) { const c = body.querySelector(`[data-id="chipDay${i}"]`); if (c && c.dataset.checked === '1') days.push(i); }
+      const err = body.querySelector('[data-id="txtScheduleError"]');
+      const fail = (t) => { if (err) { err.style.display = ''; (err.querySelector('.txt') || err).textContent = t; } return false; };
+      if (!days.length) return fail('Elige al menos un día.');
+      if (start === end) return fail('La hora de inicio y de término no pueden ser iguales.');
+      S.schedule = { start, end, days }; apply(); toast('Horario guardado: ' + describe(S.schedule));
+    }]], null, body);
+  }
+
   // ---- qué hace cada botón (setOnClickListener) ----
   const HANDLERS = {
     btnConnect: () => (S.connected ? VM.disconnect() : bluetoothPicker()),
+    itemSchedule: () => scheduleDialog(),
     btnRefresh: () => { VM.refresh(); toast('Datos de sensores actualizados'); },
     cardPIR: () => { if (S.connected) { toast(S.movement ? 'Simulación PIR: Sin movimiento' : 'Simulación PIR: Movimiento detectado'); VM.togglePIR(); } else toast('Conecta el dispositivo primero'); },
     btnVentToggle: () => { const open = !S.ventOpen; VM.toggleVent(open); toast(`Compuerta ${open ? 'Abierta' : 'Cerrada'}`); },

@@ -2,6 +2,8 @@ package com.example.ventiladorambiental
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ventiladorambiental.data.Schedule
+import java.util.Calendar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,8 +75,35 @@ class MainViewModel : ViewModel() {
         updateSuccessState()
     }
 
+    private var schedule: Schedule = Schedule.DEFAULT
+
+    /** Horario elegido por el usuario: fuera de él, el modo automático no abre la compuerta. */
+    fun setSchedule(newSchedule: Schedule) {
+        schedule = newSchedule
+        evaluateAutomation()
+        updateSuccessState()
+    }
+
+    private fun isInsideSchedule(now: Calendar = Calendar.getInstance()): Boolean {
+        // Calendar: domingo = 1 … sábado = 7  ->  lunes = 1 … domingo = 7
+        val day = (now.get(Calendar.DAY_OF_WEEK) + 5) % 7 + 1
+        val minutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+        val s = schedule
+        return if (s.startMinutes <= s.endMinutes) {
+            day in s.days && minutes in s.startMinutes until s.endMinutes
+        } else {
+            // Cruza la medianoche (ej. 22:00 – 06:00): la parte de madrugada cuenta para el día anterior
+            val previousDay = if (day == 1) 7 else day - 1
+            (day in s.days && minutes >= s.startMinutes) || (previousDay in s.days && minutes < s.endMinutes)
+        }
+    }
+
     private fun evaluateAutomation() {
         if (!isAutoMode || !isConnected) return
+        if (!isInsideSchedule()) {
+            isVentOpen = false
+            return
+        }
 
         if (isMovement && currentTempNum > 26) {
             isVentOpen = true

@@ -3,6 +3,10 @@ package com.example.ventiladorambiental
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.ventiladorambiental.data.UserPreferences
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import androidx.viewpager2.widget.ViewPager2
 import com.example.ventiladorambiental.databinding.ActivityMainBinding
 
@@ -36,6 +40,11 @@ class MainActivity : AppCompatActivity() {
                 binding.bottomNav.menu.findItem(tabs[position]).isChecked = true
             }
         })
+
+        // El horario guardado por el usuario llega al ViewModel aunque no se abra la pestaña Automatización
+        lifecycleScope.launch {
+            UserPreferences(this@MainActivity).schedule.collectLatest { viewModel.setSchedule(it) }
+        }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             val index = tabs.indexOf(item.itemId)
