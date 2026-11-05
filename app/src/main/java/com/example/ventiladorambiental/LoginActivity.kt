@@ -8,9 +8,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.ventiladorambiental.data.UserPreferences
+import com.example.ventiladorambiental.data.UserRepository
 import com.example.ventiladorambiental.databinding.ActivityLoginBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -26,7 +26,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding.btnLogin.setOnClickListener {
             val email = binding.edtEmail.text.toString().trim()
-            val password = binding.edtPassword.text.toString().trim()
+            val password = binding.edtPassword.text.toString()
 
             if (validateInputs(email, password)) {
                 performLogin(email)
@@ -97,19 +97,39 @@ class LoginActivity : AppCompatActivity() {
         return isValid
     }
 
+    private var failedAttempts = 0
+    private var lockedUntil = 0L
+
+    /** Verifica el correo y la contraseña contra la base SQLite. Tras 5 intentos fallidos bloquea 30 s. */
     private fun performLogin(email: String) {
-        binding.btnLogin.text = "Iniciando..."
+        val now = System.currentTimeMillis()
+        if (now < lockedUntil) {
+            Toast.makeText(this, "Demasiados intentos. Espera ${(lockedUntil - now) / 1000 + 1} s", Toast.LENGTH_SHORT).show()
+            return
+        }
+        binding.btnLogin.text = "Iniciando…"
         binding.btnLogin.isEnabled = false
+        val password = binding.edtPassword.text.toString().toCharArray()
 
         lifecycleScope.launch {
-            delay(1200)
-            UserPreferences(this@LoginActivity).saveEmail(email)
-
+            val user = UserRepository(this@LoginActivity).login(email, password)
             binding.btnLogin.isEnabled = true
             binding.btnLogin.text = "Iniciar Sesión"
 
-            val intent = Intent(this@LoginActivity, MainActivity::class.java)
-            startActivity(intent)
+            if (user == null) {
+                failedAttempts++
+                if (failedAttempts >= 5) {
+                    lockedUntil = System.currentTimeMillis() + 30_000
+                    failedAttempts = 0
+                }
+                binding.edtPassword.error = "Correo o contraseña incorrectos"
+                return@launch
+            }
+            failedAttempts = 0
+            val prefs = UserPreferences(this@LoginActivity)
+            prefs.saveEmail(user.email)
+            prefs.saveProfile(user.name, user.phone)
+            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
             finish()
         }
     }

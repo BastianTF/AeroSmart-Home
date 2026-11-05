@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.ventiladorambiental.data.UserPreferences
+import com.example.ventiladorambiental.data.UserRepository
 import com.example.ventiladorambiental.databinding.ActivityProfileBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.first
@@ -97,7 +98,9 @@ class ProfileActivity : AppCompatActivity() {
         binding.etProfilePhone.setText(phone)
         lifecycleScope.launch {
             userPreferences.saveProfile(name, phone)
-            showHeader(name, userPreferences.profile.first().email)
+            val email = userPreferences.profile.first().email
+            if (email.isNotBlank()) UserRepository(this@ProfileActivity).updateProfile(email, name, phone)
+            showHeader(name, email)
             Toast.makeText(this@ProfileActivity, "Datos guardados", Toast.LENGTH_SHORT).show()
         }
     }

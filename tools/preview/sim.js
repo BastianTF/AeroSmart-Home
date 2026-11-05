@@ -10,6 +10,8 @@
     schedule: { start: 8 * 60, end: 22 * 60, days: [1, 2, 3, 4, 5, 6, 7] },
     profile: { name: 'Kay', phone: '+56 9 1234 5678', email: 'kay@aerosmart.cl' },
     settings: { notif: true, keep: false },
+    users: [], // tabla usuarios de SQLite (en la vista previa vive solo en memoria)
+    failed: 0, lockedUntil: 0,
   };
   const TEMP_MIN = 20, TEMP_MAX = 34, HUM_MIN = 40, HUM_MAX = 90;
   let root = null, stream = null;
@@ -394,8 +396,15 @@
     const email = (inputOf('edtEmail')?.value || '').trim(), pass = inputOf('edtPassword')?.value || '';
     if (!validEmail(email)) return toast('Ingresa un correo válido');
     if (pass.length < 6) return toast('La contraseña debe tener al menos 6 caracteres');
+    if (Date.now() < S.lockedUntil) return toast(`Demasiados intentos. Espera ${Math.ceil((S.lockedUntil - Date.now()) / 1000)} s`);
+    const u = S.users.find((x) => x.email === email.toLowerCase() && x.pass === pass);
+    if (!u) {
+      if (++S.failed >= 5) { S.lockedUntil = Date.now() + 30000; S.failed = 0; }
+      return toast(S.users.length ? 'Correo o contraseña incorrectos' : 'Correo o contraseña incorrectos. ¿Ya creaste tu cuenta en Regístrate?');
+    }
+    S.failed = 0;
     const b = one('btnLogin'); setText('btnLogin', 'Iniciando…'); if (b) b.style.pointerEvents = 'none';
-    setTimeout(() => { S.profile.email = email.toLowerCase(); next(); }, 1200);
+    setTimeout(() => { S.profile = { name: u.name, phone: u.phone, email: u.email }; next(); }, 600);
   }
   function register(next) {
     const v = (id) => (inputOf(id)?.value || '').trim();
@@ -410,6 +419,8 @@
     box.innerHTML = '<label class="til-box outlined" style="--til-bg:#fff"><input inputmode="numeric" maxlength="4" placeholder=" " aria-label="Código"><span class="til-label">Código de 4 dígitos</span></label>';
     dialog('Verifica tu correo', `Enviamos un código a ${email}. (Código de prueba: 1234)`, [['Cancelar'], ['Verificar', () => {
       if (box.querySelector('input').value.trim() !== '1234') { toast('Código incorrecto. Inténtalo de nuevo.'); return false; }
+      if (S.users.some((x) => x.email === email.toLowerCase())) { toast('Ese correo ya tiene una cuenta. Inicia sesión.'); return; }
+      S.users.push({ name: `${first} ${last}`, phone, email: email.toLowerCase(), pass: p1 });
       S.profile = { name: `${first} ${last}`, phone, email: email.toLowerCase() };
       toast('¡Cuenta creada! Bienvenido/a'); setTimeout(next, 300);
     }]], null, box);

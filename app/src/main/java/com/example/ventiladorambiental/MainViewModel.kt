@@ -1,8 +1,10 @@
 package com.example.ventiladorambiental
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ventiladorambiental.data.AutomationRules
+import com.example.ventiladorambiental.data.ReadingRepository
 import com.example.ventiladorambiental.data.Schedule
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -20,8 +22,9 @@ import kotlinx.coroutines.launch
  * Estado compartido por las 4 pestañas.
  * Por ahora los datos de los sensores son SIMULADOS: cuando exista el enlace real
  * (HC-05 / ESP32), reemplazar [simulateReading] por la lectura del Arduino.
+ * Cada lectura se guarda en SQLite (ReadingRepository), así el historial no se pierde al cerrar la app.
  */
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<MainUiState>(MainUiState.Loading)
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -38,11 +41,19 @@ class MainViewModel : ViewModel() {
     private val history = ArrayDeque<Reading>()
     private var lastUpdate: String? = null
     private var streamJob: Job? = null
+    private val readings = ReadingRepository(application)
 
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
     init {
         updateSuccessState()
+        viewModelScope.launch {
+            readings.purgeOlderThan(HISTORY_DAYS)
+            val saved = readings.latest(MAX_HISTORY)
+            history.addAll(saved)
+            saved.lastOrNull()?.let { temperature = it.temperature; humidity = it.humidity }
+            updateSuccessState()
+        }
     }
 
     // ---------- Conexión ----------
@@ -54,7 +65,6 @@ class MainViewModel : ViewModel() {
             delay(1000)
             isConnected = true
             isMovement = true
-            history.clear()
             simulateReading()
             startStream()
             evaluateAutomation()
@@ -107,6 +117,8 @@ class MainViewModel : ViewModel() {
         lastUpdate = timeFormat.format(Date())
         history.addLast(Reading(temperature, humidity, lastUpdate!!.substring(0, 5)))
         while (history.size > MAX_HISTORY) history.removeFirst()
+        val t = temperature; val h = humidity; val m = isMovement; val v = isVentOpen
+        viewModelScope.launch { readings.insert(t, h, m, v) }
     }
 
     // ---------- Actuadores ----------
@@ -187,5 +199,6 @@ class MainViewModel : ViewModel() {
 
     companion object {
         private const val MAX_HISTORY = 20
+        private const val HISTORY_DAYS = 7L
     }
 }

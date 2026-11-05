@@ -7,7 +7,9 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
+import com.example.ventiladorambiental.data.RegisterResult
 import com.example.ventiladorambiental.data.UserPreferences
+import com.example.ventiladorambiental.data.UserRepository
 import com.example.ventiladorambiental.databinding.ActivityRegisterBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -31,8 +33,8 @@ class RegisterActivity : AppCompatActivity() {
             val lastName = binding.etLastName.text.toString().trim()
             val phone = binding.etPhone.text.toString().trim()
             val email = binding.etRegEmail.text.toString().trim()
-            val password = binding.etRegPassword.text.toString().trim()
-            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
+            val password = binding.etRegPassword.text.toString()
+            val confirmPassword = binding.etConfirmPassword.text.toString()
 
             when {
                 firstName.isEmpty() || lastName.isEmpty() -> {
@@ -85,12 +87,22 @@ class RegisterActivity : AppCompatActivity() {
             val enteredCode = input.text.toString().trim()
             if (enteredCode == simulatedCode) {
                 lifecycleScope.launch {
-                    val prefs = UserPreferences(this@RegisterActivity)
-                    prefs.saveProfile(name, phone)
-                    prefs.saveEmail(email)
-                    Toast.makeText(this@RegisterActivity, "¡Cuenta creada! Bienvenido/a", Toast.LENGTH_LONG).show()
-                    startActivity(Intent(this@RegisterActivity, MainActivity::class.java))
-                    finishAffinity()
+                    val result = UserRepository(this@RegisterActivity)
+                        .register(name, email, phone, binding.etRegPassword.text.toString().toCharArray())
+                    when (result) {
+                        RegisterResult.OK -> {
+                            val prefs = UserPreferences(this@RegisterActivity)
+                            prefs.saveProfile(name, phone)
+                            prefs.saveEmail(email)
+                            Toast.makeText(this@RegisterActivity, "¡Cuenta creada! Bienvenido/a", Toast.LENGTH_LONG).show()
+                            startActivity(Intent(this@RegisterActivity, MainActivity::class.java))
+                            finishAffinity()
+                        }
+                        RegisterResult.EMAIL_EXISTS ->
+                            Toast.makeText(this@RegisterActivity, "Ese correo ya tiene una cuenta. Inicia sesión.", Toast.LENGTH_LONG).show()
+                        RegisterResult.ERROR ->
+                            Toast.makeText(this@RegisterActivity, "No se pudo crear la cuenta. Inténtalo de nuevo.", Toast.LENGTH_LONG).show()
+                    }
                 }
             } else {
                 Toast.makeText(this, "Código incorrecto. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show()
