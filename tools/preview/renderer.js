@@ -8,7 +8,25 @@
   // Valores por defecto de Theme.Material3.Light
   const THEME = { colorPrimary: '#6750A4', onPrimary: '#FFFFFF', text: '#1D1B20', textSecondary: '#49454F', outline: '#79747E' };
   const R = window.RES;
+  R.styles = R.styles || {};
+  function styleChain(name) {
+    const out = [];
+    let n = name, guard = 0;
+    while (n && R.styles[n] && guard++ < 10) {
+      out.push(R.styles[n]);
+      const st = R.styles[n];
+      n = st.parent ? st.parent.replace(/^@style\//, '') : (n.includes('.') ? n.slice(0, n.lastIndexOf('.')) : null);
+    }
+    return out; // del más específico al más general
+  }
+  function styleItems(name) {
+    const merged = {};
+    styleChain(name).reverse().forEach((st) => Object.assign(merged, st.items));
+    return merged;
+  }
+  const appTheme = styleItems('Theme.VentiladorAmbiental');
   const warnings = new Set();
+
   const parser = new DOMParser();
   const xmlCache = {};
 
@@ -225,8 +243,10 @@
       return null;
     }
     if (tag === 'merge' || tag === 'requestFocus') return null;
+    applyStyle(el, tag);
     const div = document.createElement('div');
     div.className = 'v v-' + tag;
+    if (a(el, 'stateListAnimator')) div.classList.add('press');
     const id = (a(el, 'id') || '').replace(/^@\+?id\//, '');
     if (id) div.dataset.id = id;
     div.dataset.tag = tag;
@@ -370,23 +390,33 @@
         break;
       case 'Button': case 'MaterialButton': case 'AppCompatButton': {
         div.classList.add('clickable', 'btn');
-        const bg = bgTint || (a(el, 'background') ? null : THEME.colorPrimary);
+        const bg = bgTint || color(app(el, 'backgroundTint')) || (a(el, 'background') ? null : THEME.colorPrimary);
         if (bg) div.style.backgroundColor = bg;
         else applyBackground(div, a(el, 'background'));
         const sc = color(app(el, 'strokeColor'));
-        if (sc) div.style.border = `${dim(app(el, 'strokeWidth')) || 1}px solid ${sc}`;
+        if (sc) div.style.boxShadow = `inset 0 0 0 ${dim(app(el, 'strokeWidth')) || 1}px ${sc}`;
         div.style.borderRadius = (dim(app(el, 'cornerRadius')) ?? 999) + 'px';
         textStyle(div, el, { size: 14, color: THEME.onPrimary, weight: 500, gravity: 'center' });
-        div.style.minHeight = hDp ? '' : '40px';
+        const minH = dim(a(el, 'minHeight'));
+        div.style.minHeight = hDp ? '' : ((minH ? minH - 12 : 40) + 'px');
         div.style.minWidth = wDp ? '' : '64px';
         if (pad.s == null) pad = { t: pad.t ?? 0, b: pad.b ?? 0, s: 24, e: 24 };
         // MaterialButton reserva 6dp arriba y abajo (insetTop/insetBottom)
         const inset = dim(app(el, 'insetTop')) ?? 6;
         if (hDp) { div.style.height = (hDp - 2 * inset) + 'px'; }
         div.style.marginTop = `${mT + inset}px`; div.style.marginBottom = `${mB + inset}px`;
-        const icon = app(el, 'icon');
-        if (icon) { const d = drawable(icon); if (d && d.kind === 'vector') { const ic = document.createElement('span'); ic.className = 'btn-icon'; ic.innerHTML = d.svg(color(app(el, 'iconTint')) || div.style.color); div.prepend(ic); } }
+        div.style.gap = (dim(app(el, 'iconPadding')) ?? 8) + 'px';
         div.append(textSpan(str(a(el, 'text'))));
+        const icon = app(el, 'icon');
+        if (icon) {
+          const d = drawable(icon);
+          if (d && d.kind === 'vector') {
+            const ic = document.createElement('span'); ic.className = 'btn-icon';
+            const sz = dim(app(el, 'iconSize')) || 18; ic.style.width = ic.style.height = sz + 'px';
+            ic.innerHTML = d.svg(color(app(el, 'iconTint')) || div.style.color);
+            if ((app(el, 'iconGravity') || '').includes('End')) div.append(ic); else div.prepend(ic);
+          }
+        }
         break;
       }
       case 'ImageView': case 'ImageButton': case 'AppCompatImageView': case 'ShapeableImageView': {
@@ -447,6 +477,10 @@
             if (d.kind === 'img') { const im = document.createElement('img'); im.src = d.src; imgHost.append(im); }
             else if (d.kind === 'vector') { const b = document.createElement('div'); b.className = 'img-box'; b.innerHTML = d.svg(); imgHost.append(b); }
           }
+          div.append(node);
+        } else if (id === 'viewPagerMain' && ctx.tabLayout) {
+          const node = render(parseXml(R.layouts[ctx.tabLayout]), { kind: 'frame' }, ctx);
+          node.style.justifySelf = 'stretch'; node.style.alignSelf = 'stretch';
           div.append(node);
         } else {
           div.classList.add('placeholder'); div.append(textSpan(`${tag}: contenido por código`));
@@ -515,8 +549,10 @@
     const edit = kids(el).find((k) => /EditText$/.test(k.localName));
     const hint = str(a(el, 'hint') || (edit && a(edit, 'hint')) || '');
     const field = document.createElement('label'); field.className = 'til-box' + (outlined ? ' outlined' : '');
+    const rad = dim(app(el, 'boxCornerRadiusTopStart')); if (rad != null) field.style.borderRadius = rad + 'px';
+    const fc = color(app(el, 'boxStrokeColor')); if (fc) field.style.setProperty('--focus', fc);
     const start = app(el, 'startIconDrawable');
-    if (start) { const d = drawable(start); if (d && d.kind === 'vector') { const ic = document.createElement('span'); ic.className = 'til-icon'; ic.innerHTML = d.svg(color(app(el, 'startIconTint')) || '#757575'); field.append(ic); field.classList.add('has-start'); } }
+    if (start) { const d = drawable(start); if (d && d.kind === 'vector') { const ic = document.createElement('span'); ic.className = 'til-icon'; ic.innerHTML = d.svg(color(app(el, 'startIconTint')) || THEME.textSecondary); field.append(ic); field.classList.add('has-start'); } }
     const input = document.createElement('input');
     const it = edit ? a(edit, 'inputType') || '' : '';
     input.type = /Password/i.test(it) ? 'password' : /Email/i.test(it) ? 'email' : /phone/i.test(it) ? 'tel' : /number/i.test(it) ? 'number' : 'text';
@@ -545,7 +581,7 @@
     const inp = document.createElement('input'); inp.type = 'checkbox'; inp.className = 'sw-input';
     inp.checked = a(el, 'checked') === 'true';
     inp.setAttribute('aria-label', txt || (a(el, 'id') || 'interruptor'));
-    const c = color(a(el, 'thumbTint')) || color(app(el, 'thumbTint')) || THEME.colorPrimary;
+    const c = color(a(el, 'thumbTint')) || color(app(el, 'thumbTint')) || THEME.colorSecondary || THEME.colorPrimary;
     inp.style.setProperty('--on', c);
     div.append(inp);
     div.style.padding = `${pad.t || 0}px ${pad.e || 0}px ${pad.b || 0}px ${pad.s || 0}px`;
@@ -554,7 +590,11 @@
 
   function bottomNav(el, div, ctx) {
     const menuName = (app(el, 'menu') || '@menu/bottom_nav_menu').split('/')[1];
-    return navBar(menuName, ctx.activeTab, ctx.onTab, color(app(el, 'itemIconTint') ? null : null));
+    const nav = navBar(menuName, ctx.activeTab, ctx.onTab);
+    nav.style.alignSelf = 'stretch';
+    const bg = color(a(el, 'background')); if (bg) nav.style.background = bg;
+    if (dim(app(el, 'elevation'))) nav.style.boxShadow = '0 -1px 8px rgba(22,37,46,.08)';
+    return nav;
   }
   function navBar(menuName, active, onTab) {
     const nav = document.createElement('nav'); nav.className = 'bnav';
@@ -570,7 +610,7 @@
       b.innerHTML = `<span class="bnav-ic">${d && d.kind === 'vector' ? d.svg(c) : ''}</span>`;
       b.append(textSpan(str(a(item, 'title'))));
       b.style.color = c;
-      b.style.setProperty('--ind', c);
+      b.style.setProperty('--ind', THEME.container || c);
       b.onclick = () => onTab && onTab(idx);
       nav.append(b);
     });
@@ -589,7 +629,37 @@
     });
   }
 
+  let themeApplied = false;
+  function applyTheme() {
+    if (themeApplied) return; themeApplied = true;
+    const c = (k) => appTheme[k] && color(appTheme[k]);
+    if (c('colorPrimary')) THEME.colorPrimary = c('colorPrimary');
+    if (c('colorOnPrimary')) THEME.onPrimary = c('colorOnPrimary');
+    if (c('colorOnSurface')) THEME.text = c('colorOnSurface');
+    if (c('colorOnSurfaceVariant')) THEME.textSecondary = c('colorOnSurfaceVariant');
+    if (c('colorSecondary')) THEME.colorSecondary = c('colorSecondary');
+    THEME.container = c('colorPrimaryContainer') || '#E8DEF8';
+    THEME.bg = c('android:colorBackground') || '#FEF7FF';
+    document.documentElement.style.setProperty('--tp', THEME.colorPrimary);
+  }
+  // Copia los atributos de style="@style/..." (o del estilo por defecto del tema) al elemento
+  function applyStyle(el, tag) {
+    if (el.__styled) return; el.__styled = true;
+    let name = (el.getAttribute('style') || '').replace(/^@style\//, '');
+    if (!name) {
+      if (/^(Button|MaterialButton|AppCompatButton)$/.test(tag)) name = (appTheme.materialButtonStyle || '').replace(/^@style\//, '');
+      if (tag === 'TextInputLayout') name = (appTheme.textInputStyle || '').replace(/^@style\//, '');
+    }
+    if (!name) return;
+    const items = styleItems(name);
+    for (const [k, v] of Object.entries(items)) {
+      if (k.startsWith('android:')) { const n = k.slice(8); if (!el.hasAttributeNS(NS_A, n)) el.setAttributeNS(NS_A, 'android:' + n, v); }
+      else if (!k.includes(':')) { if (!el.hasAttributeNS(NS_APP, k)) el.setAttributeNS(NS_APP, 'app:' + k, v); }
+    }
+  }
+
   function renderLayout(name, ctx) {
+    applyTheme();
     const xml = R.layouts[name];
     if (!xml) throw new Error('Layout no encontrado: ' + name);
     const root = parseXml(xml);
@@ -599,5 +669,5 @@
     return node;
   }
 
-  window.AndroidPreview = { renderLayout, navBar, fixRelative, drawable, color, warnings, parseXml };
+  window.AndroidPreview = { THEME, renderLayout, navBar, fixRelative, drawable, color, warnings, parseXml };
 })();

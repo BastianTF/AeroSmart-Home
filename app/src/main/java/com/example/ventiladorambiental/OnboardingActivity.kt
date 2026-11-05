@@ -19,8 +19,10 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableAeroEdgeToEdge()
         binding = ActivityOnboardingBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySystemBarInsets()
 
         userPreferences = UserPreferences(this)
 

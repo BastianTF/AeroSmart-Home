@@ -1,5 +1,6 @@
 package com.example.ventiladorambiental
 
+import androidx.core.content.ContextCompat
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -77,12 +78,12 @@ class VentilationFragment : Fragment() {
                 if (state is MainUiState.Success) {
                     if (state.isVentOpen) {
                         binding.txtServoStatus.text = "Estado: Abierto"
-                        binding.txtServoStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+                        binding.txtServoStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
                         binding.btnOpenVent.setBackgroundResource(R.drawable.bg_segmented_selected)
                         binding.btnCloseVent.setBackgroundResource(R.drawable.bg_segmented_unselected)
                     } else {
                         binding.txtServoStatus.text = "Estado: Cerrado"
-                        binding.txtServoStatus.setTextColor(android.graphics.Color.parseColor("#1A73E8"))
+                        binding.txtServoStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary))
                         binding.btnOpenVent.setBackgroundResource(R.drawable.bg_segmented_unselected)
                         binding.btnCloseVent.setBackgroundResource(R.drawable.bg_segmented_selected)
                     }

@@ -13,8 +13,10 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableAeroEdgeToEdge()
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySystemBarInsets()
 
         // Carga de datos de perfil
         binding.etProfileName.setText("Usuario AeroSmart")

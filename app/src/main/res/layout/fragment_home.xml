@@ -67,6 +67,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 app:cardCornerRadius="20dp"
@@ -117,14 +118,13 @@
                     android:textSize="15sp"
                     android:textStyle="bold" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnConnect"
+                    style="@style/Widget.AeroSmart.Button.Small"
+                    app:icon="@drawable/ic_bluetooth"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/primary"
-                    android:text="@string/connect"
-                    android:textColor="@android:color/white"
-                    app:cornerRadius="12dp" />
+                    android:text="@string/connect" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -176,7 +176,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
 
@@ -225,7 +225,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
 
@@ -464,9 +464,10 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:clickable="true"
+                    android:stateListAnimator="@animator/press_scale"
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackground"
-                    app:cardBackgroundColor="#F5F7FA"
+                    app:cardBackgroundColor="@color/surface_variant"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp">
 

@@ -19,8 +19,10 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableAeroEdgeToEdge()
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySystemBarInsets()
 
         binding.btnLogin.setOnClickListener {
             val email = binding.edtEmail.text.toString().trim()

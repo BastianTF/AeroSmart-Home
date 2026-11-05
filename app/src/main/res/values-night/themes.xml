@@ -1,5 +1,0 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme forced to Light as well to prevent white text on light cards/backgrounds. -->
-    <style name="Base.Theme.VentiladorAmbiental" parent="Theme.Material3.Light.NoActionBar">
-    </style>
-</resources>

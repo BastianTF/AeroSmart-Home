@@ -1,5 +1,6 @@
 package com.example.ventiladorambiental
 
+import androidx.core.content.ContextCompat
 import android.content.Intent
 import android.os.Bundle
 import android.text.Html
@@ -141,9 +142,9 @@ class HomeFragment : Fragment() {
                         }
 
                         if (state.isVentOpen) {
-                            binding.btnVentToggle.setCardBackgroundColor(android.graphics.Color.parseColor("#E8F1FF"))
+                            binding.btnVentToggle.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primary_container))
                         } else {
-                            binding.btnVentToggle.setCardBackgroundColor(android.graphics.Color.parseColor("#F5F7FA"))
+                            binding.btnVentToggle.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface_variant))
                         }
                     }
                     is MainUiState.Error -> {

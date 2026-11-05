@@ -40,7 +40,7 @@
         <!-- Campo Nombre -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilFirstName"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -60,7 +60,7 @@
         <!-- Campo Apellido -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilLastName"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -80,7 +80,7 @@
         <!-- Campo Teléfono -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilPhone"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -100,7 +100,7 @@
         <!-- Campo Email -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilRegEmail"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -120,7 +120,7 @@
         <!-- Campo Contraseña -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilRegPassword"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -141,7 +141,7 @@
         <!-- Campo Confirmar Contraseña -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilConfirmPassword"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -160,15 +160,14 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Botón Registrarse -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRegister"
+            style="@style/Widget.AeroSmart.Button"
+            app:icon="@drawable/ic_person_add"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:backgroundTint="@color/primary"
             android:text="Registrarse y verificar correo"
-            android:textSize="16sp"
-            app:cornerRadius="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword" />
@@ -207,6 +206,7 @@
                 app:cardCornerRadius="30dp"
                 app:cardElevation="2dp"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true">
                 <ImageView
                     android:layout_width="28dp"
@@ -225,6 +225,7 @@
                 app:cardCornerRadius="30dp"
                 app:cardElevation="2dp"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true">
                 <ImageView
                     android:layout_width="28dp"
@@ -243,6 +244,7 @@
                 app:cardCornerRadius="30dp"
                 app:cardElevation="2dp"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true">
                 <ImageView
                     android:layout_width="28dp"

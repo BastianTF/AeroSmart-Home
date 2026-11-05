@@ -16,8 +16,10 @@ class RegisterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableAeroEdgeToEdge()
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySystemBarInsets()
 
         binding.btnRegister.setOnClickListener {
             val firstName = binding.etFirstName.text.toString().trim()

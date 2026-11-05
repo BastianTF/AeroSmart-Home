@@ -65,6 +65,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 app:cardCornerRadius="20dp"
@@ -193,6 +194,7 @@
                         android:layout_weight="1"
                         android:background="@drawable/bg_segmented_unselected"
                         android:clickable="true"
+                        android:stateListAnimator="@animator/press_scale"
                         android:focusable="true"
                         android:gravity="center"
                         android:orientation="vertical">
@@ -219,6 +221,7 @@
                         android:layout_weight="1"
                         android:background="@drawable/bg_segmented_selected"
                         android:clickable="true"
+                        android:stateListAnimator="@animator/press_scale"
                         android:focusable="true"
                         android:gravity="center"
                         android:orientation="vertical">
@@ -290,8 +293,8 @@
                         <View android:layout_width="0dp" android:layout_height="14dp" android:layout_margin="2dp" android:layout_weight="1" android:background="@color/primary" />
                         <View android:layout_width="0dp" android:layout_height="16dp" android:layout_margin="2dp" android:layout_weight="1" android:background="@color/primary" />
                         <View android:layout_width="0dp" android:layout_height="18dp" android:layout_margin="2dp" android:layout_weight="1" android:background="@color/primary" />
-                        <View android:layout_width="0dp" android:layout_height="20dp" android:layout_margin="2dp" android:layout_weight="1" android:background="#E0E0E0" />
-                        <View android:layout_width="0dp" android:layout_height="22dp" android:layout_margin="2dp" android:layout_weight="1" android:background="#E0E0E0" />
+                        <View android:layout_width="0dp" android:layout_height="20dp" android:layout_margin="2dp" android:layout_weight="1" android:background="@color/outline" />
+                        <View android:layout_width="0dp" android:layout_height="22dp" android:layout_margin="2dp" android:layout_weight="1" android:background="@color/outline" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -370,6 +373,7 @@
                         android:layout_weight="1"
                         android:background="@drawable/bg_segmented_selected"
                         android:clickable="true"
+                        android:stateListAnimator="@animator/press_scale"
                         android:focusable="true"
                         android:gravity="center"
                         android:orientation="horizontal">
@@ -396,6 +400,7 @@
                         android:layout_weight="1"
                         android:background="@drawable/bg_segmented_unselected"
                         android:clickable="true"
+                        android:stateListAnimator="@animator/press_scale"
                         android:focusable="true"
                         android:gravity="center"
                         android:orientation="horizontal">

@@ -64,7 +64,7 @@
 
         <!-- Campo Nombre -->
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -80,7 +80,7 @@
 
         <!-- Campo Teléfono (Reemplaza a Dirección) -->
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -94,15 +94,14 @@
                 android:textColor="@color/text_dark" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSaveProfile"
+            style="@style/Widget.AeroSmart.Button.Tonal"
+            app:icon="@drawable/ic_check"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/primary"
-            android:text="Guardar Cambios"
-            android:textSize="14sp"
-            app:cornerRadius="8dp" />
+            android:text="Guardar Cambios" />
 
         <!-- SECCIÓN: PREFERENCIAS Y NOTIFICACIONES -->
         <TextView
@@ -187,18 +186,15 @@
             android:textStyle="bold" />
 
         <!-- CERRAR SESIÓN -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
+            style="@style/Widget.AeroSmart.Button.Danger"
+            app:icon="@drawable/ic_logout"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:layout_marginBottom="24dp"
-            android:backgroundTint="#E53935"
-            android:text="Cerrar Sesión"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp" />
+            android:text="Cerrar Sesión" />
 
     </LinearLayout>
 </ScrollView>

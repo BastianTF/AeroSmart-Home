@@ -36,6 +36,20 @@ def read_values(kind):
     return out
 
 
+def read_styles():
+    """Estilos y temas de values/*.xml: {nombre: {parent, items}}."""
+    out = {}
+    for f in sorted((RES / "values").glob("*.xml")):
+        try:
+            root = ET.parse(f).getroot()
+        except ET.ParseError:
+            continue
+        for st in root.iter("style"):
+            items = {it.get("name"): (it.text or "").strip() for it in st.iter("item")}
+            out[st.get("name")] = {"parent": st.get("parent"), "items": items}
+    return out
+
+
 def read_dir(sub, exts=(".xml",)):
     out = {}
     d = RES / sub
@@ -78,6 +92,7 @@ def main():
         "drawables": read_drawables(),
         "colors": read_values("color"),
         "strings": read_values("string"),
+        "styles": read_styles(),
         "onboarding": read_onboarding_pages(),
     }
     template = (HERE / "template.html").read_text(encoding="utf-8")
