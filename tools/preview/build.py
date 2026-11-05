@@ -84,6 +84,22 @@ def read_onboarding_pages():
     return [{"title": t, "desc": d, "image": i} for t, d, i in pat.findall(src)]
 
 
+def read_kotlin_actions():
+    """Diálogos y Toasts que muestra cada botón (setOnClickListener) en los Fragments/Activities."""
+    dialogs, toasts = {}, {}
+    for kt in ROOT.glob("app/src/main/java/**/*.kt"):
+        src = kt.read_text(encoding="utf-8")
+        for vid, title, msg in re.findall(r'binding\.(\w+)\.setOnClickListener\s*\{\s*showRuleDialog\(\s*"([^"]*)",\s*"([^"]*)"', src):
+            dialogs[vid] = {"title": title, "msg": msg}
+        for vid, body in re.findall(r'binding\.(\w+)\.setOnClickListener\s*\{(.*?)\n\s{8}\}', src, re.S):
+            if "setOnClickListener" in body:
+                continue
+            m = re.search(r'Toast\.makeText\([^,]+,\s*"([^"]*)"', body)
+            if m and "$" not in m.group(1):
+                toasts.setdefault(vid, m.group(1))
+    return {"dialogs": dialogs, "toasts": toasts}
+
+
 def main():
     bundle = {
         "layouts": read_dir("layout"),
@@ -94,9 +110,10 @@ def main():
         "strings": read_values("string"),
         "styles": read_styles(),
         "onboarding": read_onboarding_pages(),
+        "kotlin": read_kotlin_actions(),
     }
     template = (HERE / "template.html").read_text(encoding="utf-8")
-    renderer = (HERE / "renderer.js").read_text(encoding="utf-8")
+    renderer = (HERE / "renderer.js").read_text(encoding="utf-8") + "\n" + (HERE / "sim.js").read_text(encoding="utf-8")
     data = json.dumps(bundle, ensure_ascii=False).replace("</", "<\\/")
     html = template.replace("/*__BUNDLE__*/", f"window.RES = {data};").replace("/*__RENDERER__*/", renderer)
     OUT.parent.mkdir(parents=True, exist_ok=True)

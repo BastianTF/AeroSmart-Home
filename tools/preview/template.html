@@ -93,6 +93,23 @@ aside { display: grid; gap: 12px; min-width: 0; }
 .splash { flex: 1; display: flex; align-items: center; justify-content: center; background: #F3F7F9; }
 .splash img { width: 160px; height: 160px; object-fit: contain; }
 .outline .v { outline: 1px dashed rgba(229,57,53,.55); outline-offset: -1px; }
+.sim-toast { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); max-width: 300px; background: #2B3A42; color: #fff; font: 14px var(--body); padding: 10px 16px; border-radius: 20px; z-index: 20; text-align: center; animation: toastIn .2s ease-out; transition: opacity .3s; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+.sim-toast.out { opacity: 0; }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } }
+.sim-scrim { position: absolute; inset: 0; background: rgba(22,37,46,.42); display: flex; align-items: center; justify-content: center; z-index: 30; animation: fadeIn .15s; transition: opacity .15s; }
+.sim-scrim.out { opacity: 0; }
+@keyframes fadeIn { from { opacity: 0; } }
+.sim-dialog { width: 296px; background: #fff; border-radius: 26px; padding: 24px 24px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: popIn .2s cubic-bezier(.34,1.56,.64,1); font-family: var(--body); }
+@keyframes popIn { from { transform: scale(.9); opacity: 0; } }
+.sim-dialog h3 { margin: 0 0 12px; font: 500 22px/1.25 var(--body); color: #16252E; }
+.sim-dialog p { margin: 0 0 16px; font-size: 14px; line-height: 1.45; color: #5B6B74; }
+.sim-items { display: grid; margin: 0 -24px 8px; }
+.sim-items button { text-align: left; border: 0; background: none; padding: 14px 24px; font: 15px var(--body); color: #16252E; cursor: pointer; }
+.sim-items button:active { background: #D8F1F8; }
+.sim-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.sim-actions button { border: 0; background: none; color: #0E7C9B; font: 600 14px var(--body); padding: 10px 14px; border-radius: 20px; cursor: pointer; }
+.sim-actions button:active { background: #D8F1F8; }
+@media (prefers-reduced-motion: reduce) { .sim-dialog, .sim-toast, .sim-scrim { animation: none; } }
 .err { padding: 16px; color: #B71C1C; font: 12px var(--mono); white-space: pre-wrap; }
 </style>
 
@@ -118,7 +135,7 @@ aside { display: grid; gap: 12px; min-width: 0; }
         <ul>
           <li>Toca los botones de la app: Saltar, Siguiente, Iniciar sesión, Regístrate, el avatar de perfil y Cerrar sesión navegan como en la app.</li>
           <li>Los campos de texto y los interruptores funcionan.</li>
-          <li>Los datos que pone el código Kotlin (temperatura, estado) se ven con el texto del XML.</li>
+          <li>Conectar, refrescar, modo automático/manual, compuerta y las reglas funcionan igual que en la app: copian la lógica de <code>MainViewModel.kt</code> (datos simulados).</li>
           <li>Desliza por las 4 pestañas con la barra inferior.</li>
           <li>Mantén el dedo o el mouse sobre una vista para ver su <code>id</code>.</li>
         </ul>
@@ -236,6 +253,7 @@ aside { display: grid; gap: 12px; min-width: 0; }
       const fn = NAV[n.dataset.id];
       if (fn) { n.classList.add('clickable'); n.addEventListener('click', (ev) => { ev.stopPropagation(); fn(s, n); }); }
     });
+    window.AndroidSim && window.AndroidSim.attach(screenEl);
     document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.screen === s.id)));
     document.getElementById('info').textContent = s.layout ? `res/layout/${s.layout}.xml` : 'Theme.App.Starting (themes.xml)';
     const w = Array.from(P.warnings);

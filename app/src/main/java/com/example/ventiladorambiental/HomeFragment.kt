@@ -104,17 +104,17 @@ class HomeFragment : Fragment() {
                 when (state) {
                     is MainUiState.Loading -> {
                         binding.btnConnect.isEnabled = false
-                        setStatusText("Conectando con Arduino...", "#757575")
+                        setStatusText("Conectando con Arduino...", "#5B6B74")
                         binding.viewStatusDot.setBackgroundResource(R.drawable.circle_gray)
                     }
                     is MainUiState.Success -> {
                         binding.btnConnect.isEnabled = true
                         if (state.isConnected) {
-                            setStatusText("Conectado", "#4CAF50")
+                            setStatusText("Conectado", "#2E9E6A")
                             binding.btnConnect.text = getString(R.string.disconnect_bluetooth)
                             binding.viewStatusDot.setBackgroundResource(R.drawable.circle_green)
                         } else {
-                            setStatusText("Desconectado", "#E53935")
+                            setStatusText("Desconectado", "#D64541")
                             binding.btnConnect.text = getString(R.string.connect)
                             binding.viewStatusDot.setBackgroundResource(R.drawable.circle_red)
                         }
