@@ -47,6 +47,8 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnRefresh.setOnClickListener {
+            it.animate().rotationBy(360f).setDuration(500)
+                .setInterpolator(android.view.animation.AccelerateDecelerateInterpolator()).start()
             viewModel.refreshSensors()
             Toast.makeText(requireContext(), "Datos de sensores actualizados", Toast.LENGTH_SHORT).show()
         }

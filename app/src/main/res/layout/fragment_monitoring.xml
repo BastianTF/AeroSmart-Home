@@ -257,6 +257,10 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardPIR"
+            android:clickable="true"
+            android:focusable="true"
+            android:stateListAnimator="@animator/press_scale"
+            android:foreground="?attr/selectableItemBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

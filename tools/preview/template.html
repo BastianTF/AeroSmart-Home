@@ -58,7 +58,8 @@ aside { display: grid; gap: 12px; min-width: 0; }
 .screen .clickable { cursor: pointer; }
 .screen .clickable:active { filter: brightness(.95); }
 .screen .press { transition: transform .18s cubic-bezier(.34,1.56,.64,1), filter .15s, box-shadow .15s; will-change: transform; }
-.screen .press:active { transform: scale(.96); transition-duration: .09s; }
+.screen .press.pressed { transform: scale(.96); transition-duration: .09s; }
+.screen .btn.pressed, .screen .clickable.pressed { filter: brightness(.93); }
 .screen .btn { transition: transform .18s cubic-bezier(.34,1.56,.64,1), filter .15s; }
 @media (hover: hover) { .screen .btn:hover { filter: brightness(1.06); } .screen .press.v-CardView:hover { filter: brightness(.985); } }
 .screen .bnav-item .bnav-ic { transition: background-color .2s, transform .2s cubic-bezier(.34,1.56,.64,1); }
@@ -165,6 +166,9 @@ aside { display: grid; gap: 12px; min-width: 0; }
     imgProfile: () => go('profile'),
     btnSaveProfile: () => back(),
     btnLogout: () => go('login'),
+    btnBack: () => back(),
+    txtBackToLogin: () => go('login'),
+    btnRefresh: (s, n) => { const r = (+n.dataset.rot || 0) + 360; n.dataset.rot = r; n.style.transition = 'transform .5s cubic-bezier(.45,0,.55,1)'; n.style.transform = `rotate(${r}deg)`; },
   };
 
   const picker = document.getElementById('picker');
@@ -230,7 +234,7 @@ aside { display: grid; gap: 12px; min-width: 0; }
     // clics de navegación
     screenEl.querySelectorAll('[data-id]').forEach((n) => {
       const fn = NAV[n.dataset.id];
-      if (fn) { n.classList.add('clickable'); n.addEventListener('click', (ev) => { ev.stopPropagation(); fn(s); }); }
+      if (fn) { n.classList.add('clickable'); n.addEventListener('click', (ev) => { ev.stopPropagation(); fn(s, n); }); }
     });
     document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.screen === s.id)));
     document.getElementById('info').textContent = s.layout ? `res/layout/${s.layout}.xml` : 'Theme.App.Starting (themes.xml)';
@@ -247,6 +251,13 @@ aside { display: grid; gap: 12px; min-width: 0; }
   }
   function back() { if (stack.length) go(stack.pop(), false); }
 
+  // Efecto de presionar con dedo o mouse (Safari en iPhone no aplica :active sin esto)
+  const clearPressed = () => screenEl.querySelectorAll('.pressed').forEach((n) => n.classList.remove('pressed'));
+  screenEl.addEventListener('pointerdown', (e) => {
+    const t = e.target.closest('.press, .btn, .clickable');
+    if (t && screenEl.contains(t)) t.classList.add('pressed');
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => screenEl.addEventListener(ev, () => setTimeout(clearPressed, 60)));
   document.getElementById('tBack').onclick = back;
   document.getElementById('tOutline').onclick = (e) => { outline = !outline; e.currentTarget.setAttribute('aria-pressed', String(outline)); draw(); };
 

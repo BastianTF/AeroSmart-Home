@@ -18,6 +18,9 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.root.applySystemBarInsets()
 
+        // Volver a la pantalla anterior
+        binding.btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+
         // Carga de datos de perfil
         binding.etProfileName.setText("Usuario AeroSmart")
         binding.etProfilePhone.setText("+56 9 1234 5678")

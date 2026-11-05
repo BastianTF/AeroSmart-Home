@@ -21,6 +21,9 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.root.applySystemBarInsets()
 
+        // Volver a la pantalla anterior
+        binding.btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+
         binding.btnRegister.setOnClickListener {
             val firstName = binding.etFirstName.text.toString().trim()
             val lastName = binding.etLastName.text.toString().trim()
