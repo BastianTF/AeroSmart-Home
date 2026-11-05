@@ -1,0 +1,250 @@
+<title>AeroSmart Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Sora:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: barra de pantallas arriba, teléfono a escala al centro, avisos del build abajo */
+:root {
+  --bg: #EEF2F6; --surface: #FFFFFF; --ink: #17212B; --muted: #5B6875; --line: #D5DDE5;
+  --accent: #1E88E5; --warn: #B45309; --warn-bg: #FEF3C7;
+  --display: 'Sora', 'Segoe UI', system-ui, sans-serif;
+  --body: 'Roboto', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E141A; --surface: #17202A; --ink: #E6EDF3; --muted: #94A3B3; --line: #2A3643;
+  --accent: #5AAEF2; --warn: #FBBF24; --warn-bg: #3A2C0A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E141A; --surface: #17202A; --ink: #E6EDF3; --muted: #94A3B3; --line: #2A3643;
+  --accent: #5AAEF2; --warn: #FBBF24; --warn-bg: #3A2C0A; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); }
+.page { max-width: 980px; margin: 0 auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+header h1 { font-family: var(--display); font-weight: 600; font-size: 20px; margin: 0; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; max-width: 62ch; }
+.picker { display: grid; gap: 8px; }
+.group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.group-label { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); width: 100%; }
+.chip { font: 500 13px var(--body); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip:focus-visible, .tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .stage { grid-template-columns: minmax(0,1fr); } }
+.phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+.phone-scale { width: 380px; max-width: 100%; }
+.phone { width: 380px; height: 800px; transform-origin: top left; border-radius: 40px; background: #111; padding: 10px; box-shadow: 0 20px 50px rgba(15,23,42,.25); }
+.screen { position: relative; width: 360px; height: 780px; border-radius: 30px; overflow: hidden; background: #F8F9FA; display: flex; flex-direction: column; font-family: var(--body); -webkit-font-smoothing: antialiased; }
+.statusbar { position: absolute; inset: 0 0 auto; height: 28px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font: 500 13px var(--body); color: #fff; z-index: 5; pointer-events: none; }
+.statusbar.classic { position: relative; background: #000; flex: none; }
+.statusbar .icons { display: flex; gap: 5px; align-items: center; }
+.gesture { position: absolute; bottom: 6px; left: 50%; width: 108px; height: 4px; margin-left: -54px; border-radius: 4px; background: rgba(0,0,0,.35); z-index: 5; pointer-events: none; }
+.app { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tool { font: 500 12px var(--body); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.tool[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+aside { display: grid; gap: 12px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; min-width: 0; }
+.panel h2 { font: 600 13px var(--display); margin: 0; }
+.panel p, .panel li { font-size: 12.5px; line-height: 1.45; color: var(--muted); margin: 0; }
+.panel ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; }
+.panel code, .info code { font: 12px var(--mono); color: var(--ink); overflow-wrap: anywhere; }
+.warn { background: var(--warn-bg); border-color: transparent; }
+.warn h2, .warn li { color: var(--warn); }
+.info { font: 12px var(--mono); color: var(--muted); text-align: center; }
+
+/* ---- vistas Android ---- */
+.screen .v { box-sizing: border-box; position: relative; min-width: 0; }
+.screen .txt { white-space: pre-wrap; overflow-wrap: break-word; }
+.screen .clamp .txt { display: -webkit-box; -webkit-line-clamp: var(--lines); -webkit-box-orient: vertical; overflow: hidden; }
+.screen .clickable { cursor: pointer; }
+.screen .clickable:active { filter: brightness(.94); }
+.screen .btn { display: flex; flex-direction: row !important; align-items: center; justify-content: center; gap: 8px; letter-spacing: .1px; overflow: hidden; }
+.screen .btn-icon { width: 18px; height: 18px; display: inline-flex; flex: none; }
+.screen .img-box { width: 100%; height: 100%; display: flex; }
+.screen .v-ImageView img, .screen .v-ImageButton img { width: 100%; height: 100%; display: block; }
+.screen .placeholder { display: flex; align-items: center; justify-content: center; border: 1px dashed #b0bec5; color: #78909c; font-size: 11px; min-height: 24px; }
+.screen .til-box { position: relative; display: flex; align-items: center; height: 56px; border: 1px solid rgba(0,0,0,.38); border-radius: 4px; background: transparent; }
+.screen .til-box:focus-within { border: 2px solid #6750A4; }
+.screen .til-box input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; font: 16px var(--body); color: #1D1B20; padding: 0 16px; }
+.screen .til-box.has-start input { padding-left: 4px; }
+.screen .til-icon { width: 24px; height: 24px; margin-left: 12px; margin-right: 12px; display: inline-flex; flex: none; }
+.screen .til-end { width: 48px; height: 48px; border: 0; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.screen .til-label { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #616161; pointer-events: none; transition: all .15s; background: transparent; padding: 0 4px; margin-left: -4px; }
+.screen .til-box.has-start .til-label { left: 52px; }
+.screen .til-box:focus-within .til-label, .screen .til-box input:not(:placeholder-shown) ~ .til-label { top: 0; left: 12px; font-size: 12px; color: #6750A4; background: var(--til-bg, #F8F9FA); }
+.screen .sw-input { appearance: none; -webkit-appearance: none; width: 36px; height: 14px; border-radius: 7px; background: rgba(0,0,0,.38); position: relative; cursor: pointer; margin: 0 4px; flex: none; }
+.screen .sw-input::after { content: ""; position: absolute; top: -3px; left: -2px; width: 20px; height: 20px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
+.screen .sw-input:checked { background: color-mix(in srgb, var(--on) 50%, transparent); }
+.screen .sw-input:checked::after { transform: translateX(20px); background: var(--on); }
+.screen .progress { border: 4px solid #E0E0E0; border-top-color: #6750A4; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .screen .progress { animation: none; } .screen .sw-input::after { transition: none; } }
+.bnav { flex: none; display: flex; height: 80px; background: #F3EDF7; padding-bottom: 12px; box-sizing: border-box; }
+.bnav-item { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 500 12px var(--body); cursor: pointer; }
+.bnav-ic { width: 64px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.bnav-ic svg { width: 24px; height: 24px; }
+.bnav-item.on .bnav-ic { background: color-mix(in srgb, var(--ind) 16%, transparent); }
+.splash { flex: 1; display: flex; align-items: center; justify-content: center; background: #F8F9FA; }
+.splash img { width: 160px; height: 160px; object-fit: contain; }
+.outline .v { outline: 1px dashed rgba(229,57,53,.55); outline-offset: -1px; }
+.err { padding: 16px; color: #B71C1C; font: 12px var(--mono); white-space: pre-wrap; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>AeroSmart Home · vista previa</h1>
+    <p>Las pantallas se dibujan leyendo los XML reales de <code>app/src/main/res</code>. Es una aproximación de Android Studio: sirve para revisar diseño y textos, no reemplaza probar en el teléfono.</p>
+  </header>
+  <div class="picker" id="picker"></div>
+  <div class="stage">
+    <div class="phone-wrap">
+      <div class="phone-scale" id="phoneScale"><div class="phone" id="phone"><div class="screen" id="screen"></div></div></div>
+      <div class="tools">
+        <button class="tool" id="tBack" type="button">← Atrás</button>
+        <button class="tool" id="tBar" type="button" aria-pressed="true">Edge-to-edge (Android 15+)</button>
+        <button class="tool" id="tOutline" type="button" aria-pressed="false">Ver bordes de vistas</button>
+      </div>
+      <div class="info" id="info"></div>
+    </div>
+    <aside>
+      <div class="panel warn" id="warnPanel" hidden><h2>Avisos de los recursos</h2><ul id="warnList"></ul></div>
+      <div class="panel">
+        <h2>Cómo usarla</h2>
+        <ul>
+          <li>Toca los botones de la app: Saltar, Siguiente, Iniciar sesión, Regístrate, el avatar de perfil y Cerrar sesión navegan como en la app.</li>
+          <li>Los campos de texto y los interruptores funcionan.</li>
+          <li>Los datos que pone el código Kotlin (temperatura, estado) se ven con el texto del XML.</li>
+          <li>Mantén el dedo o el mouse sobre una vista para ver su <code>id</code>.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Edge-to-edge</h2>
+        <p>Con <code>targetSdk 37</code>, desde Android 15 la app se dibuja debajo de la barra de estado, y el color negro del tema se ignora. Usa el botón para comparar.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>/*__BUNDLE__*/</script>
+<script>/*__RENDERER__*/</script>
+<script>
+(function () {
+  const P = window.AndroidPreview;
+  const OB = (window.RES.onboarding || []);
+  const TABS = [['fragment_home', 'Inicio'], ['fragment_monitoring', 'Monitoreo'], ['fragment_automation', 'Automatización'], ['fragment_ventilation', 'Ventilación']];
+  const SCREENS = [
+    { group: 'Flujo de la app', id: 'splash', label: 'Splash' },
+    ...OB.map((_, i) => ({ group: 'Flujo de la app', id: 'onboarding-' + (i + 1), label: 'Onboarding ' + (i + 1), layout: 'activity_onboarding', ob: i })),
+    { group: 'Flujo de la app', id: 'login', label: 'Login', layout: 'activity_login' },
+    { group: 'Flujo de la app', id: 'register', label: 'Registro', layout: 'activity_register' },
+    { group: 'Flujo de la app', id: 'main', label: 'Main (actual)', layout: 'activity_main' },
+    { group: 'Flujo de la app', id: 'profile', label: 'Perfil', layout: 'activity_profile' },
+    ...TABS.map(([l, t], i) => ({ group: 'Pestañas nuevas (aún no conectadas a MainActivity)', id: 'tab-' + (i + 1), label: t, layout: l, tab: i })),
+  ];
+  const used = new Set(SCREENS.map((s) => s.layout).concat(['item_onboarding_page']));
+  Object.keys(window.RES.layouts).filter((l) => !used.has(l)).forEach((l) => SCREENS.push({ group: 'Otros layouts', id: 'x-' + l.replace(/_/g, '-'), label: l, layout: l }));
+
+  // Navegación por id de vista (lo que hace cada Activity en Kotlin)
+  const NAV = {
+    btnSkip: () => go('login'),
+    btnSiguiente: (s) => go(s.ob < OB.length - 1 ? 'onboarding-' + (s.ob + 2) : 'login'),
+    btnLogin: () => go('main'),
+    txtRegisterLink: () => go('register'),
+    btnRegister: () => go('login'),
+    profileAvatarCard: () => go('profile'),
+    imgProfile: () => go('profile'),
+    btnSaveProfile: () => back(),
+    btnLogout: () => go('login'),
+  };
+
+  const picker = document.getElementById('picker');
+  const screenEl = document.getElementById('screen');
+  let current = null, stack = [], edge = true, outline = false;
+
+  const groups = {};
+  SCREENS.forEach((s) => {
+    if (!groups[s.group]) {
+      const g = document.createElement('div'); g.className = 'group';
+      g.innerHTML = `<span class="group-label">${s.group}</span>`;
+      picker.append(g); groups[s.group] = g;
+    }
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = s.label; b.dataset.screen = s.id;
+    b.onclick = () => go(s.id);
+    groups[s.group].append(b);
+  });
+
+  function statusBar() {
+    const sb = document.createElement('div'); sb.className = 'statusbar' + (edge ? '' : ' classic');
+    sb.innerHTML = '<span>9:41</span><span class="icons"><svg width="16" height="12" viewBox="0 0 16 12"><path fill="currentColor" d="M0 11h3v1H0zM4 8h3v4H4zM8 5h3v7H8zM12 1h3v11h-3z"/></svg><svg width="22" height="12" viewBox="0 0 22 12"><rect x=".5" y=".5" width="18" height="11" rx="2" fill="none" stroke="currentColor"/><rect x="2" y="2" width="13" height="8" rx="1" fill="currentColor"/><rect x="19.5" y="4" width="2" height="4" rx="1" fill="currentColor"/></svg></span>';
+    return sb;
+  }
+
+  function draw() {
+    const s = SCREENS.find((x) => x.id === current) || SCREENS[0];
+    screenEl.replaceChildren();
+    screenEl.classList.toggle('outline', outline);
+    const appEl = document.createElement('div'); appEl.className = 'app';
+    try {
+      if (s.id === 'splash') {
+        const d = P.drawable('@drawable/logo_ventilador');
+        const sp = document.createElement('div'); sp.className = 'splash clickable'; sp.title = 'Toca para continuar';
+        if (d && d.src) { const im = document.createElement('img'); im.src = d.src; im.alt = 'Logo AeroSmart'; sp.append(im); }
+        sp.onclick = () => go(OB.length ? 'onboarding-1' : 'login');
+        appEl.append(sp);
+      } else {
+        const ctx = { screen: s.id, onboarding: s.ob != null ? OB[s.ob] : null };
+        appEl.append(P.renderLayout(s.layout, ctx));
+        if (s.tab != null) appEl.append(P.navBar('bottom_nav_menu', s.tab, (i) => go('tab-' + (i + 1))));
+        if (s.ob != null) {
+          const dots = appEl.querySelector('[data-id="layoutDots"]');
+          if (dots) OB.forEach((_, i) => {
+            const dt = document.createElement('div');
+            const d = P.drawable(i === s.ob ? '@drawable/circle_dot_active' : '@drawable/circle_dot_inactive');
+            Object.assign(dt.style, { width: (i === s.ob ? 24 : 8) + 'px', height: '8px', margin: '0 4px' }, d && d.css ? d.css : {});
+            dots.append(dt);
+          });
+        }
+      }
+    } catch (e) {
+      const er = document.createElement('div'); er.className = 'err'; er.textContent = 'No se pudo dibujar este layout:\n' + e.message; appEl.append(er);
+    }
+    screenEl.append(appEl);
+    if (edge) screenEl.append(statusBar()); else screenEl.prepend(statusBar());
+    const g = document.createElement('div'); g.className = 'gesture'; screenEl.append(g);
+    requestAnimationFrame(() => P.fixRelative(screenEl));
+    // clics de navegación
+    screenEl.querySelectorAll('[data-id]').forEach((n) => {
+      const fn = NAV[n.dataset.id];
+      if (fn) { n.classList.add('clickable'); n.addEventListener('click', (ev) => { ev.stopPropagation(); fn(s); }); }
+    });
+    document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.screen === s.id)));
+    document.getElementById('info').textContent = s.layout ? `res/layout/${s.layout}.xml` : 'Theme.App.Starting (themes.xml)';
+    const w = Array.from(P.warnings);
+    document.getElementById('warnPanel').hidden = !w.length;
+    document.getElementById('warnList').replaceChildren(...w.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; }));
+  }
+
+  function go(id, push = true) {
+    if (push && current && current !== id) stack.push(current);
+    current = id;
+    if (location.hash !== '#' + id) { try { window.history.replaceState(null, '', '#' + id); } catch (e) { location.hash = id; } }
+    draw();
+  }
+  function back() { if (stack.length) go(stack.pop(), false); }
+
+  document.getElementById('tBack').onclick = back;
+  document.getElementById('tBar').onclick = (e) => { edge = !edge; e.currentTarget.setAttribute('aria-pressed', String(edge)); draw(); };
+  document.getElementById('tOutline').onclick = (e) => { outline = !outline; e.currentTarget.setAttribute('aria-pressed', String(outline)); draw(); };
+
+  function fit() {
+    const wrap = document.getElementById('phoneScale');
+    const scale = Math.min(1, wrap.parentElement.clientWidth / 380);
+    document.getElementById('phone').style.transform = `scale(${scale})`;
+    wrap.style.height = 800 * scale + 'px';
+  }
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (id && id !== current) go(id); });
+  fit();
+  const start = location.hash.slice(1);
+  go(SCREENS.some((s) => s.id === start) ? start : 'login', false);
+})();
+</script>
