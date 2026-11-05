@@ -29,8 +29,9 @@ class MonitoringFragment : Fragment() {
         binding.btnConnect.setOnClickListener { ConnectionUi.onConnectClick(requireContext(), viewModel) }
         binding.cardPIR.setOnClickListener {
             val state = viewModel.uiState.value as? MainUiState.Success
-            if (state?.isConnected == true) viewModel.togglePIRMovement()
-            else Toast.makeText(requireContext(), "Conecta el dispositivo para simular presencia PIR", Toast.LENGTH_SHORT).show()
+            if (state?.isConnected == true) {
+                if (!viewModel.togglePIRMovement()) Toast.makeText(requireContext(), "El sensor PIR de la placa envía su estado real", Toast.LENGTH_SHORT).show()
+            } else Toast.makeText(requireContext(), "Conecta el dispositivo para simular presencia PIR", Toast.LENGTH_SHORT).show()
         }
         binding.profileAvatarCard.setOnClickListener {
             startActivity(Intent(requireContext(), ProfileActivity::class.java))
@@ -62,14 +63,30 @@ class MonitoringFragment : Fragment() {
 
                 binding.txtPIRStatus.text = when {
                     !state.isConnected -> "Sin conexión"
-                    state.isMovementDetected -> "Movimiento detectado · toca para simular"
-                    else -> "Sin movimiento · toca para simular"
+                    state.isMovementDetected -> if (state.isDemo) "Movimiento detectado · toca para simular" else "Movimiento detectado"
+                    else -> if (state.isDemo) "Sin movimiento · toca para simular" else "Sin movimiento"
                 }
+                renderLink(state)
                 binding.viewLedPIR.setBackgroundResource(
                     if (state.isMovementDetected) R.drawable.circle_green else R.drawable.circle_gray
                 )
             }
         }
+    }
+
+    /** Tarjeta "Estabilidad de la conexión": latencia, pérdidas, reconexiones y mensajes rechazados. */
+    private fun renderLink(state: MainUiState.Success) {
+        val q = state.linkQuality
+        if (q == null) {
+            binding.txtLinkQuality.text = if (state.isDemo) "Demostración" else "Solo con la placa"
+            listOf(binding.txtLinkRtt, binding.txtLinkLoss, binding.txtLinkReconnects, binding.txtLinkRejected).forEach { it.text = "--" }
+            return
+        }
+        binding.txtLinkQuality.text = q.label
+        binding.txtLinkRtt.text = q.rttMs?.let { "$it ms" } ?: "--"
+        binding.txtLinkLoss.text = "${q.lossPercent} %"
+        binding.txtLinkReconnects.text = q.reconnects.toString()
+        binding.txtLinkRejected.text = q.rejected.toString()
     }
 
     override fun onDestroyView() {

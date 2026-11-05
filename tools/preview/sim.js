@@ -52,18 +52,23 @@
     apply();
   }
   const VM = {
-    connect() {
+    connect(demo) {
       if (S.connected) return;
-      S.loading = true; apply();
+      S.loading = true; S.demo = !!demo; apply();
       setTimeout(() => {
-        S.loading = false; S.connected = true; S.movement = true; S.history = [];
+        S.loading = false; S.connected = true; S.movement = true;
+        S.link = demo ? null : { rtt: 0, received: 0, lost: 0, rejected: 0, reconnects: 0 };
         simulateReading(); evaluateAutomation(); emit();
         clearInterval(stream);
-        stream = setInterval(() => { if (!S.connected) return; simulateReading(); evaluateAutomation(); emit(); }, 5000);
+        stream = setInterval(() => {
+          if (!S.connected) return;
+          if (S.link) { S.link.received += 3; S.link.rtt = 35 + Math.floor(Math.random() * 40); }
+          simulateReading(); evaluateAutomation(); emit();
+        }, 5000);
       }, 1000);
     },
     disconnect() { clearInterval(stream); S.connected = false; S.ventOpen = false; S.movement = false; S.lastUpdate = null; emit(); },
-    togglePIR() { if (!S.connected) return; S.movement = !S.movement; evaluateAutomation(); emit(); },
+    togglePIR() { if (!S.connected || !S.demo) return; S.movement = !S.movement; evaluateAutomation(); emit(); },
     refresh() { if (!S.connected) return; simulateReading(); evaluateAutomation(); emit(); },
     setAuto(v) { S.auto = v; evaluateAutomation(); emit(); },
     toggleVent(open) { S.auto = false; S.ventOpen = open; emit(); },
@@ -133,7 +138,7 @@
     const onVentTab = !!one('toggleVent');
     // ConnectionUi.render
     if (S.loading) { setText('txtStatus', 'Conectando…'); setText('txtStatusHint', 'Buscando el módulo Arduino'); setBg('viewStatusDot', '@drawable/circle_gray'); }
-    else if (S.connected) { setText('txtStatus', str('status_connected')); setText('txtStatusHint', S.lastUpdate ? `Última lectura ${S.lastUpdate}` : 'Recibiendo datos'); setBg('viewStatusDot', '@drawable/circle_green'); }
+    else if (S.connected) { setText('txtStatus', S.demo ? 'Demostración' : str('status_connected')); setText('txtStatusHint', S.lastUpdate ? `Última lectura ${S.lastUpdate}` : 'Recibiendo datos'); setBg('viewStatusDot', '@drawable/circle_green'); }
     else { setText('txtStatus', str('status_disconnected')); setText('txtStatusHint', 'Vincula tu Arduino para ver datos en vivo'); setBg('viewStatusDot', '@drawable/circle_red'); }
     if (!S.loading) setText('btnConnect', S.connected ? str('disconnect_bluetooth') : str('connect'));
     q('btnConnect').forEach((n) => { n.style.opacity = S.loading ? '.5' : ''; n.style.pointerEvents = S.loading ? 'none' : ''; });
@@ -145,7 +150,16 @@
     q('gaugeHumidity').forEach((g) => g._setProgress && g._setProgress(S.connected ? S.hum : 0));
     setText('txtLastUpdate', S.lastUpdate ? `Actualizado a las ${S.lastUpdate}` : 'Sin lecturas todavía');
     const mov = S.connected && S.movement;
-    if (onMonitoring) setText('txtPIRStatus', !S.connected ? 'Sin conexión' : mov ? 'Movimiento detectado · toca para simular' : 'Sin movimiento · toca para simular');
+    const sim = S.demo ? ' · toca para simular' : '';
+    if (onMonitoring) setText('txtPIRStatus', !S.connected ? 'Sin conexión' : mov ? 'Movimiento detectado' + sim : 'Sin movimiento' + sim);
+    if (onMonitoring) {
+      const L = S.connected ? S.link : null;
+      setText('txtLinkQuality', L ? (L.received ? 'Estable' : 'Sin datos aún') : S.connected && S.demo ? 'Demostración' : 'Solo con la placa');
+      setText('txtLinkRtt', L && L.rtt ? `${L.rtt} ms` : '--');
+      setText('txtLinkLoss', L ? '0 %' : '--');
+      setText('txtLinkReconnects', L ? String(L.reconnects) : '--');
+      setText('txtLinkRejected', L ? String(L.rejected) : '--');
+    }
     else setText('txtPIRStatus', mov ? 'Movimiento detectado' : 'Sin movimiento');
     setBg('viewLedPIR', mov ? '@drawable/circle_green' : '@drawable/circle_gray');
     // Monitoreo
@@ -239,8 +253,10 @@
     return { body, close };
   }
   function bluetoothPicker() {
-    const devices = ['AeroSmart-ESP32 (Bluetooth BLE)', 'HC-05 (Bluetooth Classic)', 'Arduino Wi-Fi / MQTT Broker'];
-    dialog('Elige tu dispositivo', null, [['Cancelar']], devices.map((d) => [d, () => { toast(`Vinculando con ${d}…`); VM.connect(); }]));
+    dialog('Elige tu dispositivo', null, [['Cancelar']], [
+      ['Placa AeroSmart (Wi-Fi 192.168.4.1)', () => { toast('Saludo seguro con la placa…'); VM.connect(false); }],
+      ['Modo demostración (sin placa)', () => VM.connect(true)],
+    ]);
   }
 
   // Selector de hora tipo rueda (equivale a MaterialTimePicker en Android)
@@ -356,7 +372,7 @@
   const HANDLERS = {
     btnConnect: () => (S.connected ? VM.disconnect() : bluetoothPicker()),
     btnRefresh: () => { if (S.connected) { VM.refresh(); toast('Datos de sensores actualizados'); } else toast('Conecta el dispositivo primero'); },
-    cardPIR: () => { if (S.connected) VM.togglePIR(); else toast('Conecta el dispositivo para simular presencia PIR'); },
+    cardPIR: () => { if (S.connected) { if (S.demo) VM.togglePIR(); else toast('El sensor PIR de la placa envía su estado real'); } else toast('Conecta el dispositivo para simular presencia PIR'); },
     btnVentToggle: () => { const open = !S.ventOpen; VM.toggleVent(open); toast(open ? 'Compuerta abierta' : 'Compuerta cerrada'); },
     btnSegAuto: () => VM.setAuto(true),
     btnSegManual: () => VM.setAuto(false),

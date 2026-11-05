@@ -51,7 +51,9 @@ class HomeFragment : Fragment() {
 
         binding.cardPIR.setOnClickListener {
             if (isConnected()) {
-                viewModel.togglePIRMovement()
+                if (!viewModel.togglePIRMovement()) {
+                    Toast.makeText(requireContext(), "El sensor PIR de la placa envía su estado real", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(requireContext(), "Conecta el dispositivo para simular presencia PIR", Toast.LENGTH_SHORT).show()
             }

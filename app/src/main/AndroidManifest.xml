@@ -4,6 +4,11 @@
     <!-- Alertas locales cuando el sensor PIR detecta movimiento (Android 13+ pide permiso) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Enlace con la placa ESP8266 por su red Wi-Fi propia (socket TCP local) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"

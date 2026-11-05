@@ -6,6 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.ventiladorambiental.data.AutomationRules
 import com.example.ventiladorambiental.data.ReadingRepository
 import com.example.ventiladorambiental.data.Schedule
+import com.example.ventiladorambiental.link.Commands
+import com.example.ventiladorambiental.link.DeviceLink
+import com.example.ventiladorambiental.link.LinkQuality
+import com.example.ventiladorambiental.link.SecureChannel
+import com.example.ventiladorambiental.link.Telemetry
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -20,8 +25,12 @@ import kotlinx.coroutines.launch
 
 /**
  * Estado compartido por las 4 pestañas.
- * Por ahora los datos de los sensores son SIMULADOS: cuando exista el enlace real
- * (HC-05 / ESP32), reemplazar [simulateReading] por la lectura del Arduino.
+ *
+ * Dos formas de conectarse:
+ *  - Placa real (ESP8266 Wemos D1): [connectDevice] abre el enlace seguro [DeviceLink] por Wi-Fi.
+ *    Las lecturas llegan desde el Arduino y las órdenes (compuerta, turbina, modo) se le envían firmadas.
+ *  - Modo demostración: [connectDemo] simula lecturas para mostrar la app sin hardware.
+ *
  * Cada lectura se guarda en SQLite (ReadingRepository), así el historial no se pierde al cerrar la app.
  */
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -30,6 +39,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     private var isConnected = false
+    private var isDemo = false
     private var isVentOpen = false
     private var isAutoMode = true
     private var temperature = 25
@@ -40,7 +50,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var schedule: Schedule = Schedule.DEFAULT
     private val history = ArrayDeque<Reading>()
     private var lastUpdate: String? = null
-    private var streamJob: Job? = null
+    private var linkStatus: String? = null
+    private var linkQuality: LinkQuality? = null
+    private var demoJob: Job? = null
+    private val linkJobs = mutableListOf<Job>()
+    private var link: DeviceLink? = null
     private val readings = ReadingRepository(application)
 
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -56,64 +70,142 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // ---------- Conexión ----------
+    // ---------- Conexión con la placa real ----------
+
+    /** true si la clave del enlace está configurada en local.properties (ver README). */
+    val isLinkConfigured: Boolean get() = SecureChannel.keyFromHex(BuildConfig.LINK_KEY_HEX) != null
 
     fun connectDevice() {
-        if (isConnected) return
-        viewModelScope.launch {
-            _uiState.value = MainUiState.Loading
-            delay(1000)
-            isConnected = true
-            isMovement = true
-            simulateReading()
-            startStream()
-            evaluateAutomation()
-            updateSuccessState()
+        if (isConnected || link != null) return
+        val key = SecureChannel.keyFromHex(BuildConfig.LINK_KEY_HEX)
+        if (key == null) {
+            _uiState.value = MainUiState.Error("Falta la clave del enlace (aerosmart.linkKey en local.properties).")
+            return
         }
+        stopDemo()
+        isDemo = false
+        val l = DeviceLink(getApplication(), key, BuildConfig.DEVICE_HOST, BuildConfig.DEVICE_PORT, viewModelScope)
+        link = l
+        linkJobs += viewModelScope.launch { l.state.collect { onLinkState(it) } }
+        linkJobs += viewModelScope.launch { l.messages.collect { onDeviceMessage(it) } }
+        linkJobs += viewModelScope.launch { l.quality.collect { linkQuality = it; if (isConnected) updateSuccessState() } }
+        _uiState.value = MainUiState.Loading
+        l.connect()
     }
 
-    fun disconnectDevice() {
-        streamJob?.cancel()
-        isConnected = false
-        isVentOpen = false
-        isMovement = false
-        lastUpdate = null
+    private fun onLinkState(state: DeviceLink.State) {
+        when (state) {
+            DeviceLink.State.Connecting -> { linkStatus = "Conectando con la placa…"; _uiState.value = MainUiState.Loading; return }
+            DeviceLink.State.Connected -> {
+                isConnected = true
+                linkStatus = null
+                // Al conectar se envía el estado deseado para que la placa quede igual que la app
+                link?.send(Commands.mode(isAutoMode))
+                link?.send(Commands.fan(fanSpeed))
+            }
+            is DeviceLink.State.Reconnecting -> { isConnected = false; linkStatus = "Reconectando (${state.attempt}/6)…" }
+            is DeviceLink.State.Failed -> {
+                isConnected = false
+                linkStatus = null
+                releaseLink()
+                _uiState.value = MainUiState.Error(state.message)
+                return
+            }
+            DeviceLink.State.Idle -> { isConnected = false; linkStatus = null }
+        }
         updateSuccessState()
     }
 
-    /** Mientras está conectado, llega una lectura nueva cada 5 segundos. */
-    private fun startStream() {
-        streamJob?.cancel()
-        streamJob = viewModelScope.launch {
-            while (isActive && isConnected) {
-                delay(5000)
-                simulateReading()
-                evaluateAutomation()
-                updateSuccessState()
+    private fun onDeviceMessage(body: String) {
+        val t = Telemetry.parse(body) ?: return
+        temperature = t.temperature
+        humidity = t.humidity
+        isMovement = t.movement
+        isVentOpen = t.ventOpen
+        // La turbina reporta 0 cuando la compuerta está cerrada; se conserva la velocidad elegida
+        if (t.ventOpen && t.fanPercent > 0) fanSpeed = t.fanPercent
+        recordReading()
+        evaluateAutomation()
+        updateSuccessState()
+    }
+
+    fun disconnectDevice() {
+        stopDemo()
+        releaseLink()
+        isConnected = false
+        isDemo = false
+        isVentOpen = false
+        isMovement = false
+        lastUpdate = null
+        linkStatus = null
+        updateSuccessState()
+    }
+
+    private fun releaseLink() {
+        link?.disconnect()
+        link = null
+        linkJobs.forEach { it.cancel() }
+        linkJobs.clear()
+        linkQuality = null
+    }
+
+    // ---------- Modo demostración (sin placa) ----------
+
+    fun connectDemo() {
+        if (isConnected) return
+        releaseLink()
+        viewModelScope.launch {
+            _uiState.value = MainUiState.Loading
+            delay(800)
+            isConnected = true
+            isDemo = true
+            isMovement = true
+            simulateReading()
+            evaluateAutomation()
+            updateSuccessState()
+            demoJob = viewModelScope.launch {
+                while (isActive && isConnected && isDemo) {
+                    delay(5000)
+                    simulateReading()
+                    evaluateAutomation()
+                    updateSuccessState()
+                }
             }
         }
+    }
+
+    private fun stopDemo() {
+        demoJob?.cancel()
+        demoJob = null
+    }
+
+    private fun simulateReading() {
+        temperature = (temperature + (-1..1).random()).coerceIn(18, 34)
+        humidity = (humidity + (-3..3).random()).coerceIn(30, 90)
+        recordReading()
     }
 
     // ---------- Sensores ----------
 
     fun refreshSensors() {
         if (!isConnected) return
-        simulateReading()
-        evaluateAutomation()
-        updateSuccessState()
+        if (isDemo) {
+            simulateReading(); evaluateAutomation(); updateSuccessState()
+        } else {
+            link?.send(Commands.ping(System.currentTimeMillis()))
+        }
     }
 
-    fun togglePIRMovement() {
-        if (!isConnected) return
+    /** Solo en modo demostración: en la placa real el PIR manda su propio estado. */
+    fun togglePIRMovement(): Boolean {
+        if (!isConnected || !isDemo) return false
         isMovement = !isMovement
         evaluateAutomation()
         updateSuccessState()
+        return true
     }
 
-    private fun simulateReading() {
-        // Variación pequeña y realista entre lecturas
-        temperature = (temperature + (-1..1).random()).coerceIn(18, 34)
-        humidity = (humidity + (-3..3).random()).coerceIn(30, 90)
+    private fun recordReading() {
         lastUpdate = timeFormat.format(Date())
         history.addLast(Reading(temperature, humidity, lastUpdate!!.substring(0, 5)))
         while (history.size > MAX_HISTORY) history.removeFirst()
@@ -125,20 +217,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setAutoMode(enabled: Boolean) {
         isAutoMode = enabled
+        link?.send(Commands.mode(enabled))
         evaluateAutomation()
         updateSuccessState()
     }
 
     fun toggleVentilation(isOpen: Boolean) {
         isAutoMode = false
-        isVentOpen = isOpen
+        link?.send(Commands.mode(false))
+        applyVent(isOpen)
         updateSuccessState()
     }
 
     /** Velocidad de la turbina en %, de 20 a 100 en pasos de 20. */
     fun setFanSpeed(percent: Int) {
         fanSpeed = (percent / 20 * 20).coerceIn(20, 100)
+        link?.send(Commands.fan(fanSpeed))
         updateSuccessState()
+    }
+
+    /** Cambia la compuerta y, si hay placa real, le envía la orden. */
+    private fun applyVent(open: Boolean) {
+        isVentOpen = open
+        if (!isDemo && isConnected) link?.send(Commands.vent(open))
     }
 
     // ---------- Reglas y horario (vienen de UserPreferences) ----------
@@ -172,13 +273,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /** Modo automático: abre si hace calor o hay humedad alta (y hay presencia, si la regla lo pide). */
     private fun evaluateAutomation() {
         if (!isAutoMode || !isConnected) return
-        if (!isInsideSchedule()) {
-            isVentOpen = false
-            return
+        val wanted = if (!isInsideSchedule()) {
+            false
+        } else {
+            val climateNeedsAir = temperature >= rules.tempThreshold || humidity >= rules.humidityThreshold
+            climateNeedsAir && (!rules.requirePresence || isMovement)
         }
-        val climateNeedsAir = temperature >= rules.tempThreshold || humidity >= rules.humidityThreshold
-        val presenceOk = !rules.requirePresence || isMovement
-        isVentOpen = climateNeedsAir && presenceOk
+        if (wanted != isVentOpen) applyVent(wanted)
     }
 
     private fun updateSuccessState() {
@@ -193,8 +294,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             history = history.toList(),
             rules = rules,
             insideSchedule = isInsideSchedule(),
-            lastUpdate = lastUpdate
+            lastUpdate = lastUpdate,
+            isDemo = isDemo,
+            linkStatus = linkStatus,
+            linkQuality = if (isConnected && !isDemo) linkQuality else null
         )
+    }
+
+    override fun onCleared() {
+        releaseLink()
+        super.onCleared()
     }
 
     companion object {
