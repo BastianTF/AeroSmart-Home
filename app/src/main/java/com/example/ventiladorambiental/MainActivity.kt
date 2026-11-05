@@ -1,118 +1,87 @@
 package com.example.ventiladorambiental
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import android.view.WindowManager
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
+import com.example.ventiladorambiental.data.UserPreferences
 import com.example.ventiladorambiental.databinding.ActivityMainBinding
+import kotlin.math.abs
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * Pantalla principal con 4 pestañas: Inicio, Monitoreo, Automatización y Ventilación.
+ * Cada pestaña es un Fragment (ver MainPagerAdapter) y comparte el mismo MainViewModel.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
+    private lateinit var userPreferences: UserPreferences
+    private var lastMovement = false
+
+    private val tabs = listOf(R.id.nav_home, R.id.nav_monitoring, R.id.nav_automation, R.id.nav_ventilation)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableAeroEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.mainRoot.applySystemBarInsets(bottom = false)
+        userPreferences = UserPreferences(this)
 
-        setupListeners()
-        observeUiState()
+        setupTabs()
+        connectPreferencesToViewModel()
+        watchMovementForAlerts()
     }
 
-    private fun setupListeners() {
-        binding.btnConnect.setOnClickListener {
-            // Si ya está conectado, desconectar; si no, buscar dispositivos Arduino Bluetooth/Wi-Fi
-            showBluetoothDevicesDialog()
+    private fun setupTabs() {
+        binding.viewPagerMain.adapter = MainPagerAdapter(this)
+        binding.viewPagerMain.offscreenPageLimit = 1
+        // Al cambiar de pestaña la página entra con un leve fundido y escala
+        binding.viewPagerMain.setPageTransformer { page, position ->
+            val p = abs(position)
+            page.alpha = 1f - p * 0.4f
+            page.scaleY = 1f - p * 0.04f
         }
-
-        binding.profileAvatarCard.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.switchAutoMode.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setAutoMode(isChecked)
-        }
-
-        binding.switchVentilation.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.toggleVentilation(isChecked)
-            val statusText = if (isChecked) getString(R.string.status_open) else getString(R.string.status_closed)
-            binding.txtServoStatus.text = statusText
+        binding.viewPagerMain.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                binding.bottomNav.menu.findItem(tabs[position]).isChecked = true
+            }
+        })
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            val index = tabs.indexOf(item.itemId)
+            if (index >= 0) binding.viewPagerMain.setCurrentItem(index, true)
+            index >= 0
         }
     }
 
-    private fun showBluetoothDevicesDialog() {
-        val devices = arrayOf(
-            "AeroSmart-ESP32 (Bluetooth BLE)",
-            "HC-05 (Bluetooth Classic)",
-            "Arduino Wi-Fi / MQTT Broker"
-        )
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Vincular con Hardware Arduino")
-        builder.setItems(devices) { _, which ->
-            val selectedDevice = devices[which]
-            Toast.makeText(this, "Vinculando con $selectedDevice...", Toast.LENGTH_SHORT).show()
-            viewModel.connectDevice()
+    /** Horario, reglas y "pantalla encendida" guardados por el usuario llegan al ViewModel. */
+    private fun connectPreferencesToViewModel() {
+        lifecycleScope.launch { userPreferences.schedule.collectLatest { viewModel.setSchedule(it) } }
+        lifecycleScope.launch { userPreferences.rules.collectLatest { viewModel.setRules(it) } }
+        lifecycleScope.launch {
+            userPreferences.settings.collectLatest { settings ->
+                if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
         }
-        builder.setNegativeButton("Cancelar", null)
-        builder.show()
     }
 
-    private fun observeUiState() {
+    /** Notificación cuando el PIR pasa de "sin movimiento" a "movimiento" (si el usuario la activó). */
+    private fun watchMovementForAlerts() {
         lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
-                when (state) {
-                    is MainUiState.Loading -> {
-                        binding.btnConnect.isEnabled = false
-                        binding.txtStatus.text = "Conectando con Arduino..."
-                        binding.viewStatusDot.setBackgroundResource(R.drawable.circle_gray)
+                if (state is MainUiState.Success) {
+                    val moving = state.isMovementDetected
+                    if (moving && !lastMovement && userPreferences.settings.first().notificationsEnabled) {
+                        NotificationHelper.showMovementAlert(this@MainActivity)
                     }
-                    is MainUiState.Success -> {
-                        binding.btnConnect.isEnabled = true
-
-                        if (state.isConnected) {
-                            binding.txtStatus.text = getString(R.string.status_connected)
-                            binding.btnConnect.text = getString(R.string.disconnect_bluetooth)
-                            binding.viewStatusDot.setBackgroundResource(R.drawable.circle_green)
-                        } else {
-                            binding.txtStatus.text = getString(R.string.status_disconnected)
-                            binding.btnConnect.text = getString(R.string.connect_bluetooth)
-                            binding.viewStatusDot.setBackgroundResource(R.drawable.circle_red)
-                        }
-
-                        binding.txtTemperature.text = state.temperature
-                        binding.txtHumidity.text = state.humidity
-
-                        if (state.isMovementDetected && state.isConnected) {
-                            binding.txtPIRStatus.text = "Movimiento detectado"
-                            binding.viewLedPIR.setBackgroundResource(R.drawable.circle_green)
-                        } else {
-                            binding.txtPIRStatus.text = getString(R.string.status_no_movement)
-                            binding.viewLedPIR.setBackgroundResource(R.drawable.circle_gray)
-                        }
-
-                        // Auto Mode UI
-                        binding.switchAutoMode.isChecked = state.isAutoMode
-                        binding.txtAutoStatus.text = if (state.isAutoMode) {
-                            "El sistema decide cuándo encenderse"
-                        } else {
-                            "Modo manual activado"
-                        }
-
-                        binding.switchVentilation.isChecked = state.isVentOpen
-                        binding.txtServoStatus.text = if (state.isVentOpen) "Abierto" else "Cerrado"
-                    }
-                    is MainUiState.Error -> {
-                        binding.btnConnect.isEnabled = true
-                        binding.viewStatusDot.setBackgroundResource(R.drawable.circle_red)
-                        Toast.makeText(this@MainActivity, state.message, Toast.LENGTH_LONG).show()
-                    }
+                    lastMovement = moving
                 }
             }
         }

@@ -14,7 +14,11 @@
         android:layout_marginTop="32dp"
         android:padding="8dp"
         android:text="Saltar"
-        android:textColor="#757575"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:stateListAnimator="@animator/press_scale"
+        android:textColor="@color/primary"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,14 +52,14 @@
             android:layout_marginBottom="24dp"
             android:orientation="horizontal" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSiguiente"
+            style="@style/Widget.AeroSmart.Button"
+            app:icon="@drawable/ic_arrow_forward"
+            app:iconGravity="textEnd"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:backgroundTint="@color/primary"
-            android:text="Siguiente"
-            android:textSize="16sp"
-            app:cornerRadius="12dp" />
+            android:layout_height="wrap_content"
+            android:text="Siguiente" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

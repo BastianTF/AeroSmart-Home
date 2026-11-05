@@ -1,8 +1,25 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Tema Base con barra de estado negra por defecto -->
+    <!-- Tema AeroSmart: colores del logo aplicados a todos los componentes Material3 -->
     <style name="Base.Theme.VentiladorAmbiental" parent="Theme.Material3.Light.NoActionBar">
-        <item name="android:statusBarColor">#000000</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/primary_dark</item>
+        <item name="colorSecondary">@color/primary</item>
+        <item name="colorSecondaryContainer">@color/primary_container</item>
+        <item name="colorTertiary">@color/sun</item>
+        <item name="colorTertiaryContainer">@color/sun_container</item>
+        <item name="colorOnTertiaryContainer">@color/on_sun</item>
+        <item name="colorError">@color/alert_red</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_dark</item>
+        <item name="colorOnSurfaceVariant">@color/text_gray</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="materialButtonStyle">@style/Widget.AeroSmart.Button</item>
+        <item name="textInputStyle">@style/Widget.AeroSmart.TextInput</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.AeroSmart.BottomSheet</item>
     </style>
 
     <style name="Theme.VentiladorAmbiental" parent="Base.Theme.VentiladorAmbiental" />

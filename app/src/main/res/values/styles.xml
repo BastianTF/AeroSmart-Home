@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Jerarquía de botones AeroSmart:
+     1. Widget.AeroSmart.Button         -> acción principal (relleno azul petróleo)
+     2. Widget.AeroSmart.Button.Tonal   -> acción secundaria (fondo celeste claro)
+     3. Widget.AeroSmart.Button.Danger -> acción destructiva (borde rojo)
+     4. Widget.AeroSmart.Button.Text    -> acción menor (solo texto)
+     Todos se achican al presionar (animator/press_scale). -->
+<resources>
+    <style name="Widget.AeroSmart.Button" parent="Widget.Material3.Button">
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/on_primary</item>
+        <item name="iconTint">@color/on_primary</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconSize">20dp</item>
+        <item name="rippleColor">#33FFFFFF</item>
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+    </style>
+
+    <!-- Versión compacta para usar dentro de tarjetas (ej. Conectar) -->
+    <style name="Widget.AeroSmart.Button.Small">
+        <item name="android:minHeight">44dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="iconSize">18dp</item>
+        <item name="iconPadding">6dp</item>
+    </style>
+
+    <style name="Widget.AeroSmart.Button.Tonal">
+        <item name="backgroundTint">@color/primary_container</item>
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="iconTint">@color/primary_dark</item>
+        <item name="rippleColor">#220E7C9B</item>
+    </style>
+
+    <style name="Widget.AeroSmart.Button.Danger">
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="android:textColor">@color/alert_red</item>
+        <item name="iconTint">@color/alert_red</item>
+        <item name="strokeColor">@color/alert_red</item>
+        <item name="strokeWidth">1.5dp</item>
+        <item name="rippleColor">#22D64541</item>
+    </style>
+
+    <style name="Widget.AeroSmart.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+    </style>
+
+    <!-- Tarjetas que se pueden tocar: se achican al presionar -->
+    <style name="Widget.AeroSmart.Card.Clickable" parent="">
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.AeroSmart.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="boxStrokeColor">@color/primary</item>
+        <item name="hintTextColor">@color/primary</item>
+        <item name="startIconTint">@color/text_gray</item>
+    </style>
+
+    <!-- Píldora detrás del ícono activo de la barra inferior -->
+    <style name="Widget.AeroSmart.NavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/primary_container</item>
+    </style>
+
+    <!-- Botón circular de volver (arriba a la izquierda) -->
+    <style name="Widget.AeroSmart.BackButton" parent="">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:background">@drawable/bg_refresh_btn</item>
+        <item name="android:src">@drawable/ic_arrow_back</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:contentDescription">@string/back</item>
+        <item name="android:elevation">1dp</item>
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+    </style>
+
+    <!-- Chip de día (L, M, X...) para el horario: relleno cuando está elegido -->
+    <style name="Widget.AeroSmart.DayChip" parent="Widget.Material3.Chip.Filter">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:checkable">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="chipMinTouchTargetSize">44dp</item>
+        <item name="chipBackgroundColor">@color/chip_day_bg</item>
+        <item name="android:textColor">@color/chip_day_text</item>
+        <item name="chipStrokeColor">@color/outline</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="chipStartPadding">0dp</item>
+        <item name="chipEndPadding">0dp</item>
+        <item name="textStartPadding">0dp</item>
+        <item name="textEndPadding">0dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+    </style>
+
+    <!-- Botón de grupo segmentado (MaterialButtonToggleGroup): relleno cuando está elegido -->
+    <style name="Widget.AeroSmart.Segmented" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@color/seg_bg</item>
+        <item name="android:textColor">@color/seg_text</item>
+        <item name="iconTint">@color/seg_text</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconSize">18dp</item>
+        <item name="iconPadding">6dp</item>
+        <item name="strokeColor">@color/outline</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+    </style>
+
+    <!-- Tarjeta estándar: borde fino, sin sombra pesada -->
+    <style name="Widget.AeroSmart.Card" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardBackgroundColor">@color/card_bg</item>
+        <item name="strokeColor">@color/outline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <!-- Chip de atajo de horario (no queda marcado, solo rellena las horas) -->
+    <style name="Widget.AeroSmart.PresetChip" parent="Widget.Material3.Chip.Assist">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="chipBackgroundColor">@color/card_bg</item>
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="chipStrokeColor">@color/outline</item>
+        <item name="chipMinTouchTargetSize">44dp</item>
+        <item name="android:stateListAnimator">@animator/press_scale</item>
+    </style>
+
+    <!-- Paneles inferiores con esquinas redondeadas -->
+    <style name="ThemeOverlay.AeroSmart.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.AeroSmart.BottomSheet</item>
+    </style>
+    <style name="Widget.AeroSmart.BottomSheet" parent="Widget.Material3.BottomSheet">
+        <item name="backgroundTint">@color/card_bg</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.AeroSmart.Sheet</item>
+    </style>
+    <style name="ShapeAppearance.AeroSmart.Sheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+</resources>

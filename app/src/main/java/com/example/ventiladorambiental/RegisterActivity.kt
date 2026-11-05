@@ -3,12 +3,16 @@ package com.example.ventiladorambiental
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
-import android.util.Patterns
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
+import com.example.ventiladorambiental.data.RegisterResult
+import com.example.ventiladorambiental.data.UserPreferences
+import com.example.ventiladorambiental.data.UserRepository
 import com.example.ventiladorambiental.databinding.ActivityRegisterBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -16,35 +20,43 @@ class RegisterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableAeroEdgeToEdge()
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySystemBarInsets()
+
+        // Volver a la pantalla anterior
+        binding.btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         binding.btnRegister.setOnClickListener {
             val firstName = binding.etFirstName.text.toString().trim()
             val lastName = binding.etLastName.text.toString().trim()
             val phone = binding.etPhone.text.toString().trim()
             val email = binding.etRegEmail.text.toString().trim()
-            val password = binding.etRegPassword.text.toString().trim()
-            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
+            val password = binding.etRegPassword.text.toString()
+            val confirmPassword = binding.etConfirmPassword.text.toString()
 
             when {
                 firstName.isEmpty() || lastName.isEmpty() -> {
                     Toast.makeText(this, "Ingresa tu nombre y apellido", Toast.LENGTH_SHORT).show()
                 }
-                phone.length < 7 -> {
-                    Toast.makeText(this, "Ingresa un número de celular válido para alertas de emergencia", Toast.LENGTH_LONG).show()
+                !Validators.isValidName("$firstName $lastName") -> {
+                    Toast.makeText(this, "El nombre solo puede tener letras", Toast.LENGTH_SHORT).show()
                 }
-                !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                Validators.normalizeChileanMobile(phone) == null -> {
+                    Toast.makeText(this, "Ingresa un celular válido: +56 9 1234 5678", Toast.LENGTH_LONG).show()
+                }
+                !Validators.isValidEmail(email) -> {
                     Toast.makeText(this, "Ingresa un correo electrónico válido", Toast.LENGTH_SHORT).show()
                 }
-                password.length < 6 -> {
-                    Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show()
+                password.length < 8 -> {
+                    Toast.makeText(this, "La contraseña debe tener al menos 8 caracteres", Toast.LENGTH_SHORT).show()
                 }
                 password != confirmPassword -> {
                     Toast.makeText(this, "Las contraseñas no coinciden. Verifícala.", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
-                    showVerificationCodeDialog(email)
+                    showVerificationCodeDialog("$firstName $lastName", Validators.normalizeChileanMobile(phone)!!, email)
                 }
             }
         }
@@ -53,16 +65,16 @@ class RegisterActivity : AppCompatActivity() {
             finish()
         }
 
-        binding.btnRegGoogle.setOnClickListener { showSocialEmailDialog("Google") }
-        binding.btnRegFacebook.setOnClickListener { showSocialEmailDialog("Facebook") }
-        binding.btnRegApple.setOnClickListener { showSocialEmailDialog("Apple") }
+        binding.btnRegGoogle.setOnClickListener { showComingSoon("Google") }
+        binding.btnRegFacebook.setOnClickListener { showComingSoon("Facebook") }
+        binding.btnRegApple.setOnClickListener { showComingSoon("Apple") }
     }
 
-    private fun showVerificationCodeDialog(email: String) {
+    private fun showVerificationCodeDialog(name: String, phone: String, email: String) {
         val simulatedCode = "1234"
         Toast.makeText(this, "Código enviado a $email (Simulado: $simulatedCode)", Toast.LENGTH_LONG).show()
 
-        val builder = AlertDialog.Builder(this)
+        val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle("Verificación de Correo Oficial")
         builder.setMessage("Hemos enviado un código de verificación de 4 dígitos a $email para activar las alertas y confirmar tu cuenta.\n\n(Código de prueba: 1234)")
 
@@ -74,10 +86,24 @@ class RegisterActivity : AppCompatActivity() {
         builder.setPositiveButton("Verificar y Registrar") { _, _ ->
             val enteredCode = input.text.toString().trim()
             if (enteredCode == simulatedCode) {
-                Toast.makeText(this, "¡Correo verificado y cuenta creada con éxito!", Toast.LENGTH_LONG).show()
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finishAffinity()
+                lifecycleScope.launch {
+                    val result = UserRepository(this@RegisterActivity)
+                        .register(name, email, phone, binding.etRegPassword.text.toString().toCharArray())
+                    when (result) {
+                        RegisterResult.OK -> {
+                            val prefs = UserPreferences(this@RegisterActivity)
+                            prefs.saveProfile(name, phone)
+                            prefs.saveEmail(email)
+                            Toast.makeText(this@RegisterActivity, "¡Cuenta creada! Bienvenido/a", Toast.LENGTH_LONG).show()
+                            startActivity(Intent(this@RegisterActivity, MainActivity::class.java))
+                            finishAffinity()
+                        }
+                        RegisterResult.EMAIL_EXISTS ->
+                            Toast.makeText(this@RegisterActivity, "Ese correo ya tiene una cuenta. Inicia sesión.", Toast.LENGTH_LONG).show()
+                        RegisterResult.ERROR ->
+                            Toast.makeText(this@RegisterActivity, "No se pudo crear la cuenta. Inténtalo de nuevo.", Toast.LENGTH_LONG).show()
+                    }
+                }
             } else {
                 Toast.makeText(this, "Código incorrecto. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show()
             }
@@ -86,28 +112,11 @@ class RegisterActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private fun showSocialEmailDialog(provider: String) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Vincular cuenta con $provider")
-        builder.setMessage("Ingresa tu correo electrónico oficial de $provider:")
-
-        val input = EditText(this)
-        input.hint = "correo@${provider.lowercase()}.com"
-        input.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-        builder.setView(input)
-
-        builder.setPositiveButton("Continuar") { _, _ ->
-            val email = input.text.toString().trim()
-            if (email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "¡Autenticado con éxito en $provider ($email)!", Toast.LENGTH_LONG).show()
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finishAffinity()
-            } else {
-                Toast.makeText(this, "Correo de $provider no válido", Toast.LENGTH_SHORT).show()
-            }
-        }
-        builder.setNegativeButton("Cancelar", null)
-        builder.show()
+    private fun showComingSoon(provider: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Registro con $provider")
+            .setMessage("El registro con $provider estará disponible próximamente. Por ahora crea tu cuenta con el formulario.")
+            .setPositiveButton("Entendido", null)
+            .show()
     }
 }

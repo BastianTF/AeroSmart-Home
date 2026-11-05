@@ -1,6 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
+}
+
+// Datos del enlace con la placa: se leen de local.properties (no se sube al repositorio).
+//   aerosmart.linkKey=<32 o 64 caracteres hexadecimales, la misma clave de arduino/AeroSmartHome/secrets.h>
+//   aerosmart.host=192.168.4.1   (opcional)
+//   aerosmart.port=3333          (opcional)
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
 }
 
 android {
@@ -17,6 +28,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "LINK_KEY_HEX", "\"${localProps.getProperty("aerosmart.linkKey", "")}\"")
+        buildConfigField("String", "DEVICE_HOST", "\"${localProps.getProperty("aerosmart.host", "192.168.4.1")}\"")
+        buildConfigField("int", "DEVICE_PORT", localProps.getProperty("aerosmart.port", "3333"))
     }
 
     buildTypes {
@@ -28,6 +43,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

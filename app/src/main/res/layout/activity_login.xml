@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F8F9FA">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,7 +28,7 @@
             android:text="¡Bienvenido de nuevo!"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="#212121"
+            android:textColor="@color/text_dark"
             android:layout_marginTop="16dp"/>
 
         <TextView
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:text="Inicia sesión para gestionar tu hogar"
             android:textSize="14sp"
-            android:textColor="#757575"
+            android:textColor="@color/text_gray"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="32dp"/>
 
@@ -45,7 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Correo electrónico"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             android:layout_marginBottom="16dp"
             app:startIconDrawable="@android:drawable/ic_dialog_email">
 
@@ -61,7 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Contraseña"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.AeroSmart.TextInput"
             app:passwordToggleEnabled="true"
             app:startIconDrawable="@android:drawable/ic_lock_lock">
 
@@ -78,25 +78,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="¿Olvidaste tu contraseña?"
-            android:textColor="#1976D2"
+            android:textColor="@color/primary"
             android:textSize="13sp"
             android:textStyle="bold"
             android:layout_gravity="end"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="24dp"
             android:clickable="true"
+            android:stateListAnimator="@animator/press_scale"
             android:focusable="true"/>
 
         <!-- BOTÓN ENTRAR -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogin"
+            style="@style/Widget.AeroSmart.Button"
+            app:icon="@drawable/ic_login"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:text="Iniciar Sesión"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            android:backgroundTint="#1976D2"
             android:layout_marginBottom="24dp"/>
 
         <!-- SEPARADOR "O CONTINÚA CON" -->
@@ -106,9 +105,9 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginBottom="24dp">
-            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="#E0E0E0"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" O continúa con " android:textColor="#9E9E9E" android:textSize="12sp"/>
-            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="#E0E0E0"/>
+            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="@color/outline"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" O continúa con " android:textColor="@color/text_hint" android:textSize="12sp"/>
+            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="@color/outline"/>
         </LinearLayout>
 
         <!-- BOTONES DE LOGINS SOCIALES EN HORIZONTAL -->
@@ -128,6 +127,7 @@
                 app:cardCornerRadius="30dp"
                 app:cardElevation="2dp"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true">
                 <ImageView
                     android:layout_width="28dp"
@@ -146,6 +146,7 @@
                 app:cardCornerRadius="30dp"
                 app:cardElevation="2dp"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true">
                 <ImageView
                     android:layout_width="28dp"
@@ -164,6 +165,7 @@
                 app:cardCornerRadius="30dp"
                 app:cardElevation="2dp"
                 android:clickable="true"
+                android:stateListAnimator="@animator/press_scale"
                 android:focusable="true">
                 <ImageView
                     android:layout_width="28dp"
@@ -180,8 +182,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="16dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="¿No tienes una cuenta? " android:textColor="#757575"/>
-            <TextView android:id="@+id/txtRegisterLink" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Regístrate" android:textColor="#1976D2" android:textStyle="bold" android:clickable="true" android:focusable="true"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="¿No tienes una cuenta? " android:textColor="@color/text_gray"/>
+            <TextView android:id="@+id/txtRegisterLink" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Regístrate" android:textColor="@color/primary" android:textStyle="bold" android:padding="4dp" android:background="?attr/selectableItemBackgroundBorderless" android:clickable="true" android:stateListAnimator="@animator/press_scale" android:focusable="true"/>
         </LinearLayout>
 
     </LinearLayout>

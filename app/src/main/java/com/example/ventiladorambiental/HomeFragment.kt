@@ -2,16 +2,16 @@ package com.example.ventiladorambiental
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.ventiladorambiental.R
+import com.example.ventiladorambiental.data.UserPreferences
 import com.example.ventiladorambiental.databinding.FragmentHomeBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -22,9 +22,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -33,132 +31,85 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
         observeUiState()
+        observeName()
+        UiFx.animateChildrenIn(binding.contentLayout)
     }
 
     private fun setupListeners() {
-        binding.btnConnect.setOnClickListener {
-            val currentState = viewModel.uiState.value
-            if (currentState is MainUiState.Success && currentState.isConnected) {
-                viewModel.disconnectDevice()
+        binding.btnConnect.setOnClickListener { ConnectionUi.onConnectClick(requireContext(), viewModel) }
+
+        binding.btnRefresh.setOnClickListener {
+            it.animate().rotationBy(360f).setDuration(500)
+                .setInterpolator(AccelerateDecelerateInterpolator()).start()
+            if (isConnected()) {
+                viewModel.refreshSensors()
+                Toast.makeText(requireContext(), "Datos de sensores actualizados", Toast.LENGTH_SHORT).show()
             } else {
-                showBluetoothDevicesDialog()
+                Toast.makeText(requireContext(), "Conecta el dispositivo primero", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.btnRefresh.setOnClickListener {
-            viewModel.refreshSensors()
-            Toast.makeText(requireContext(), "Datos de sensores actualizados", Toast.LENGTH_SHORT).show()
-        }
-
         binding.cardPIR.setOnClickListener {
-            val currentState = viewModel.uiState.value
-            if (currentState is MainUiState.Success && currentState.isConnected) {
-                viewModel.togglePIRMovement()
-                val msg = if (currentState.isMovementDetected) "Simulación PIR: Sin movimiento" else "Simulación PIR: Movimiento detectado"
-                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+            if (isConnected()) {
+                if (!viewModel.togglePIRMovement()) {
+                    Toast.makeText(requireContext(), "El sensor PIR de la placa envía su estado real", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(requireContext(), "Conecta el dispositivo para simular presencia PIR", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.btnVentToggle.setOnClickListener {
-            val currentState = viewModel.uiState.value
-            if (currentState is MainUiState.Success) {
-                viewModel.toggleVentilation(!currentState.isVentOpen)
-                val status = if (!currentState.isVentOpen) "Abierta" else "Cerrada"
-                Toast.makeText(requireContext(), "Compuerta " + status, Toast.LENGTH_SHORT).show()
-            }
+            val state = viewModel.uiState.value as? MainUiState.Success ?: return@setOnClickListener
+            viewModel.toggleVentilation(!state.isVentOpen)
+            Toast.makeText(requireContext(), if (!state.isVentOpen) "Compuerta abierta" else "Compuerta cerrada", Toast.LENGTH_SHORT).show()
         }
 
         binding.profileAvatarCard.setOnClickListener {
             startActivity(Intent(requireContext(), ProfileActivity::class.java))
         }
 
-        binding.switchAutoMode.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setAutoMode(isChecked)
+        binding.switchAutoMode.setOnCheckedChangeListener { button, isChecked ->
+            if (button.isPressed) viewModel.setAutoMode(isChecked)
         }
     }
 
-    private fun showBluetoothDevicesDialog() {
-        val devices = arrayOf(
-            "AeroSmart-ESP32 (Bluetooth BLE)",
-            "HC-05 (Bluetooth Classic)",
-            "Arduino Wi-Fi / MQTT Broker"
-        )
-        AlertDialog.Builder(requireContext())
-            .setTitle("Vincular con Hardware Arduino")
-            .setItems(devices) { _, which ->
-                Toast.makeText(requireContext(), "Vinculando con " + devices[which] + "...", Toast.LENGTH_SHORT).show()
-                viewModel.connectDevice()
+    private fun isConnected() = (viewModel.uiState.value as? MainUiState.Success)?.isConnected == true
+
+    private fun observeName() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            UserPreferences(requireContext()).profile.collectLatest { profile ->
+                binding.txtGreeting.text = UiFx.greeting(profile.name)
             }
-            .setNegativeButton("Cancelar", null)
-            .show()
+        }
     }
 
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
-                when (state) {
-                    is MainUiState.Loading -> {
-                        binding.btnConnect.isEnabled = false
-                        setStatusText("Conectando con Arduino...", "#757575")
-                        binding.viewStatusDot.setBackgroundResource(R.drawable.circle_gray)
-                    }
-                    is MainUiState.Success -> {
-                        binding.btnConnect.isEnabled = true
-                        if (state.isConnected) {
-                            setStatusText("Conectado", "#4CAF50")
-                            binding.btnConnect.text = getString(R.string.disconnect_bluetooth)
-                            binding.viewStatusDot.setBackgroundResource(R.drawable.circle_green)
-                        } else {
-                            setStatusText("Desconectado", "#E53935")
-                            binding.btnConnect.text = getString(R.string.connect)
-                            binding.viewStatusDot.setBackgroundResource(R.drawable.circle_red)
-                        }
+                ConnectionUi.render(state, binding.viewStatusDot, binding.txtStatus, binding.txtStatusHint, binding.btnConnect)
+                if (state !is MainUiState.Success) return@collectLatest
 
-                        binding.txtTemperature.text = state.temperature
-                        binding.txtHumidity.text = state.humidity
+                binding.txtTemperature.text = state.temperature
+                binding.txtHumidity.text = state.humidity
+                binding.txtComfort.text = state.comfortLabel
+                binding.gaugeHumidity.setProgressCompat(state.humidityPct ?: 0, true)
+                binding.txtLastUpdate.text = state.lastUpdate?.let { "Actualizado a las $it" } ?: "Sin lecturas todavía"
 
-                        if (state.isMovementDetected && state.isConnected) {
-                            binding.txtPIRStatus.text = "Estado: Movimiento detectado"
-                            binding.viewLedPIR.setBackgroundResource(R.drawable.circle_green)
-                        } else {
-                            binding.txtPIRStatus.text = getString(R.string.status_no_movement)
-                            binding.viewLedPIR.setBackgroundResource(R.drawable.circle_gray)
-                        }
+                binding.txtPIRStatus.text = if (state.isMovementDetected) "Movimiento detectado" else "Sin movimiento"
+                binding.viewLedPIR.setBackgroundResource(
+                    if (state.isMovementDetected) R.drawable.circle_green else R.drawable.circle_gray
+                )
 
-                        binding.switchAutoMode.isChecked = state.isAutoMode
-                        binding.txtAutoStatus.text = if (state.isAutoMode) {
-                            getString(R.string.auto_mode_desc)
-                        } else {
-                            "Modo manual activado"
-                        }
+                if (binding.switchAutoMode.isChecked != state.isAutoMode) binding.switchAutoMode.isChecked = state.isAutoMode
+                binding.txtAutoStatus.text = if (state.isAutoMode) getString(R.string.auto_mode_desc) else "Modo manual activado"
 
-                        binding.txtServoStatus.text = if (state.isVentOpen) {
-                            getString(R.string.status_open)
-                        } else {
-                            getString(R.string.status_closed)
-                        }
-
-                        if (state.isVentOpen) {
-                            binding.btnVentToggle.setCardBackgroundColor(android.graphics.Color.parseColor("#E8F1FF"))
-                        } else {
-                            binding.btnVentToggle.setCardBackgroundColor(android.graphics.Color.parseColor("#F5F7FA"))
-                        }
-                    }
-                    is MainUiState.Error -> {
-                        binding.btnConnect.isEnabled = true
-                        binding.viewStatusDot.setBackgroundResource(R.drawable.circle_red)
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                    }
-                }
+                binding.txtServoStatus.text = if (state.isVentOpen) "Abierta" else "Cerrada"
+                binding.btnVentToggle.setCardBackgroundColor(
+                    ContextCompat.getColor(requireContext(), if (state.isVentOpen) R.color.primary_container else R.color.card_bg)
+                )
             }
         }
-    }
-
-    private fun setStatusText(statusText: String, colorHex: String) {
-        val htmlText = "Estado: <font color='" + colorHex + "'><b>" + statusText + "</b></font>"
-        binding.txtStatus.text = Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
     }
 
     override fun onDestroyView() {

@@ -1,108 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Pestaña "Automatización". Generado con la estructura común: encabezado + tarjetas. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
+    android:clipToPadding="false"
     android:fillViewport="true">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
+        android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:paddingBottom="24dp">
 
-        <RelativeLayout
+        <!-- ENCABEZADO -->
+        <LinearLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="12dp"
-            app:layout_constraintTop_toTopOf="parent">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="12dp"
+            android:paddingBottom="8dp">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_toStartOf="@id/profileAvatarCard"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:contentDescription="@string/app_name"
-                    android:src="@drawable/logo_ventilador" />
-
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical">
+                    android:text="Reglas y horario"
+                    android:textColor="@color/text_gray"
+                    android:textSize="13sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/app_name"
-                        android:textColor="@color/text_dark"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/app_subtitle"
-                        android:textColor="@color/text_gray"
-                        android:textSize="12sp" />
-                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Automatización"
+                    android:textColor="@color/text_dark"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/profileAvatarCard"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
+                style="@style/Widget.AeroSmart.Card"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp">
+                android:stateListAnimator="@animator/press_scale"
+                app:cardCornerRadius="22dp">
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="Perfil"
-                    android:scaleType="centerCrop"
+                    android:padding="9dp"
                     android:src="@drawable/ic_profile_placeholder" />
-            </androidx.cardview.widget.CardView>
-        </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txtAutoTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:text="Control Automático"
-            android:textColor="@color/text_dark"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/headerLayout" />
-
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardAutoStatus"
+            style="@style/Widget.AeroSmart.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintTop_toBottomOf="@id/txtAutoTitle">
+            android:layout_marginTop="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -110,162 +81,127 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <View
                         android:id="@+id/dotAuto"
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="8dp"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_marginEnd="10dp"
                         android:background="@drawable/circle_green" />
 
                     <TextView
                         android:id="@+id/txtAutoStatusHeader"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/dotAuto"
-                        android:text="Estado: Activado"
+                        android:layout_weight="1"
+                        android:text="Automático activado"
                         android:textColor="@color/text_dark"
-                        android:textSize="15sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/switchAutoMain"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:checked="true" />
-                </RelativeLayout>
+                        android:checked="true"
+                        android:contentDescription="Modo automático" />
+                </LinearLayout>
 
                 <TextView
+                    android:id="@+id/txtAutoDesc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="El sistema decidirá cuándo encenderse"
+                    android:layout_marginTop="4dp"
+                    android:text="La compuerta se abre sola según tus reglas y horario."
                     android:textColor="@color/text_gray"
-                    android:textSize="12sp" />
-
-                <LinearLayout
+                    android:textSize="13sp" />
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/toggleAutoMode"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_segmented_container"
-                    android:orientation="horizontal"
-                    android:padding="4dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:checkedButton="@id/btnSegAuto"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
 
-                    <LinearLayout
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSegAuto"
+                        style="@style/Widget.AeroSmart.Segmented"
+                        app:icon="@drawable/ic_robot"
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_segmented_selected"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:orientation="horizontal">
+                        android:text="Automático" />
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginEnd="6dp"
-                            android:src="@drawable/ic_robot" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Automático"
-                            android:textColor="@color/primary"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSegManual"
+                        style="@style/Widget.AeroSmart.Segmented"
+                        app:icon="@drawable/ic_hand"
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_segmented_unselected"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginEnd="6dp"
-                            android:src="@drawable/ic_hand" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Manual"
-                            android:textColor="@color/text_gray"
-                            android:textSize="13sp" />
-                    </LinearLayout>
-                </LinearLayout>
+                        android:text="Manual" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardRules"
-            android:layout_width="match_parent"
+        </com.google.android.material.card.MaterialCardView>
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintTop_toBottomOf="@id/cardAutoStatus">
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:text="Reglas de activación"
+            android:textColor="@color/text_dark"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRules"
+            style="@style/Widget.AeroSmart.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:text="Reglas de Activación"
-                    android:textColor="@color/text_dark"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
                 <LinearLayout
                     android:id="@+id/ruleTemp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
+                    android:minHeight="64dp"
                     android:orientation="horizontal"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp">
-
+                    android:paddingStart="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="10dp"
+                    android:stateListAnimator="@animator/press_scale">
                     <FrameLayout
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="12dp"
                         android:background="@drawable/bg_circle_temp">
 
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
+                            android:importantForAccessibility="no"
                             android:src="@drawable/ic_temperature" />
                     </FrameLayout>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
@@ -274,57 +210,61 @@
                             android:layout_height="wrap_content"
                             android:text="Temperatura"
                             android:textColor="@color/text_dark"
-                            android:textSize="14sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/txtRuleTemp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Se activa según el rango definido"
+                            android:text="Abre desde 26 °C"
                             android:textColor="@color/text_gray"
-                            android:textSize="12sp" />
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_chevron_right" />
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:background="#EEEEEE" />
-
+                    android:layout_marginStart="68dp"
+                    android:background="@color/outline" />
                 <LinearLayout
                     android:id="@+id/ruleHumidity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
+                    android:minHeight="64dp"
                     android:orientation="horizontal"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp">
-
+                    android:paddingStart="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="10dp"
+                    android:stateListAnimator="@animator/press_scale">
                     <FrameLayout
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="12dp"
                         android:background="@drawable/bg_circle_humidity">
 
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
+                            android:importantForAccessibility="no"
                             android:src="@drawable/ic_humidity" />
                     </FrameLayout>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
@@ -333,164 +273,185 @@
                             android:layout_height="wrap_content"
                             android:text="Humedad"
                             android:textColor="@color/text_dark"
-                            android:textSize="14sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/txtRuleHumidity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Se activa según el nivel establecido"
+                            android:text="Abre desde 70 %"
                             android:textColor="@color/text_gray"
-                            android:textSize="12sp" />
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_chevron_right" />
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:background="#EEEEEE" />
-
+                    android:layout_marginStart="68dp"
+                    android:background="@color/outline" />
                 <LinearLayout
                     android:id="@+id/rulePIR"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
+                    android:minHeight="64dp"
                     android:orientation="horizontal"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp">
-
+                    android:paddingStart="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="10dp"
+                    android:stateListAnimator="@animator/press_scale">
                     <FrameLayout
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="12dp"
                         android:background="@drawable/bg_circle_pir">
 
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
+                            android:importantForAccessibility="no"
                             android:src="@drawable/ic_walk" />
                     </FrameLayout>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Presencia de Usuarios"
+                            android:text="Presencia"
                             android:textColor="@color/text_dark"
-                            android:textSize="14sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/txtRulePIR"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Se activa cuando se detecta movimiento"
+                            android:text="Solo si hay personas"
                             android:textColor="@color/text_gray"
-                            android:textSize="12sp" />
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_chevron_right" />
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardSchedule"
-            android:layout_width="match_parent"
+        </com.google.android.material.card.MaterialCardView>
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintTop_toBottomOf="@id/cardRules">
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:text="Horario"
+            android:textColor="@color/text_dark"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSchedule"
+            style="@style/Widget.AeroSmart.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:text="Programación Horaria"
-                    android:textColor="@color/text_dark"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
                 <LinearLayout
                     android:id="@+id/itemSchedule"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
+                    android:minHeight="64dp"
                     android:orientation="horizontal"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
-
+                    android:paddingStart="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="10dp"
+                    android:stateListAnimator="@animator/press_scale">
                     <FrameLayout
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="@drawable/bg_circle_temp">
+                        android:background="@drawable/bg_circle_auto">
 
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
+                            android:importantForAccessibility="no"
                             android:src="@drawable/ic_schedule" />
                     </FrameLayout>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Programación Horaria"
+                            android:text="Programación horaria"
                             android:textColor="@color/text_dark"
-                            android:textSize="14sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/txtScheduleDesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Configura los periodos de funcionamiento"
+                            android:text="Toca para elegir horario y días"
                             android:textColor="@color/text_gray"
-                            android:textSize="12sp" />
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
+                        android:importantForAccessibility="no"
                         android:src="@drawable/ic_chevron_right" />
                 </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/txtScheduleState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="68dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/bg_pill_soft"
+                    android:paddingStart="10dp"
+                    android:paddingTop="3dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="3dp"
+                    android:text="Dentro del horario"
+                    android:textColor="@color/primary_dark"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 </ScrollView>

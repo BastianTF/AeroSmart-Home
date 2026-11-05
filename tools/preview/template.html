@@ -1,0 +1,379 @@
+<title>AeroSmart Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Sora:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: barra de pantallas arriba, teléfono a escala al centro, avisos del build abajo */
+:root {
+  --bg: #EEF2F6; --surface: #FFFFFF; --ink: #17212B; --muted: #5B6875; --line: #D5DDE5;
+  --accent: #1E88E5; --warn: #B45309; --warn-bg: #FEF3C7;
+  --display: 'Sora', 'Segoe UI', system-ui, sans-serif;
+  --body: 'Roboto', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E141A; --surface: #17202A; --ink: #E6EDF3; --muted: #94A3B3; --line: #2A3643;
+  --accent: #5AAEF2; --warn: #FBBF24; --warn-bg: #3A2C0A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E141A; --surface: #17202A; --ink: #E6EDF3; --muted: #94A3B3; --line: #2A3643;
+  --accent: #5AAEF2; --warn: #FBBF24; --warn-bg: #3A2C0A; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); }
+.page { max-width: 980px; margin: 0 auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+header h1 { font-family: var(--display); font-weight: 600; font-size: 20px; margin: 0; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; max-width: 62ch; }
+.picker { display: grid; gap: 8px; }
+.group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.group-label { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); width: 100%; }
+.chip { font: 500 13px var(--body); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip:focus-visible, .tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .stage { grid-template-columns: minmax(0,1fr); } }
+.phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+.phone-scale { width: calc(var(--sw, 360px) + 20px); max-width: 100%; }
+.phone { --sw: 360px; --sh: 780px; width: calc(var(--sw) + 20px); height: calc(var(--sh) + 20px); box-sizing: border-box; transform-origin: top left; border-radius: 40px; background: #111; padding: 10px; box-shadow: 0 20px 50px rgba(15,23,42,.25); }
+.screen { position: relative; width: var(--sw); height: var(--sh); border-radius: 30px; overflow: hidden; background: #F3F7F9; display: flex; flex-direction: column; font-family: var(--body); -webkit-font-smoothing: antialiased; }
+.statusbar { position: absolute; inset: 0 0 auto; height: 28px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font: 500 13px var(--body); color: #16252E; z-index: 5; pointer-events: none; }
+.statusbar.classic { position: relative; background: #000; flex: none; }
+.statusbar .icons { display: flex; gap: 5px; align-items: center; }
+.gesture { position: absolute; bottom: 6px; left: 50%; width: 108px; height: 4px; margin-left: -54px; border-radius: 4px; background: rgba(0,0,0,.35); z-index: 5; pointer-events: none; }
+.app { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tool { font: 500 12px var(--body); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.tool[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+aside { display: grid; gap: 12px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; min-width: 0; }
+.panel h2 { font: 600 13px var(--display); margin: 0; }
+.panel p, .panel li { font-size: 12.5px; line-height: 1.45; color: var(--muted); margin: 0; }
+.panel ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; }
+.panel code, .info code { font: 12px var(--mono); color: var(--ink); overflow-wrap: anywhere; }
+.warn { background: var(--warn-bg); border-color: transparent; }
+.warn h2, .warn li { color: var(--warn); }
+.info { font: 12px var(--mono); color: var(--muted); text-align: center; }
+
+/* ---- vistas Android ---- */
+.screen .v { box-sizing: border-box; position: relative; min-width: 0; }
+.screen .txt { white-space: pre-wrap; overflow-wrap: break-word; }
+.screen .clamp .txt { display: -webkit-box; -webkit-line-clamp: var(--lines); -webkit-box-orient: vertical; overflow: hidden; }
+.screen .clickable { cursor: pointer; }
+.screen .clickable:active { filter: brightness(.95); }
+.screen .press { transition: transform .18s cubic-bezier(.34,1.56,.64,1), filter .15s, box-shadow .15s; will-change: transform; }
+.screen .press.pressed { transform: scale(.96); transition-duration: .09s; }
+.screen .btn.pressed, .screen .clickable.pressed { filter: brightness(.93); }
+.screen .btn { transition: transform .18s cubic-bezier(.34,1.56,.64,1), filter .15s; }
+@media (hover: hover) { .screen .btn:hover { filter: brightness(1.06); } .screen .press.v-CardView:hover { filter: brightness(.985); } }
+.screen .bnav-item .bnav-ic { transition: background-color .2s, transform .2s cubic-bezier(.34,1.56,.64,1); }
+.screen .bnav-item:active .bnav-ic { transform: scale(.9); }
+.screen .btn { display: flex; flex-direction: row !important; align-items: center; justify-content: center; gap: 8px; letter-spacing: .1px; overflow: hidden; }
+.screen .btn-icon { width: 18px; height: 18px; display: inline-flex; flex: none; }
+.screen .img-box { width: 100%; height: 100%; display: flex; }
+.screen .v-ImageView img, .screen .v-ImageButton img { width: 100%; height: 100%; display: block; }
+.screen .placeholder { display: flex; align-items: center; justify-content: center; border: 1px dashed #b0bec5; color: #78909c; font-size: 11px; min-height: 24px; }
+.screen .til-box { position: relative; display: flex; align-items: center; height: 56px; border: 1px solid rgba(0,0,0,.38); border-radius: 4px; background: transparent; }
+.screen .til-box:focus-within { border: 2px solid var(--focus, var(--tp, #6750A4)); }
+.screen .til-box input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; font: 16px var(--body); color: #1D1B20; padding: 0 16px; }
+.screen .til-box.has-start input { padding-left: 4px; }
+.screen .til-icon { width: 24px; height: 24px; margin-left: 12px; margin-right: 12px; display: inline-flex; flex: none; }
+.screen .til-end { width: 48px; height: 48px; border: 0; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.screen .til-label { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #616161; pointer-events: none; transition: all .15s; background: transparent; padding: 0 4px; margin-left: -4px; }
+.screen .til-box.has-start .til-label { left: 52px; }
+.screen .til-box:focus-within .til-label, .screen .til-box input:not(:placeholder-shown) ~ .til-label { top: 0; left: 12px; font-size: 12px; color: var(--focus, var(--tp, #6750A4)); background: var(--til-bg, #F3F7F9); }
+.screen .sw-input { appearance: none; -webkit-appearance: none; width: 36px; height: 14px; border-radius: 7px; background: rgba(0,0,0,.38); position: relative; cursor: pointer; margin: 0 4px; flex: none; }
+.screen .sw-input::after { content: ""; position: absolute; top: -3px; left: -2px; width: 20px; height: 20px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
+.screen .sw-input:checked { background: color-mix(in srgb, var(--on) 50%, transparent); }
+.screen .sw-input:checked::after { transform: translateX(20px); background: var(--on); }
+.screen .progress { border: 4px solid #E0E0E0; border-top-color: #6750A4; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .screen .progress { animation: none; } .screen .sw-input::after { transition: none; } }
+.bnav { flex: none; display: flex; min-height: 80px; background: #F3EDF7; box-sizing: border-box; padding-top: 12px; padding-bottom: 12px; }
+.bnav-item { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 500 12px var(--body); cursor: pointer; }
+.bnav-ic { width: 64px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.bnav-ic svg { width: 24px; height: 24px; }
+.bnav-item.on .bnav-ic { background: color-mix(in srgb, var(--ind) 16%, transparent); }
+.splash { flex: 1; display: flex; align-items: center; justify-content: center; background: #F3F7F9; }
+.splash img { width: 160px; height: 160px; object-fit: contain; }
+.outline .v { outline: 1px dashed rgba(229,57,53,.55); outline-offset: -1px; }
+.sim-toast { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); max-width: calc(100% - 48px); width: max-content; background: #2B3A42; color: #fff; font: 14px var(--body); padding: 10px 16px; border-radius: 20px; z-index: 20; text-align: center; animation: toastIn .2s ease-out; transition: opacity .3s; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+.sim-toast.out { opacity: 0; }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } }
+.sim-scrim { position: absolute; inset: 0; background: rgba(22,37,46,.42); display: flex; align-items: center; justify-content: center; z-index: 30; animation: fadeIn .15s; transition: opacity .15s; }
+.sim-scrim.out { opacity: 0; }
+@keyframes fadeIn { from { opacity: 0; } }
+.sim-dialog { width: min(312px, calc(100% - 48px)); box-sizing: border-box; background: #fff; border-radius: 26px; padding: 24px 24px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: popIn .2s cubic-bezier(.34,1.56,.64,1); font-family: var(--body); }
+@keyframes popIn { from { transform: scale(.9); opacity: 0; } }
+.sim-dialog h3 { margin: 0 0 12px; font: 500 22px/1.25 var(--body); color: #16252E; }
+.sim-dialog p { margin: 0 0 16px; font-size: 14px; line-height: 1.45; color: #5B6B74; }
+.sim-items { display: grid; margin: 0 -24px 8px; }
+.sim-items button { text-align: left; border: 0; background: none; padding: 14px 24px; font: 15px var(--body); color: #16252E; cursor: pointer; }
+.sim-items button:active { background: #D8F1F8; }
+.sim-content { margin: 0 -24px 12px; }
+.screen .chip-v { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 36px; padding: 0 12px; border-radius: 10px; box-sizing: border-box; font-family: var(--body); user-select: none; }
+.screen .time-overlay { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; margin: 0; font-size: 16px; }
+.screen .time-overlay::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+.sim-dialog { max-height: 90%; overflow-y: auto; }
+.sim-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.sim-actions button { border: 0; background: none; color: #0E7C9B; font: 600 14px var(--body); padding: 10px 14px; border-radius: 20px; cursor: pointer; }
+.sim-actions button:active { background: #D8F1F8; }
+@media (prefers-reduced-motion: reduce) { .sim-dialog, .sim-toast, .sim-scrim { animation: none; } }
+
+/* ---- Material 3: interruptor, deslizador, ripple, ayuda de campos ---- */
+.screen .sw-input.m3 { width: 52px; height: 32px; border-radius: 16px; background: #E2EEF2; box-shadow: inset 0 0 0 2px #8A9AA3; margin: 0; transition: background-color .2s, box-shadow .2s; }
+.screen .sw-input.m3::after { top: 8px; left: 8px; width: 16px; height: 16px; background: #8A9AA3; box-shadow: none; transition: transform .22s cubic-bezier(.34,1.56,.64,1), width .2s, height .2s, top .2s, left .2s, background-color .2s; }
+.screen .sw-input.m3:checked { background: var(--tp); box-shadow: none; }
+.screen .sw-input.m3:checked::after { top: 4px; left: 4px; width: 24px; height: 24px; transform: translateX(20px); background: #fff; }
+.screen .sw-input.m3:active::after { width: 28px; height: 28px; top: 2px; left: 2px; }
+.screen .slider { -webkit-appearance: none; appearance: none; height: 44px; background: transparent; cursor: pointer; margin: 0; }
+.screen .slider::-webkit-slider-runnable-track { height: 16px; border-radius: 8px; background: linear-gradient(to right, var(--tp) var(--pct, 50%), #D8F1F8 var(--pct, 50%)); }
+.screen .slider::-moz-range-track { height: 16px; border-radius: 8px; background: #D8F1F8; }
+.screen .slider::-moz-range-progress { height: 16px; border-radius: 8px; background: var(--tp); }
+.screen .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 4px; height: 40px; margin-top: -12px; border-radius: 2px; background: var(--tp); box-shadow: 0 0 0 4px #fff; }
+.screen .slider::-moz-range-thumb { width: 4px; height: 40px; border: 0; border-radius: 2px; background: var(--tp); box-shadow: 0 0 0 4px #fff; }
+.screen .ripple { transition: background-color .15s; }
+.screen .ripple.pressed { background-color: rgba(14,124,155,.08) !important; }
+.screen .til-helper { font-size: 12px; color: #5B6B74; margin: 4px 16px 0; line-height: 1.3; }
+.screen .til-helper.error, .screen .til-box.error .til-label { color: #D64541 !important; }
+.screen .til-box.error { border: 2px solid #D64541 !important; }
+.screen .til-box { border-radius: 14px; border-color: #D3DEE3; }
+.screen .btn[aria-pressed] { transition: background-color .2s, color .2s, transform .18s cubic-bezier(.34,1.56,.64,1); }
+.screen .spark svg { display: block; width: 100%; height: 100%; }
+.screen .cpi { transition: stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1); }
+/* Entrada de tarjetas y cambio de pestaña (UiFx.animateChildrenIn y PageTransformer) */
+.screen .enter > * { animation: cardIn .38s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(14px); } }
+.screen .fan-spin { animation: spin var(--spin, 1.2s) linear infinite; }
+@media (prefers-reduced-motion: reduce) { .screen .enter > * { animation: none; } .screen .fan-spin { animation: none; } }
+/* Panel inferior (BottomSheetDialog) */
+.sim-sheet-scrim { position: absolute; inset: 0; background: rgba(22,37,46,.42); z-index: 30; display: flex; align-items: flex-end; animation: fadeIn .2s; transition: opacity .2s; }
+.sim-sheet-scrim.out { opacity: 0; }
+.sim-sheet { width: 100%; max-height: 88%; overflow-y: auto; background: #fff; border-radius: 28px 28px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,.18); animation: sheetUp .32s cubic-bezier(.2,.8,.2,1); transition: transform .22s ease-in; padding-bottom: 16px; }
+.sim-sheet-scrim.out .sim-sheet { transform: translateY(100%); }
+@keyframes sheetUp { from { transform: translateY(100%); } }
+.sim-sheet > .v { --til-bg: #fff; }
+/* Selector de hora tipo rueda */
+.wheel-wrap { display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; height: 200px; margin: 4px 0 8px; }
+.wheel-wrap::before { content: ""; position: absolute; left: 24px; right: 24px; top: 50%; height: 48px; margin-top: -24px; border-radius: 14px; background: #D8F1F8; z-index: 0; }
+.wheel { position: relative; z-index: 1; width: 84px; height: 200px; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; -webkit-mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); overscroll-behavior: contain; }
+.wheel::-webkit-scrollbar { display: none; }
+.wheel div { height: 48px; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; font: 500 28px var(--body); color: #8A9AA3; font-variant-numeric: tabular-nums; transition: color .15s, transform .15s; }
+.wheel div.sel { color: #075E76; transform: scale(1.12); font-weight: 700; }
+.wheel .pad { height: 76px; scroll-snap-align: none; }
+.wheel-colon { position: relative; z-index: 1; font: 700 28px var(--body); color: #075E76; }
+.sim-dialog .sim-sub { font-size: 13px; color: #5B6B74; margin: -6px 0 6px; text-align: center; }
+/* Tamaños de teléfono */
+.sizes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+.sim-notif { position: absolute; left: 8px; right: 8px; top: 34px; z-index: 40; display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,.97); border-radius: 20px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.18); font-family: var(--body); animation: notifIn .35s cubic-bezier(.2,.8,.2,1); transition: transform .3s, opacity .3s; }
+.sim-notif.out { transform: translateY(-120%); opacity: 0; }
+@keyframes notifIn { from { transform: translateY(-120%); } }
+.sim-notif-ic { width: 36px; height: 36px; border-radius: 50%; background: #0E7C9B; display: flex; align-items: center; justify-content: center; flex: none; }
+.sim-notif-ic svg { width: 20px; height: 20px; }
+.sim-notif b { display: block; font-size: 13px; color: #16252E; }
+.sim-notif small { display: block; font-size: 12.5px; color: #5B6B74; line-height: 1.3; }
+.sim-actions button.danger { color: #D64541; }
+.sim-content .til-box { margin-bottom: 4px; }
+.err { padding: 16px; color: #B71C1C; font: 12px var(--mono); white-space: pre-wrap; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>AeroSmart Home · vista previa</h1>
+    <p>Las pantallas se dibujan leyendo los XML reales de <code>app/src/main/res</code>. Es una aproximación de Android Studio: sirve para revisar diseño y textos, no reemplaza probar en el teléfono.</p>
+  </header>
+  <div class="picker" id="picker"></div>
+  <div class="stage">
+    <div class="phone-wrap">
+      <div class="phone-scale" id="phoneScale"><div class="phone" id="phone"><div class="screen" id="screen"></div></div></div>
+      <div class="sizes" id="sizes" role="group" aria-label="Tamaño de teléfono"></div>
+      <div class="tools">
+        <button class="tool" id="tBack" type="button">← Atrás</button>
+        <button class="tool" id="tOutline" type="button" aria-pressed="false">Ver bordes de vistas</button>
+      </div>
+      <div class="info" id="info"></div>
+    </div>
+    <aside>
+      <div class="panel warn" id="warnPanel" hidden><h2>Avisos de los recursos</h2><ul id="warnList"></ul></div>
+      <div class="panel">
+        <h2>Cómo usarla</h2>
+        <ul>
+          <li>Toca los botones de la app: Saltar, Siguiente, Iniciar sesión, Regístrate, el avatar de perfil y Cerrar sesión navegan como en la app.</li>
+          <li>Los campos de texto y los interruptores funcionan.</li>
+          <li>Conectar, refrescar, modo automático/manual, compuerta, velocidad, reglas y horario funcionan igual que en la app: copian la lógica de <code>MainViewModel.kt</code>. Al conectar llega una lectura simulada cada 5 segundos.</li>
+          <li>Prueba los 3 tamaños de teléfono bajo la pantalla para revisar que nada se corte.</li>
+          <li>El login revisa la tabla <code>usuarios</code> de SQLite: primero crea una cuenta en Regístrate (código 1234) y luego inicia sesión con ese correo.</li>
+          <li>Desliza por las 4 pestañas con la barra inferior.</li>
+          <li>Mantén el dedo o el mouse sobre una vista para ver su <code>id</code>.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Jerarquía de botones</h2>
+        <ul>
+          <li><b>Principal</b> (relleno azul): Iniciar sesión, Siguiente, Registrarse, Conectar.</li>
+          <li><b>Secundario</b> (celeste claro): Guardar cambios.</li>
+          <li><b>Destructivo</b> (borde rojo): Cerrar sesión.</li>
+          <li><b>Menor</b> (solo texto): Saltar, ¿Olvidaste tu contraseña?, Regístrate.</li>
+        </ul>
+        <p>Todo lo que se puede tocar se achica un poco al presionarlo, igual que en Android con <code>animator/press_scale.xml</code>.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>/*__BUNDLE__*/</script>
+<script>/*__RENDERER__*/</script>
+<script>
+(function () {
+  const P = window.AndroidPreview;
+  const OB = (window.RES.onboarding || []);
+  const TABS = [['fragment_home', 'Inicio'], ['fragment_monitoring', 'Monitoreo'], ['fragment_automation', 'Automatización'], ['fragment_ventilation', 'Ventilación']];
+  const SCREENS = [
+    { group: 'Flujo de la app', id: 'splash', label: 'Splash' },
+    ...OB.map((_, i) => ({ group: 'Flujo de la app', id: 'onboarding-' + (i + 1), label: 'Onboarding ' + (i + 1), layout: 'activity_onboarding', ob: i })),
+    { group: 'Flujo de la app', id: 'login', label: 'Login', layout: 'activity_login' },
+    { group: 'Flujo de la app', id: 'register', label: 'Registro', layout: 'activity_register' },
+    ...TABS.map(([l, t], i) => ({ group: 'Pantalla principal (MainActivity)', id: 'tab-' + (i + 1), label: t, layout: 'activity_main', tabLayout: l, tab: i })),
+    { group: 'Flujo de la app', id: 'profile', label: 'Perfil', layout: 'activity_profile' },
+  ];
+  const used = new Set(SCREENS.map((s) => s.layout).concat(SCREENS.map((s) => s.tabLayout), ['item_onboarding_page']));
+  Object.keys(window.RES.layouts).filter((l) => !used.has(l)).forEach((l) => SCREENS.push({ group: 'Otros layouts', id: 'x-' + l.replace(/_/g, '-'), label: l, layout: l }));
+
+  // Navegación por id de vista (lo que hace cada Activity en Kotlin)
+  const NAV = {
+    btnSkip: () => go('login'),
+    btnSiguiente: (s) => go(s.ob < OB.length - 1 ? 'onboarding-' + (s.ob + 2) : 'login'),
+    btnLogin: () => window.AndroidSim.login(() => go('tab-1')),
+    txtRegisterLink: () => go('register'),
+    btnRegister: () => window.AndroidSim.register(() => go('tab-1')),
+    profileAvatarCard: () => go('profile'),
+    imgProfile: () => go('profile'),
+
+    btnLogout: () => window.AndroidSim.logout(() => go('login')),
+    btnBack: () => back(),
+    txtBackToLogin: () => go('login'),
+    btnRefresh: (s, n) => { const r = (+n.dataset.rot || 0) + 360; n.dataset.rot = r; n.style.transition = 'transform .5s cubic-bezier(.45,0,.55,1)'; n.style.transform = `rotate(${r}deg)`; },
+    txtRegOr: null,
+  };
+
+  const picker = document.getElementById('picker');
+  const screenEl = document.getElementById('screen');
+  let current = null, stack = [], outline = false;
+
+  const groups = {};
+  SCREENS.forEach((s) => {
+    if (!groups[s.group]) {
+      const g = document.createElement('div'); g.className = 'group';
+      g.innerHTML = `<span class="group-label">${s.group}</span>`;
+      picker.append(g); groups[s.group] = g;
+    }
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = s.label; b.dataset.screen = s.id;
+    b.onclick = () => go(s.id);
+    groups[s.group].append(b);
+  });
+
+  function statusBar() {
+    const sb = document.createElement('div'); sb.className = 'statusbar';
+    sb.innerHTML = '<span>9:41</span><span class="icons"><svg width="16" height="12" viewBox="0 0 16 12"><path fill="currentColor" d="M0 11h3v1H0zM4 8h3v4H4zM8 5h3v7H8zM12 1h3v11h-3z"/></svg><svg width="22" height="12" viewBox="0 0 22 12"><rect x=".5" y=".5" width="18" height="11" rx="2" fill="none" stroke="currentColor"/><rect x="2" y="2" width="13" height="8" rx="1" fill="currentColor"/><rect x="19.5" y="4" width="2" height="4" rx="1" fill="currentColor"/></svg></span>';
+    return sb;
+  }
+
+  function draw() {
+    const s = SCREENS.find((x) => x.id === current) || SCREENS[0];
+    screenEl.replaceChildren();
+    screenEl.classList.toggle('outline', outline);
+    const appEl = document.createElement('div'); appEl.className = 'app';
+    try {
+      if (s.id === 'splash') {
+        const d = P.drawable('@drawable/logo_ventilador');
+        const sp = document.createElement('div'); sp.className = 'splash clickable'; sp.title = 'Toca para continuar';
+        if (d && d.src) { const im = document.createElement('img'); im.src = d.src; im.alt = 'Logo AeroSmart'; sp.append(im); }
+        sp.onclick = () => go(OB.length ? 'onboarding-1' : 'login');
+        appEl.append(sp);
+      } else {
+        const ctx = { screen: s.id, onboarding: s.ob != null ? OB[s.ob] : null, tabLayout: s.tabLayout, activeTab: s.tab, onTab: (i) => go('tab-' + (i + 1)) };
+        const root = P.renderLayout(s.layout, ctx);
+        // Simula applySystemBarInsets(): espacio de la barra de estado y de la barra de gestos
+        const pt = parseFloat(root.style.paddingTop) || 0, pb = parseFloat(root.style.paddingBottom) || 0;
+        root.style.paddingTop = (pt + 28) + 'px';
+        const nav = root.querySelector('.bnav');
+        if (nav) nav.style.paddingBottom = '16px'; else root.style.paddingBottom = (pb + 16) + 'px';
+        appEl.append(root);
+        if (s.ob != null) {
+          const dots = appEl.querySelector('[data-id="layoutDots"]');
+          if (dots) OB.forEach((_, i) => {
+            const dt = document.createElement('div');
+            const d = P.drawable(i === s.ob ? '@drawable/circle_dot_active' : '@drawable/circle_dot_inactive');
+            Object.assign(dt.style, { width: (i === s.ob ? 24 : 8) + 'px', height: '8px', margin: '0 4px' }, d && d.css ? d.css : {});
+            dots.append(dt);
+          });
+        }
+      }
+    } catch (e) {
+      const er = document.createElement('div'); er.className = 'err'; er.textContent = 'No se pudo dibujar este layout:\n' + e.message; appEl.append(er);
+    }
+    screenEl.append(appEl);
+    screenEl.append(statusBar());
+    const g = document.createElement('div'); g.className = 'gesture'; screenEl.append(g);
+    requestAnimationFrame(() => P.fixRelative(screenEl));
+    // clics de navegación
+    screenEl.querySelectorAll('[data-id]').forEach((n) => {
+      const fn = NAV[n.dataset.id];
+      if (fn) { n.classList.add('clickable'); n.addEventListener('click', (ev) => { ev.stopPropagation(); fn(s, n); }); }
+    });
+    const cl = screenEl.querySelector('[data-id="contentLayout"]'); if (cl) cl.classList.add('enter');
+    window.AndroidSim && window.AndroidSim.attach(screenEl);
+    document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.screen === s.id)));
+    document.getElementById('info').textContent = s.layout ? `res/layout/${s.layout}.xml` : 'Theme.App.Starting (themes.xml)';
+    const w = Array.from(P.warnings);
+    document.getElementById('warnPanel').hidden = !w.length;
+    document.getElementById('warnList').replaceChildren(...w.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; }));
+  }
+
+  function go(id, push = true) {
+    if (push && current && current !== id) stack.push(current);
+    current = id;
+    if (location.hash !== '#' + id) { try { window.history.replaceState(null, '', '#' + id); } catch (e) { location.hash = id; } }
+    draw();
+  }
+  function back() { if (stack.length) go(stack.pop(), false); }
+
+  // Efecto de presionar con dedo o mouse (Safari en iPhone no aplica :active sin esto)
+  const clearPressed = () => screenEl.querySelectorAll('.pressed').forEach((n) => n.classList.remove('pressed'));
+  screenEl.addEventListener('pointerdown', (e) => {
+    const t = e.target.closest('.press, .btn, .clickable');
+    if (t && screenEl.contains(t)) t.classList.add('pressed');
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => screenEl.addEventListener(ev, () => setTimeout(clearPressed, 60)));
+  document.getElementById('tBack').onclick = back;
+  document.getElementById('tOutline').onclick = (e) => { outline = !outline; e.currentTarget.setAttribute('aria-pressed', String(outline)); draw(); };
+
+  // Tamaños de pantalla en dp: celular chico, estándar y grande
+  const SIZES = [['Chico', 320, 640, 'iPhone SE / Android compacto'], ['Normal', 360, 780, 'Android típico'], ['Grande', 412, 915, 'Pixel Pro / Galaxy Plus']];
+  let size = 1;
+  try { const v = localStorage.getItem('aero-size'); if (v !== null && SIZES[+v]) size = +v; } catch (e) {}
+  const sizesEl = document.getElementById('sizes');
+  SIZES.forEach(([n, w, h, hint], i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tool'; b.title = hint;
+    b.textContent = `${n} · ${w}×${h}`;
+    b.onclick = () => { size = i; try { localStorage.setItem('aero-size', String(i)); } catch (e) {} setSize(); draw(); };
+    sizesEl.append(b);
+  });
+  function setSize() {
+    const [, w, h] = SIZES[size];
+    const ph = document.getElementById('phone');
+    ph.style.setProperty('--sw', w + 'px'); ph.style.setProperty('--sh', h + 'px');
+    document.getElementById('phoneScale').style.setProperty('--sw', w + 'px');
+    sizesEl.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-pressed', String(i === size)));
+    fit();
+  }
+  function fit() {
+    const [, w, h] = SIZES[size];
+    const wrap = document.getElementById('phoneScale');
+    const scale = Math.min(1, wrap.parentElement.clientWidth / (w + 20));
+    document.getElementById('phone').style.transform = `scale(${scale})`;
+    wrap.style.height = (h + 20) * scale + 'px';
+  }
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (id && id !== current) go(id); });
+  setSize();
+  const start = location.hash.slice(1);
+  go(SCREENS.some((s) => s.id === start) ? start : 'login', false);
+})();
+</script>

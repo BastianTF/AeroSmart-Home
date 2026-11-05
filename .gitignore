@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Claves del Arduino (no subir)
+arduino/**/secrets.h

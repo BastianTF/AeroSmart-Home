@@ -3,14 +3,14 @@ package com.example.ventiladorambiental
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
-import android.util.Patterns
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.ventiladorambiental.data.UserPreferences
+import com.example.ventiladorambiental.data.UserRepository
 import com.example.ventiladorambiental.databinding.ActivityLoginBinding
-import kotlinx.coroutines.delay
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -19,15 +19,17 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableAeroEdgeToEdge()
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySystemBarInsets()
 
         binding.btnLogin.setOnClickListener {
             val email = binding.edtEmail.text.toString().trim()
-            val password = binding.edtPassword.text.toString().trim()
+            val password = binding.edtPassword.text.toString()
 
             if (validateInputs(email, password)) {
-                performLogin()
+                performLogin(email)
             }
         }
 
@@ -40,38 +42,21 @@ class LoginActivity : AppCompatActivity() {
             showForgotPasswordDialog()
         }
 
-        binding.btnGoogle.setOnClickListener { showSocialEmailDialog("Google") }
-        binding.btnFacebook.setOnClickListener { showSocialEmailDialog("Facebook") }
-        binding.btnApple.setOnClickListener { showSocialEmailDialog("Apple") }
+        binding.btnGoogle.setOnClickListener { showComingSoon("Google") }
+        binding.btnFacebook.setOnClickListener { showComingSoon("Facebook") }
+        binding.btnApple.setOnClickListener { showComingSoon("Apple") }
     }
 
-    private fun showSocialEmailDialog(provider: String) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Iniciar sesión con $provider")
-        builder.setMessage("Ingresa tu correo electrónico oficial de $provider para continuar:")
-
-        val input = EditText(this)
-        input.hint = "correo@${provider.lowercase()}.com"
-        input.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-        builder.setView(input)
-
-        builder.setPositiveButton("Continuar") { _, _ ->
-            val email = input.text.toString().trim()
-            if (email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "¡Autenticación exitosa con $provider ($email)!", Toast.LENGTH_LONG).show()
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finishAffinity()
-            } else {
-                Toast.makeText(this, "Correo de $provider no válido", Toast.LENGTH_SHORT).show()
-            }
-        }
-        builder.setNegativeButton("Cancelar", null)
-        builder.show()
+    private fun showComingSoon(provider: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Inicio con $provider")
+            .setMessage("El inicio de sesión con $provider estará disponible próximamente. Por ahora ingresa con tu correo y contraseña.")
+            .setPositiveButton("Entendido", null)
+            .show()
     }
 
     private fun showForgotPasswordDialog() {
-        val builder = AlertDialog.Builder(this)
+        val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle("Recuperar Contraseña")
         builder.setMessage("Ingresa el correo electrónico del titular de la cuenta para enviar el enlace de recuperación:")
 
@@ -82,7 +67,7 @@ class LoginActivity : AppCompatActivity() {
 
         builder.setPositiveButton("Enviar Enlace") { _, _ ->
             val email = input.text.toString().trim()
-            if (email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (Validators.isValidEmail(email)) {
                 Toast.makeText(this, "Enlace de recuperación enviado a $email", Toast.LENGTH_LONG).show()
             } else {
                 Toast.makeText(this, "Por favor ingresa un correo válido", Toast.LENGTH_SHORT).show()
@@ -95,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
     private fun validateInputs(email: String, password: String): Boolean {
         var isValid = true
 
-        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!Validators.isValidEmail(email)) {
             binding.edtEmail.error = "Ingresa un correo válido"
             isValid = false
         } else {
@@ -112,18 +97,39 @@ class LoginActivity : AppCompatActivity() {
         return isValid
     }
 
-    private fun performLogin() {
-        binding.btnLogin.text = "Iniciando..."
+    private var failedAttempts = 0
+    private var lockedUntil = 0L
+
+    /** Verifica el correo y la contraseña contra la base SQLite. Tras 5 intentos fallidos bloquea 30 s. */
+    private fun performLogin(email: String) {
+        val now = System.currentTimeMillis()
+        if (now < lockedUntil) {
+            Toast.makeText(this, "Demasiados intentos. Espera ${(lockedUntil - now) / 1000 + 1} s", Toast.LENGTH_SHORT).show()
+            return
+        }
+        binding.btnLogin.text = "Iniciando…"
         binding.btnLogin.isEnabled = false
+        val password = binding.edtPassword.text.toString().toCharArray()
 
         lifecycleScope.launch {
-            delay(1500)
-
+            val user = UserRepository(this@LoginActivity).login(email, password)
             binding.btnLogin.isEnabled = true
             binding.btnLogin.text = "Iniciar Sesión"
 
-            val intent = Intent(this@LoginActivity, MainActivity::class.java)
-            startActivity(intent)
+            if (user == null) {
+                failedAttempts++
+                if (failedAttempts >= 5) {
+                    lockedUntil = System.currentTimeMillis() + 30_000
+                    failedAttempts = 0
+                }
+                binding.edtPassword.error = "Correo o contraseña incorrectos"
+                return@launch
+            }
+            failedAttempts = 0
+            val prefs = UserPreferences(this@LoginActivity)
+            prefs.saveEmail(user.email)
+            prefs.saveProfile(user.name, user.phone)
+            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
             finish()
         }
     }
