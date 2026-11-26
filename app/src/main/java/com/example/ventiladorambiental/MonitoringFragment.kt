@@ -86,6 +86,12 @@ class MonitoringFragment : Fragment() {
 
     /** Tarjeta "Estabilidad de la conexión": latencia, pérdidas, reconexiones y mensajes rechazados. */
     private fun renderLink(state: MainUiState.Success) {
+        // Almacenamiento temporal: lecturas guardadas en el teléfono que aún no llegan a la nube
+        val sync = buildString {
+            append(if (state.pendingSync == 0) "Nube: al día" else "Nube: ${state.pendingSync} lecturas pendientes (se suben al volver Internet)")
+            if (state.recoveredFromDevice > 0) append("\nRecuperadas de la placa: ${state.recoveredFromDevice}")
+        }
+        if (binding.txtSyncStatus.text != sync) binding.txtSyncStatus.text = sync
         val q = state.linkQuality
         if (q == null) {
             binding.txtLinkQuality.text = if (state.isDemo) "Demostración" else "Solo con la placa"

@@ -16,3 +16,4 @@ local.properties
 
 # Claves del Arduino (no subir)
 arduino/**/secrets.h
+__pycache__/

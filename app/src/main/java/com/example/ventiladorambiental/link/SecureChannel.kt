@@ -6,7 +6,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * Protocolo seguro sobre la comunicación serial Bluetooth (HC-05) entre la app y el Arduino.
+ * Protocolo seguro sobre la comunicación serial (socket TCP por Wi-Fi) entre la app y la Wemos D1 mini.
  *
  * Cada mensaje es una línea de texto:   SEQ|CUERPO|MAC\n
  *  - SEQ: número de secuencia que siempre sube. Un mensaje con SEQ repetido o menor se rechaza (antirepetición).

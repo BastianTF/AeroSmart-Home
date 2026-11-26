@@ -26,7 +26,11 @@ sealed class MainUiState {
         /** Texto del enlace cuando no está conectado: "Reconectando (2/6)…", error, etc. */
         val linkStatus: String? = null,
         /** Estabilidad del enlace con la placa (solo conexión real). */
-        val linkQuality: LinkQuality? = null
+        val linkQuality: LinkQuality? = null,
+        /** Lecturas guardadas en el teléfono que aún no se suben a la nube. */
+        val pendingSync: Int = 0,
+        /** Lecturas que la placa guardó sin conexión y reenvió al reconectar (en esta sesión de la app). */
+        val recoveredFromDevice: Int = 0
     ) : MainUiState() {
         val temperature: String get() = temperatureC?.let { "$it °C" } ?: "-- °C"
         val humidity: String get() = humidityPct?.let { "$it %" } ?: "-- %"

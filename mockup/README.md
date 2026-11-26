@@ -3,6 +3,9 @@
 
 Este directorio contiene la aplicación de simulación interactiva desarrollada para la evaluación sumativa de la Unidad 2.
 
+> **Ojo:** es un prototipo de diseño (U2). Algunas cosas que muestra (BLE/ESP32, selector de backend, multi-dispositivo, OTP) **no** son lo que hace la app real.
+> La app real usa Wi-Fi con una Wemos D1 mini, SQLite y Firebase: ver `README.md` en la raíz y `docs/rubrica-u2.md`.
+
 ## 🌟 Cómo abrir y usar el Mockup
 
 1. Abre el archivo [`index.html`](index.html) con cualquier navegador web moderno (Google Chrome, Microsoft Edge, Mozilla Firefox o Safari).

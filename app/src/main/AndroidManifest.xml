@@ -5,22 +5,14 @@
     <!-- Alertas locales cuando el sensor PIR detecta movimiento (Android 13+ pide permiso) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Enlace con la placa ESP8266 por su red Wi-Fi propia (socket TCP local) -->
+    <!-- Enlace con la placa ESP8266 por su red Wi-Fi propia (socket TCP local) y sincronización con Firebase -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Elegir la red Wi-Fi de la placa y saber cuándo vuelve Internet para sincronizar -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" tools:targetApi="s" />
 
-    <!-- Ubicación requerida por Android para escaneo de Wi-Fi y Bluetooth -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- Bluetooth -->
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" tools:targetApi="s" />
+    <!-- Minimización de datos (ISO/IEC 27400, 27701): NO se piden Bluetooth ni ubicación porque la app
+         no escanea redes ni dispositivos; el teléfono se une a la red de la placa desde Ajustes. -->
 
     <application
         android:allowBackup="false"

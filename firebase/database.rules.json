@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "lecturas_iot": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$lectura": {
+          ".validate": "newData.hasChildren(['temperatura', 'humedad', 'movimiento', 'compuerta_abierta', 'timestamp'])",
+          "temperatura": { ".validate": "newData.isNumber() && newData.val() >= -10 && newData.val() <= 60" },
+          "humedad": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "movimiento": { ".validate": "newData.isBoolean()" },
+          "compuerta_abierta": { ".validate": "newData.isBoolean()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "$otro": { ".validate": false }
+        }
+      }
+    }
+  }
+}

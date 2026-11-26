@@ -1,55 +1,38 @@
 # Plan de trabajo — Evaluación 3 (TI3042)
 
-Estado al 26-11-2026. Último commit revisado: `31cf7bb "ns"` (sincronización SQLite → Firebase de lecturas pendientes).
-
-## Qué se hizo en los últimos commits
-
-| Commit | Qué hizo |
-|---|---|
-| `55373cf upgrade` | Mejoras de conexión en la app (ConnectionUi, Home, Monitoreo) y firmware. |
-| `caf0f57 optimizacion` | Tema oscuro, ajustes de perfil, permisos en Manifest, potencia Wi-Fi a 14 dBm en la placa. |
-| `31cf7bb ns` | Columna `sincronizado` en SQLite (BD v2) + `SyncRepository` que sube lecturas pendientes a Firebase cuando vuelve Internet. |
+Estado al 26-11-2026. Punto de partida: commit `31cf7bb "ns"` (sincronización SQLite → Firebase de lecturas pendientes).
 
 ## Rúbricas a cumplir (las 3)
 
-- **A. Escala eva3 (Excel, 14 indicadores, 68,6 pts)** → `docs/rubrica-eva3.md`
-- **B. Rúbrica 3.1.x Sí/No (12 indicadores, 100 pts)** → ya cubierta en `docs/rubrica-u3.md`
-- **C. Rúbrica 2.1.x (U2, 15 indicadores)** → `docs/EVALUACION_TI3042_U2.md` (hay que corregirlo)
+| Rúbrica | Documento de evidencia |
+|---|---|
+| A. Escala eva3 (Excel, 14 indicadores, 68,6 pts) | `docs/rubrica-eva3.md` |
+| B. Rúbrica 3.1.x Sí/No (12 indicadores) | `docs/rubrica-u3.md` |
+| C. Rúbrica 2.1.x (U2, 15 indicadores) | `docs/rubrica-u2.md` |
 
-## Estado por indicador nuevo (Excel)
+## Plan y estado
 
-| Indicador | Estado | Falta |
-|---|---|---|
-| 3.1.1.1 / 3.1.1.2 Envío seguro e integridad | ✅ HMAC-SHA256, secuencia, tests | Solo documentar |
-| 3.1.1.3 Reconexión automática | ✅ backoff 1-2-4-8 s | Solo documentar |
-| 3.1.1.4 Almacenamiento temporal en móvil **y microcontrolador** sin conexión | ⚠️ móvil sí, placa **no** | Buffer circular de lecturas en la placa que se reenvía al reconectar |
-| 3.1.2.5 / 3.1.2.6 App envía / recibe | ✅ | Solo documentar |
-| 3.1.2.7 Almacenamiento temporal + sync externa | ⚠️ hecho en último commit | Revisar: usa el **correo del usuario** como clave en Firebase (dato personal en la nube); sin reglas de Firebase; mostrar en UI "pendientes / sincronizado" |
-| 3.1.3.8 / 3.1.3.9 Placa envía / recibe | ✅ | Solo documentar |
-| 3.1.3.10 Consumo de energía | ⚠️ parcial (14 dBm, escritura BD cada 30 s) | Medición/estimación de consumo (tabla mA por componente), modem-sleep en placa, intervalo adaptativo en la app |
-| 3.1.4.11 Estándares ISO | ✅ tabla ISO 27001/27400 | Actualizar con la nube |
-| 3.1.4.12 Datos personales | ⚠️ docs dicen "solo en el teléfono" y ya no es cierto | Usar ID anónimo (hash) en Firebase + reglas de acceso; corregir doc |
-| 3.1.4.13 Plan de contingencia y continuidad | ⚠️ existe modo seguro en placa | Documento formal: escenarios de falla → respuesta (app y placa) |
-| 3.1.4.14 Compatibilidad versiones Android y arquitecturas | ⚠️ minSdk 24, Kotlin puro | Documentar matriz (API 24–37, arm64/armv7/x86_64), probar en 2 emuladores |
+| # | Tarea | Indicadores | Estado |
+|---|---|---|---|
+| 1 | Búfer offline en la placa (120 lecturas, reenvío `HIST`) | 3.1.1.4, 3.1.3.8 | ✅ Hecho (falta probar en placa real) |
+| 2 | App: recibir `HIST` y guardarlo con su hora | 3.1.1.4, 3.1.2.6 | ✅ Hecho |
+| 3 | Sync Firebase con UID anónimo (sin correo), por lotes, al volver Internet | 3.1.2.7, 3.1.4.12, 3.1.3.10 | ✅ Hecho (falta habilitar Auth anónimo en la consola) |
+| 4 | Reglas de Firebase (`firebase/database.rules.json`) | 3.1.4.11, 3.1.4.12 | ✅ Hecho (falta publicarlas en la consola) |
+| 5 | Contador de pendientes y recuperadas en Monitoreo | 3.1.2.7 | ✅ Hecho |
+| 6 | No borrar lecturas pendientes al limpiar la BD | 3.1.2.7 | ✅ Hecho |
+| 7 | Celular cifrado también en DataStore | 3.1.4.12, 2.1.3.10 | ✅ Hecho |
+| 8 | Quitar permisos sin uso (Bluetooth, ubicación) | 2.1.3.9, 3.1.4.12 | ✅ Hecho |
+| 9 | Ahorro de energía en placa (loop lento sin app) y app (sync cada 5 min) | 3.1.3.10 | ✅ Hecho |
+| 10 | Monitor serie muestra cada orden recibida | 3.1.3.9 | ✅ Hecho |
+| 11 | Placa simulada con modo offline | Plan B | ✅ Hecho y probado |
+| 12 | Tests `HistoryReadingTest` | 3.1.1.2 | ✅ 11/11 pasan |
+| 13 | Docs: eva3, contingencia, energía, compatibilidad, guía del equipo | 3.1.3.10, 3.1.4.13, 3.1.4.14 | ✅ Hecho |
+| 14 | Corregir README, U2, U3, Arduino README, JSON del mockup (decían BLE/ESP32/LCD/MQTT/Argon2) | 2.1.4.13–15 | ✅ Hecho |
+| 15 | Compilar app y probar en emuladores API 24 y 34+ | 3.1.4.14 | ⏳ Equipo (en el entorno de Claude no hay Android SDK) |
+| 16 | Compilar y cargar el sketch en la Wemos | todos 3.1.3 | ⏳ Equipo |
+| 17 | Medir consumo con medidor USB y llenar tabla | 3.1.3.10 | ⏳ Equipo (opcional, suma) |
+| 18 | Anotar retroalimentación del profe | 2.1.2.7, 2.1.4.15 | ⏳ Equipo |
 
-## Problemas detectados (hay que arreglarlos sí o sí)
+## Bitácora
 
-1. **Docs U2 y README dicen cosas que el código no hace**: BLE/ESP32, HC-05, MQTT, Argon2, 2FA OTP, TLS 1.3, RBAC, servo en GPIO18. El hardware real es **Wemos D1 mini (ESP8266) por Wi-Fi TCP**. Si el profe pregunta (2.1.4.13/2.1.4.15) se cae. → Reescribir con lo real.
-2. **Firebase**: correo del usuario como ruta en la nube y sin reglas de seguridad documentadas.
-3. `mockup/aeroSmart_firebase_database.json` describe ESP32/BLE → actualizar.
-4. No hay buffer offline en la placa (3.1.1.4).
-
-## Plan (resumido)
-
-1. **Firmware**: buffer circular (~60 lecturas) cuando no hay app conectada; al reconectar envía `HIST` con las lecturas guardadas; modem-sleep cuando no hay cliente.
-2. **App**: recibir `HIST` y guardarlo en SQLite; Firebase con ID anónimo (SHA-256 del correo), mostrar contador "pendientes de sincronizar"; ahorro de energía (menos frecuencia en segundo plano).
-3. **Seguridad nube**: archivo `firebase/database.rules.json` (solo el usuario autenticado escribe su nodo).
-4. **Tests**: unit tests de parseo `HIST` y del buffer; `placa_simulada.py` actualizado con modo sin conexión.
-5. **Documentación** (`docs/`):
-   - `rubrica-eva3.md`: evidencia + cómo demostrar, por cada indicador del Excel.
-   - `plan-contingencia.md`: fallas y respuesta.
-   - `energia.md`: consumo estimado y optimizaciones.
-   - `compatibilidad.md`: matriz de versiones/arquitecturas y pruebas.
-   - Corregir `EVALUACION_TI3042_U2.md`, `README.md`, `rubrica-u3.md` y el JSON del mockup para que digan lo que realmente hay.
-   - `GUIA_EQUIPO.md`: cómo compilar, cargar la placa, demostrar cada criterio y posibles preguntas del profe con respuesta.
-6. **Verificar**: correr tests y compilar (en este entorno no hay Android SDK; se intenta instalar, si no, se indica que lo prueben en Android Studio).
+- **26-11-2026:** revisión contra las 3 rúbricas; tareas 1–14 implementadas. Ver `docs/GUIA_EQUIPO.md` para probar.
