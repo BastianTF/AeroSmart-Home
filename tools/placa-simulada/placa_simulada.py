@@ -64,6 +64,10 @@ def serve(conn):
         send(st["tx"], body)
 
     def data():
+        if os.environ.get("AEROSMART_SIN_DHT"):  # simula DHT11 caído, como la placa real
+            nxt("ERR:DHT")
+            nxt(f"STATE:{st['pir']},{st['vent']},{st['fan'] if st['vent'] else 0}")
+            return
         nxt(f"DATA:{st['t']},{st['h']},{st['pir']},{st['vent']},{st['fan'] if st['vent'] else 0}")
 
     def sensors():
@@ -77,7 +81,7 @@ def serve(conn):
                 st["pir"] ^= 1
             try:
                 data()
-            except OSError:
+            except (OSError, ValueError):  # el teléfono se desconectó
                 return
 
     threading.Thread(target=sensors, daemon=True).start()

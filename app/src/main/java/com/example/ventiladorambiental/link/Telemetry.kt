@@ -45,6 +45,22 @@ data class HistoryReading(val ageSeconds: Long, val temperature: Int, val humidi
     }
 }
 
+/** Estado sin temperatura/humedad (cuando falla el DHT11): "STATE:pir,compuerta,turbina". */
+data class DeviceState(val movement: Boolean, val ventOpen: Boolean, val fanPercent: Int) {
+    companion object {
+        fun parse(body: String): DeviceState? {
+            if (!body.startsWith("STATE:")) return null
+            val p = body.removePrefix("STATE:").split(',')
+            if (p.size != 3) return null
+            val pir = p[0].toIntOrNull() ?: return null
+            val vent = p[1].toIntOrNull() ?: return null
+            val fan = p[2].toIntOrNull() ?: return null
+            if (pir !in 0..1 || vent !in 0..1 || fan !in 0..100) return null
+            return DeviceState(pir == 1, vent == 1, fan)
+        }
+    }
+}
+
 /** Órdenes que la app envía al Arduino. */
 object Commands {
     fun vent(open: Boolean) = "VENT:${if (open) 1 else 0}"

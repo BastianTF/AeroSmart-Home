@@ -28,4 +28,11 @@ class HistoryReadingTest {
     fun liveDataIsNotHistory() {
         assertNull(Telemetry.parse("HIST:90,24,61,1,0"))
     }
+
+    @Test
+    fun stateWithoutDhtIsParsed() {
+        assertEquals(DeviceState(movement = true, ventOpen = false, fanPercent = 0), DeviceState.parse("STATE:1,0,0"))
+        assertNull(DeviceState.parse("STATE:2,0,0"))
+        assertNull(DeviceState.parse("STATE:1,0"))
+    }
 }

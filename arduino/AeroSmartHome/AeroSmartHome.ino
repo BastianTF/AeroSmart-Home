@@ -169,7 +169,14 @@ void applyOutputs() {
 }
 
 void sendData() {
-  if (!dhtOk) { send("ERR:DHT"); return; }
+  if (!dhtOk) {
+    // Sin DHT11 igual se informa PIR, compuerta y turbina: "STATE:pir,compuerta,turbina"
+    send("ERR:DHT");
+    char st[32];
+    snprintf(st, sizeof(st), "STATE:%d,%d,%d", movement ? 1 : 0, ventOpen ? 1 : 0, ventOpen ? fanPct : 0);
+    send(st);
+    return;
+  }
   char body[48];
   snprintf(body, sizeof(body), "DATA:%d,%d,%d,%d,%d", temperature, humidity, movement ? 1 : 0, ventOpen ? 1 : 0, ventOpen ? fanPct : 0);
   send(body);

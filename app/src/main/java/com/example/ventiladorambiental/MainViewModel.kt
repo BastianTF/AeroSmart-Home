@@ -9,6 +9,7 @@ import com.example.ventiladorambiental.data.Schedule
 import com.example.ventiladorambiental.data.SyncRepository
 import com.example.ventiladorambiental.link.Commands
 import com.example.ventiladorambiental.link.DeviceLink
+import com.example.ventiladorambiental.link.DeviceState
 import com.example.ventiladorambiental.link.HistoryReading
 import com.example.ventiladorambiental.link.LinkQuality
 import com.example.ventiladorambiental.link.SecureChannel
@@ -149,6 +150,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         HistoryReading.parse(body)?.let { saveDeviceHistory(it); return }
         if (body == "ERR:DHT") {
             if (!sensorError) { sensorError = true; updateSuccessState() }
+            return
+        }
+        DeviceState.parse(body)?.let { st ->
+            // DHT11 caído: igual se muestran PIR, compuerta y turbina reales
+            isMovement = st.movement
+            isVentOpen = st.ventOpen
+            if (st.ventOpen && st.fanPercent > 0) fanSpeed = st.fanPercent
+            lastUpdate = timeFormat.format(Date())
+            updateSuccessState()
             return
         }
         val t = Telemetry.parse(body) ?: return
