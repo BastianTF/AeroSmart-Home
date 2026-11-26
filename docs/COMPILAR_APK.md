@@ -13,12 +13,13 @@ Si ya lo tenías:
 cd ~/AeroSmart-Home && git checkout master && git pull
 ```
 
-## 2. Crear `local.properties`
-La clave de la placa (`linkKey`) la entrega el equipo por WhatsApp o en persona, nunca por GitHub.
+## 2. Configurar la placa (1 paso, solo si se usará la placa real)
 ```bash
-printf 'sdk.dir=C\\:\\\\Users\\\\%s\\\\AppData\\\\Local\\\\Android\\\\Sdk\naerosmart.linkKey=PEGA_AQUI_LA_CLAVE\n' "$USERNAME" > local.properties && cat local.properties
+bash tools/configurar.sh
 ```
-Sin la clave igual compila: la app funciona en **Modo demostración**, pero no se conecta a la placa real.
+Pide la **clave del enlace** (la entrega el equipo por WhatsApp o en persona, nunca por GitHub) y la **clave del Wi-Fi** de la placa, y deja listos `local.properties` y `arduino/AeroSmartHome/secrets.h`.
+
+Sin este paso igual compila y funciona en **Modo demostración**. Android Studio crea solo `local.properties` con la ruta del SDK al abrir el proyecto.
 
 ## 3. Compilar el APK
 ```bash

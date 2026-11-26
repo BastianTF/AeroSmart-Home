@@ -25,6 +25,8 @@ Notas:
 
 ## Clave y red (no se suben al repositorio)
 
+Atajo: `bash tools/configurar.sh` desde la raíz del proyecto hace estos 3 pasos solo.
+
 1. Copia `secrets.example.h` como `secrets.h` en la misma carpeta.
 2. Cambia `AP_PASSWORD` (mínimo 8 caracteres) y `LINK_KEY_HEX` (32 caracteres hexadecimales).
 3. Pon **la misma clave** en Android Studio, en `local.properties`:

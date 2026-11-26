@@ -2,6 +2,12 @@
 
 ## 1. Preparar (una vez)
 
+### En 1 paso (app + placa)
+```bash
+bash tools/configurar.sh
+```
+Pide la clave del enlace y la del Wi-Fi de la placa y crea `local.properties` y `secrets.h`. Después: Sync + Run en Android Studio y subir el sketch con el Arduino IDE. Lo de abajo es el detalle manual (no hace falta si se usó el script).
+
 ### App
 1. Abrir la carpeta en **Android Studio** y dejar que Gradle sincronice.
 2. En `local.properties` (no se sube a GitHub) agregar:
