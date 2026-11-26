@@ -33,7 +33,23 @@ android {
         buildConfigField("String", "DEVICE_HOST", "\"${localProps.getProperty("aerosmart.host", "192.168.4.1")}\"")
         buildConfigField("int", "DEVICE_PORT", localProps.getProperty("aerosmart.port", "3333"))
         // Inicio con Google: "ID de cliente web" de OAuth (Firebase > Authentication > Google). Ver docs/GUIA_EQUIPO.md
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProps.getProperty("aerosmart.googleWebClientId", "")}\"")
+        // Es público (no es secreto): queda por defecto para que compile en cualquier PC.
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProps.getProperty("aerosmart.googleWebClientId", "237695332072-bdk4rtmt0vdie0peifh4cfglbicd03dp.apps.googleusercontent.com")}\"")
+    }
+
+    // Llave de depuración compartida del equipo (app/debug.keystore): así todos los PCs generan
+    // el mismo SHA-1 y el inicio con Google funciona sin registrar cada PC en Firebase.
+    // Solo sirve para pruebas; NO usar para publicar en Play Store.
+    val teamDebugKeystore = rootProject.file("app/debug.keystore")
+    if (teamDebugKeystore.exists()) {
+        signingConfigs {
+            getByName("debug") {
+                storeFile = teamDebugKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
     }
 
     buildTypes {

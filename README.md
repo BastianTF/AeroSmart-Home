@@ -34,6 +34,7 @@ App Android (Kotlin, MVVM)                         Wemos D1 mini (ESP8266)
 | Documento | Para qué |
 |---|---|
 | [`docs/GUIA_EQUIPO.md`](docs/GUIA_EQUIPO.md) | **Empezar aquí.** Cómo compilar, cargar la placa, demostrar y responder al profe. |
+| [`docs/COMPILAR_APK.md`](docs/COMPILAR_APK.md) | Compilar el APK en cualquier PC e instalarlo en el teléfono. |
 | [`docs/rubrica-eva3.md`](docs/rubrica-eva3.md) | Evidencia por indicador de la escala de apreciación eva3 (Excel). |
 | [`docs/rubrica-u3.md`](docs/rubrica-u3.md) | Evidencia por indicador de la rúbrica 3.1.x (Sí/No). |
 | [`docs/rubrica-u2.md`](docs/rubrica-u2.md) | Evidencia por indicador de la rúbrica 2.1.x (U2). |
