@@ -9,6 +9,8 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -65,6 +67,12 @@ class DeviceLink(
     @Volatile private var lastRxAt = 0L
     private val pending = LinkedHashMap<Long, Pending>()
     private val writeLock = Any()
+    /**
+     * Las escrituras al socket van en un hilo propio y en orden: send() se llama desde la pantalla
+     * (hilo principal) y Android prohíbe usar la red ahí (NetworkOnMainThreadException), lo que
+     * cerraba la conexión justo después de abrirla.
+     */
+    private val writer: ExecutorService = Executors.newSingleThreadExecutor { r -> Thread(r, "aerosmart-link-writer") }
 
     private data class Pending(val body: String, val sentAt: Long, val tries: Int)
 
@@ -77,13 +85,25 @@ class DeviceLink(
 
     fun disconnect() {
         wanted = false
+        writer.shutdownNow() // descarta envíos pendientes; se puede llamar más de una vez
         closeSocket()
         job?.cancel()
         _state.value = State.Idle
     }
 
-    /** Envía una orden firmada. Devuelve false si no hay conexión. */
+    /** Envía una orden firmada (en segundo plano). Devuelve false si no hay conexión. */
     fun send(body: String): Boolean {
+        val ch = channel ?: return false
+        if (!ch.isEstablished || writer.isShutdown) return false
+        return try {
+            writer.execute { sendNow(body) }
+            true
+        } catch (e: java.util.concurrent.RejectedExecutionException) {
+            false
+        }
+    }
+
+    private fun sendNow(body: String): Boolean {
         val ch = channel ?: return false
         if (!ch.isEstablished) return false
         return try {
