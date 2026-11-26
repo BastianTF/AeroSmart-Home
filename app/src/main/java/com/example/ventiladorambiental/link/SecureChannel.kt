@@ -139,6 +139,8 @@ class SecureChannel(
         fun keyFromHex(hex: String): ByteArray? {
             val h = hex.trim()
             if (!(isHex(h, 32) || isHex(h, 64))) return null
+            // Clave por defecto (puros ceros) = no se configuró aerosmart.linkKey: se trata como "falta la clave"
+            if (h.all { it == '0' }) return null
             return ByteArray(h.length / 2) { i -> h.substring(i * 2, i * 2 + 2).toInt(16).toByte() }
         }
     }

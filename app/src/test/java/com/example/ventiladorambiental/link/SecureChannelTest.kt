@@ -79,4 +79,9 @@ class SecureChannelTest {
         assertNull(Telemetry.parse("DATA:99,55,1,0,60"))
         assertNull(Telemetry.parse("DATA:25,55,1,0"))
     }
+
+    @Test
+    fun defaultZeroKeyIsTreatedAsMissing() {
+        assertNull(SecureChannel.keyFromHex("00000000000000000000000000000000"))
+    }
 }

@@ -129,7 +129,7 @@ class DeviceLink(
             attempt++
             _quality.value = _quality.value.copy(reconnects = _quality.value.reconnects + 1)
             if (attempt > MAX_ATTEMPTS) {
-                _state.value = State.Failed("No se pudo conectar con la placa. Revisa que el teléfono esté en la red Wi-Fi AeroSmart-Home.")
+                _state.value = State.Failed("No se pudo conectar con la placa. Revisa que el teléfono esté en la red Wi-Fi AeroSmart-Home y que la clave del enlace (linkKey) sea la misma de la placa (secrets.h).")
                 wanted = false
                 break
             }
