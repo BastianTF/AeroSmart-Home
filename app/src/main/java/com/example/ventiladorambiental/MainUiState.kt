@@ -32,7 +32,9 @@ sealed class MainUiState {
         /** Lecturas que la placa guardó sin conexión y reenvió al reconectar (en esta sesión de la app). */
         val recoveredFromDevice: Int = 0,
         /** La placa está conectada pero el DHT11 no responde (revisar cable en D5). */
-        val sensorError: Boolean = false
+        val sensorError: Boolean = false,
+        /** Temperatura y humedad simuladas porque el DHT11 no responde (se avisa en pantalla). */
+        val climateSimulated: Boolean = false
     ) : MainUiState() {
         val temperature: String get() = temperatureC?.let { "$it °C" } ?: "-- °C"
         val humidity: String get() = humidityPct?.let { "$it %" } ?: "-- %"
@@ -40,6 +42,7 @@ sealed class MainUiState {
         /** Texto corto de confort térmico según la temperatura. */
         val comfortLabel: String
             get() = when {
+                climateSimulated -> "Simulado (sensor sin lectura)"
                 sensorError -> "Sensor DHT11 sin lectura"
                 !isConnected -> "Sin conexión"
                 temperatureC == null -> "Esperando lectura…"

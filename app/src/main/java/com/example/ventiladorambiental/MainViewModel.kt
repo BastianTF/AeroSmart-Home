@@ -66,6 +66,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var sensorError = false
     /** true cuando llegó al menos una lectura real (DATA) en esta conexión. */
     private var hasReading = false
+    /** Con el DHT11 caído se muestran temperatura/humedad simuladas (marcadas como tal, no se guardan). */
+    private var simulatedClimate = false
     private val stopNetworkWatch: () -> Unit
 
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -106,6 +108,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         isDemo = false
         hasReading = false
         sensorError = false
+        simulatedClimate = false
         val l = DeviceLink(getApplication(), key, BuildConfig.DEVICE_HOST, BuildConfig.DEVICE_PORT, viewModelScope)
         link = l
         linkJobs += viewModelScope.launch { l.state.collect { onLinkState(it) } }
@@ -153,17 +156,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         DeviceState.parse(body)?.let { st ->
-            // DHT11 caído: igual se muestran PIR, compuerta y turbina reales
+            // DHT11 caído: PIR, compuerta y turbina son reales; temperatura y humedad se simulan
             isMovement = st.movement
             isVentOpen = st.ventOpen
             if (st.ventOpen && st.fanPercent > 0) fanSpeed = st.fanPercent
             lastUpdate = timeFormat.format(Date())
+            simulateClimateWithoutSensor()
             updateSuccessState()
             return
         }
         val t = Telemetry.parse(body) ?: return
         sensorError = false
         hasReading = true
+        simulatedClimate = false
         temperature = t.temperature
         humidity = t.humidity
         isMovement = t.movement
@@ -173,6 +178,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         recordReading()
         evaluateAutomation()
         updateSuccessState()
+    }
+
+    /** Valores simulados solo para la pantalla y el gráfico: NO se guardan en SQLite ni se suben a Firebase. */
+    private fun simulateClimateWithoutSensor() {
+        if (!simulatedClimate) { temperature = 24; humidity = 55; simulatedClimate = true }
+        temperature = (temperature + (-1..1).random()).coerceIn(20, 30)
+        humidity = (humidity + (-2..2).random()).coerceIn(40, 70)
+        history.addLast(Reading(temperature, humidity, lastUpdate?.substring(0, 5) ?: ""))
+        while (history.size > MAX_HISTORY) history.removeFirst()
     }
 
     /** Lectura que la placa guardó mientras la app no estaba conectada: se guarda con su hora real. */
@@ -189,6 +203,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun disconnectDevice() {
         sensorError = false
         hasReading = false
+        simulatedClimate = false
         stopDemo()
         releaseLink()
         isConnected = false
@@ -352,11 +367,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun updateSuccessState() {
+        val showClimate = isConnected && (isDemo || (hasReading && !sensorError) || (sensorError && simulatedClimate))
         _uiState.value = MainUiState.Success(
             isConnected = isConnected,
             // Con la placa real solo se muestran valores que de verdad llegaron (no los de partida)
-            temperatureC = if (isConnected && (isDemo || hasReading) && !sensorError) temperature else null,
-            humidityPct = if (isConnected && (isDemo || hasReading) && !sensorError) humidity else null,
+            temperatureC = if (showClimate) temperature else null,
+            humidityPct = if (showClimate) humidity else null,
             isMovementDetected = isConnected && isMovement,
             isVentOpen = isVentOpen,
             isAutoMode = isAutoMode,
@@ -370,6 +386,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             linkQuality = if (isConnected && !isDemo) linkQuality else null,
             pendingSync = pendingSync,
             sensorError = isConnected && !isDemo && sensorError,
+            climateSimulated = isConnected && !isDemo && sensorError && simulatedClimate,
             recoveredFromDevice = recoveredFromDevice
         )
     }
