@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.ventiladorambiental.data.UserPreferences
@@ -53,6 +54,7 @@ class ProfileActivity : AppCompatActivity() {
             showHeader(profile.name, profile.email)
             binding.switchNotifications.isChecked = settings.notificationsEnabled && NotificationHelper.canNotify(this@ProfileActivity)
             binding.switchKeepScreen.isChecked = settings.keepScreenOn
+            binding.switchDarkMode.isChecked = settings.isDarkMode
             // Los listeners se conectan después de cargar, así no reaccionan a los valores iniciales.
             setupListeners()
         }
@@ -81,6 +83,19 @@ class ProfileActivity : AppCompatActivity() {
         binding.rowKeepScreen.setOnClickListener { binding.switchKeepScreen.toggle() }
         binding.switchKeepScreen.setOnCheckedChangeListener { _, isChecked ->
             lifecycleScope.launch { userPreferences.setKeepScreenOn(isChecked) }
+        }
+
+        binding.rowDarkMode.setOnClickListener { binding.switchDarkMode.toggle() }
+        binding.switchDarkMode.setOnCheckedChangeListener { button, isChecked ->
+            if (button.isPressed) {
+                lifecycleScope.launch {
+                    userPreferences.setDarkMode(isChecked)
+                    AppCompatDelegate.setDefaultNightMode(
+                        if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                        else AppCompatDelegate.MODE_NIGHT_NO
+                    )
+                }
+            }
         }
 
         binding.txtTerms.setOnClickListener { showTermsDialog() }

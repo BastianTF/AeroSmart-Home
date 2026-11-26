@@ -276,7 +276,7 @@ class DeviceLink(
         private const val CONNECT_TIMEOUT_MS = 4000
         private const val READ_TIMEOUT_MS = 1000
         private const val LINK_TIMEOUT_MS = 10_000L
-        private const val HEARTBEAT_MS = 3000L
+        private const val HEARTBEAT_MS = 5000L
         private const val ACK_TIMEOUT_MS = 1500L
         private const val MAX_RETRIES = 2
         private const val MAX_ATTEMPTS = 6

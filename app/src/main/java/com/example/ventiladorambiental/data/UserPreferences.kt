@@ -27,7 +27,7 @@ data class AutomationRules(
 
 data class UserProfile(val name: String, val phone: String, val email: String)
 
-data class AppSettings(val notificationsEnabled: Boolean, val keepScreenOn: Boolean)
+data class AppSettings(val notificationsEnabled: Boolean, val keepScreenOn: Boolean, val isDarkMode: Boolean = false)
 
 class UserPreferences(private val context: Context) {
 
@@ -44,6 +44,7 @@ class UserPreferences(private val context: Context) {
         private val PROFILE_EMAIL = stringPreferencesKey("profile_email")
         private val SETTING_NOTIFICATIONS = booleanPreferencesKey("setting_notifications")
         private val SETTING_KEEP_SCREEN = booleanPreferencesKey("setting_keep_screen")
+        private val SETTING_DARK_MODE = booleanPreferencesKey("setting_dark_mode")
 
         const val TEMP_MIN = 20
         const val TEMP_MAX = 34
@@ -132,7 +133,8 @@ class UserPreferences(private val context: Context) {
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
         AppSettings(
             notificationsEnabled = prefs[SETTING_NOTIFICATIONS] ?: true,
-            keepScreenOn = prefs[SETTING_KEEP_SCREEN] ?: false
+            keepScreenOn = prefs[SETTING_KEEP_SCREEN] ?: false,
+            isDarkMode = prefs[SETTING_DARK_MODE] ?: false
         )
     }
 
@@ -142,5 +144,9 @@ class UserPreferences(private val context: Context) {
 
     suspend fun setKeepScreenOn(enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[SETTING_KEEP_SCREEN] = enabled }
+    }
+
+    suspend fun setDarkMode(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[SETTING_DARK_MODE] = enabled }
     }
 }

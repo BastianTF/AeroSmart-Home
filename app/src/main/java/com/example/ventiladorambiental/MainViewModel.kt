@@ -213,12 +213,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
+    private var lastDbWriteMs = 0L
+
     private fun recordReading() {
         lastUpdate = timeFormat.format(Date())
         history.addLast(Reading(temperature, humidity, lastUpdate!!.substring(0, 5)))
         while (history.size > MAX_HISTORY) history.removeFirst()
-        val t = temperature; val h = humidity; val m = isMovement; val v = isVentOpen
-        viewModelScope.launch { readings.insert(t, h, m, v) }
+
+        val now = System.currentTimeMillis()
+        if (now - lastDbWriteMs >= 30_000L) { // Guardar en base de datos máximo cada 30 s para ahorrar batería
+            lastDbWriteMs = now
+            val t = temperature; val h = humidity; val m = isMovement; val v = isVentOpen
+            viewModelScope.launch { readings.insert(t, h, m, v) }
+        }
     }
 
     // ---------- Actuadores ----------

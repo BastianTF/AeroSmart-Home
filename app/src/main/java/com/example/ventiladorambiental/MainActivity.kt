@@ -1,9 +1,15 @@
 package com.example.ventiladorambiental
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.example.ventiladorambiental.data.UserPreferences
@@ -26,6 +32,19 @@ class MainActivity : AppCompatActivity() {
 
     private val tabs = listOf(R.id.nav_home, R.id.nav_monitoring, R.id.nav_automation, R.id.nav_ventilation)
 
+    private val initialPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val notifGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions[Manifest.permission.POST_NOTIFICATIONS] ?: true
+        } else {
+            true
+        }
+        if (!notifGranted) {
+            lifecycleScope.launch { userPreferences.setNotificationsEnabled(false) }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableAeroEdgeToEdge()
@@ -37,6 +56,32 @@ class MainActivity : AppCompatActivity() {
         setupTabs()
         connectPreferencesToViewModel()
         watchMovementForAlerts()
+        requestInitialPermissions()
+    }
+
+    private fun requestInitialPermissions() {
+        val needed = mutableListOf<String>()
+
+        needed.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        needed.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            needed.add(Manifest.permission.BLUETOOTH_CONNECT)
+            needed.add(Manifest.permission.BLUETOOTH_SCAN)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            needed.add(Manifest.permission.NEARBY_WIFI_DEVICES)
+            needed.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        val missing = needed.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (missing.isNotEmpty()) {
+            initialPermissionsLauncher.launch(missing.toTypedArray())
+        }
     }
 
     private fun setupTabs() {
@@ -60,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Horario, reglas y "pantalla encendida" guardados por el usuario llegan al ViewModel. */
+    /** Horario, reglas, modo oscuro y "pantalla encendida" guardados por el usuario llegan al ViewModel. */
     private fun connectPreferencesToViewModel() {
         lifecycleScope.launch { userPreferences.schedule.collectLatest { viewModel.setSchedule(it) } }
         lifecycleScope.launch { userPreferences.rules.collectLatest { viewModel.setRules(it) } }
@@ -68,6 +113,11 @@ class MainActivity : AppCompatActivity() {
             userPreferences.settings.collectLatest { settings ->
                 if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+                AppCompatDelegate.setDefaultNightMode(
+                    if (settings.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
+                    else AppCompatDelegate.MODE_NIGHT_NO
+                )
             }
         }
     }

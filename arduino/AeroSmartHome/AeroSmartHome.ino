@@ -3,7 +3,6 @@
  *
  * Sensores: DHT11 (temperatura y humedad en D5/GPIO14) y PIR HC-SR501 (presencia en D6/GPIO12).
  * Actuadores: Servo SG90 (compuerta en D7/GPIO13) y Turbina (transistor/MOSFET en RX/GPIO3).
- * Pantalla: LCD 16x2 en modo 4 bits (RS=D1, E=D2, D4=D3, D5=D4, D6=D0, D7=D8).
  *
  * Comunicación con la app: La placa crea su propia red Wi-Fi WPA2 (AP_SSID) y escucha en el puerto 3333.
  * Transmite seguridad mediante HMAC-SHA256 utilizando la clave en secrets.h.
@@ -12,7 +11,6 @@
 #include <ESP8266WiFi.h>
 #include <Servo.h>
 #include <DHT.h>
-#include <LiquidCrystal.h>
 #include <bearssl/bearssl.h>
 #include "secrets.h"
 
@@ -21,9 +19,6 @@ const uint8_t PIN_DHT   = 14;   // D5 (GPIO14)
 const uint8_t PIN_PIR   = 12;   // D6 (GPIO12)
 const uint8_t PIN_SERVO = 13;   // D7 (GPIO13)
 const uint8_t PIN_FAN   = 3;    // RX (GPIO3)
-
-// LCD 16x2 paralelo modo 4 bits: RS=D1(5), E=D2(4), D4=D3(0), D5=D4(2), D6=D0(16), D7=D8(15)
-LiquidCrystal lcd(5, 4, 0, 2, 16, 15);
 
 // ---------- Umbrales de humedad y Servo ----------
 const float HUMEDAD_MAX = 65.0; // Abre compuerta en modo auto
@@ -36,9 +31,8 @@ const int SERVO_PULSO_MAX = 2400;  // µs
 
 // ---------- Ajustes de red y protocolo ----------
 const uint16_t PORT = 3333;
-const unsigned long DATA_EVERY_MS = 2000;
+const unsigned long DATA_EVERY_MS = 3000;
 const unsigned long LINK_TIMEOUT_MS = 15000;
-const unsigned long LCD_EVERY_MS = 1000;
 const size_t MAX_LINE = 120;
 
 WiFiServer server(PORT);
@@ -52,7 +46,7 @@ char appNonce[17] = "";
 char devNonce[17] = "";
 bool session = false;
 uint32_t txSeq = 0, rxSeq = 0;
-unsigned long lastRxMs = 0, lastDataMs = 0, lastLcdMs = 0;
+unsigned long lastRxMs = 0, lastDataMs = 0;
 uint32_t rejected = 0;
 
 // ---------- Estado del sistema ----------
@@ -141,8 +135,10 @@ void send(const char *body) { if (session) sendFrame(++txSeq, body); }
 // ---------- Actuadores y Control Automático ----------
 
 void applyOutputs() {
+  servo.attach(PIN_SERVO, SERVO_PULSO_MIN, SERVO_PULSO_MAX);
   servo.write(ventOpen ? SERVO_OPEN : SERVO_CLOSED);
-  // La turbina solo opera cuando la compuerta está abierta
+  delay(350);
+  servo.detach(); // Detener impulsos PWM para ahorrar energía cuando el servo no está moviéndose
   analogWrite(PIN_FAN, ventOpen ? map(fanPct, 0, 100, 0, 1023) : 0);
 }
 
@@ -288,7 +284,7 @@ void readClient() {
   }
 }
 
-// ---------- Sensores y pantalla LCD ----------
+// ---------- Sensores ----------
 
 void readSensors() {
   float t = dht.readTemperature();
@@ -297,17 +293,7 @@ void readSensors() {
   if (dhtOk) { temperature = (int)lround(t); humidity = (int)lround(h); }
 }
 
-void updateLcd() {
-  char r0[17], r1[17];
-  if (dhtOk) snprintf(r0, sizeof(r0), "T%2dC H%2d%% Mov:%s", temperature, humidity, movement ? "SI" : "NO");
-  else snprintf(r0, sizeof(r0), "DHT11 sin datos ");
-  snprintf(r1, sizeof(r1), "%-7s %s %s", ventOpen ? "ABIERTA" : "CERRADA", autoMode ? "AUTO" : "MAN ", session ? "APP" : "---");
-  lcd.setCursor(0, 0); lcd.print(r0); for (size_t i = strlen(r0); i < 16; i++) lcd.print(' ');
-  lcd.setCursor(0, 1); lcd.print(r1); for (size_t i = strlen(r1); i < 16; i++) lcd.print(' ');
-}
-
 void halt(const __FlashStringHelper *msg) {
-  lcd.clear(); lcd.print(F("Error config.")); lcd.setCursor(0, 1); lcd.print(msg);
   Serial.println(msg);
   while (true) delay(1000);
 }
@@ -322,11 +308,10 @@ void setup() {
   analogWrite(PIN_FAN, 0);
   pinMode(PIN_PIR, INPUT);
 
-  lcd.begin(16, 2);
-  lcd.print(F("AeroSmart Home"));
-
   servo.attach(PIN_SERVO, SERVO_PULSO_MIN, SERVO_PULSO_MAX);
   servo.write(SERVO_CLOSED);
+  delay(350);
+  servo.detach();
   dht.begin();
 
   // Clave compartida desde secrets.h
@@ -338,12 +323,12 @@ void setup() {
   if (strlen(AP_PASSWORD) < 8) halt(F("Clave WiFi < 8"));
 
   WiFi.mode(WIFI_AP);
+  WiFi.setOutputPower(14.0); // Reducir potencia RF a 14 dBm para optimizar consumo de corriente
   WiFi.softAP(AP_SSID, AP_PASSWORD, 6, false, 1);
   server.begin();
   server.setNoDelay(true);
 
   Serial.print(F("Red: ")); Serial.print(AP_SSID); Serial.print(F("  IP: ")); Serial.println(WiFi.softAPIP());
-  lcd.setCursor(0, 1); lcd.print(WiFi.softAPIP());
   delay(1500);
   readSensors();
 }
@@ -380,11 +365,6 @@ void loop() {
     readSensors();
     processAutoMode();
     sendData();
-  }
-
-  if (now - lastLcdMs >= LCD_EVERY_MS) {
-    lastLcdMs = now;
-    updateLcd();
   }
 
   delay(5);
