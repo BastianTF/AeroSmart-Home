@@ -107,14 +107,12 @@ class LoginActivity : AppCompatActivity() {
             Toast.makeText(this, "Demasiados intentos. Espera ${(lockedUntil - now) / 1000 + 1} s", Toast.LENGTH_SHORT).show()
             return
         }
-        binding.btnLogin.text = "Iniciando…"
-        binding.btnLogin.isEnabled = false
+        UiFx.setButtonLoading(binding.btnLogin, true, "Iniciando…")
         val password = binding.edtPassword.text.toString().toCharArray()
 
         lifecycleScope.launch {
             val user = UserRepository(this@LoginActivity).login(email, password)
-            binding.btnLogin.isEnabled = true
-            binding.btnLogin.text = "Iniciar Sesión"
+            UiFx.setButtonLoading(binding.btnLogin, false)
 
             if (user == null) {
                 failedAttempts++

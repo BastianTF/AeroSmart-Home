@@ -108,8 +108,15 @@ object ConnectionUi {
 
         if (status.text != targetStatus) status.text = targetStatus
         if (hint.text != targetHint) hint.text = targetHint
-        if (button.text != targetBtnText) button.text = targetBtnText
-        if (button.isEnabled != targetBtnEnabled) button.isEnabled = targetBtnEnabled
+        // Conectando: ruedita de carga dentro del botón
+        val loading = state is MainUiState.Loading
+        if (loading) {
+            UiFx.setButtonLoading(button, true, "Conectando…")
+        } else {
+            UiFx.setButtonLoading(button, false)
+            if (button.text != targetBtnText) button.text = targetBtnText
+            if (button.isEnabled != targetBtnEnabled) button.isEnabled = targetBtnEnabled
+        }
         if ((dot.tag as? Int) != targetDot) {
             dot.setBackgroundResource(targetDot)
             dot.tag = targetDot

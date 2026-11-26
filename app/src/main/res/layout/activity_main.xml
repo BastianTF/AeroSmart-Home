@@ -16,16 +16,32 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
+    <!-- Barra inferior: la píldora (navPill) va detrás de los íconos y se desliza al cambiar de pestaña -->
+    <FrameLayout
+        android:id="@+id/navContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/card_bg"
-        app:elevation="8dp"
-        app:itemActiveIndicatorStyle="@style/Widget.AeroSmart.NavIndicator"
-        app:itemIconTint="@color/color_bottom_nav_item"
-        app:itemTextColor="@color/color_bottom_nav_item"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu" />
+        android:elevation="8dp">
+
+        <View
+            android:id="@+id/navPill"
+            android:layout_width="64dp"
+            android:layout_height="32dp"
+            android:alpha="0"
+            android:background="@drawable/bg_nav_pill" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            app:elevation="0dp"
+            app:itemIconTint="@color/color_bottom_nav_icon"
+            app:itemTextColor="@color/color_bottom_nav_text"
+            app:itemRippleColor="@android:color/transparent"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_menu" />
+    </FrameLayout>
 
 </LinearLayout>

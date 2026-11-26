@@ -43,7 +43,6 @@ class AutomationFragment : Fragment() {
         setupListeners()
         observeUiState()
         observePreferences()
-        UiFx.animateChildrenIn(binding.contentLayout)
     }
 
     private fun setupListeners() {
@@ -222,6 +221,12 @@ class AutomationFragment : Fragment() {
         }
         val overnight = if (s.endMinutes < s.startMinutes) " (+1 día)" else ""
         return "${UiFx.formatMinutes(s.startMinutes)} – ${UiFx.formatMinutes(s.endMinutes)}$overnight · $days"
+    }
+
+    /** Animación de entrada cada vez que la pestaña se muestra (ViewPager2 deja RESUMED solo a la visible). */
+    override fun onResume() {
+        super.onResume()
+        UiFx.enterScreen(binding.root, binding.contentLayout, binding.headerLayout)
     }
 
     override fun onDestroyView() {

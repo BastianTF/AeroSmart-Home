@@ -4,7 +4,7 @@
     <string name="status_disconnected">Desconectado</string>
     <string name="status_connected">Conectado</string>
     <string name="connect">Conectar</string>
-    <string name="connect_bluetooth">Vincular Bluetooth</string>
+    <string name="connect_bluetooth">Conectar placa</string>
     <string name="disconnect_bluetooth">Desconectar</string>
     <string name="environmental_monitoring">Monitoreo Ambiental</string>
     <string name="temperature">Temperatura</string>

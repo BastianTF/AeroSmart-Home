@@ -117,7 +117,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnConnect"
                     style="@style/Widget.AeroSmart.Button.Small"
-                    app:icon="@drawable/ic_bluetooth"
+                    app:icon="@drawable/ic_wifi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/connect" />

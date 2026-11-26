@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "237695332072",
+    "firebase_url": "https://aerosmart-99678-default-rtdb.firebaseio.com",
     "project_id": "aerosmart-99678",
     "storage_bucket": "aerosmart-99678.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.ventiladorambiental"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "237695332072-aucdjt13tkcbk9u4dmctpbomseh3vei2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ventiladorambiental",
+            "certificate_hash": "ce64dade57f8dd20b9cece6c5c375b5d0d6b49f4"
+          }
+        },
+        {
+          "client_id": "237695332072-bdk4rtmt0vdie0peifh4cfglbicd03dp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB0awcRbL43jP_gIl6pgP26l4UCH37pd9c"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "237695332072-bdk4rtmt0vdie0peifh4cfglbicd03dp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -32,7 +32,6 @@ class VentilationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
         observeUiState()
-        UiFx.animateChildrenIn(binding.contentLayout)
     }
 
     private fun setupListeners() {
@@ -88,6 +87,12 @@ class VentilationFragment : Fragment() {
         fanAnimSpeed = wanted
         fanAnimator?.cancel()
         fanAnimator = if (open) UiFx.spin(binding.imgFan, (2400L * 20 / speed).coerceAtLeast(350L)) else null
+    }
+
+    /** Animación de entrada cada vez que la pestaña se muestra (ViewPager2 deja RESUMED solo a la visible). */
+    override fun onResume() {
+        super.onResume()
+        UiFx.enterScreen(binding.root, binding.contentLayout, binding.headerLayout)
     }
 
     override fun onDestroyView() {
