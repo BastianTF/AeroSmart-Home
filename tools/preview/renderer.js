@@ -181,7 +181,7 @@
     }
     function node(el) {
       if (el.localName === 'path') {
-        const d = a(el, 'pathData') || a(el, 'path') || '';
+        const d = a(el, 'pathData') || ''; // Android solo acepta pathData: 'path' se ignora y el ícono queda vacío
         const fill = fillOf(el);
         const st = color(a(el, 'strokeColor'));
         const attrs = [`d="${d}"`, `fill="${fill || 'none'}"`, `data-f="${fill && fill !== 'none' ? 1 : 0}"`];
