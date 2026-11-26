@@ -60,43 +60,59 @@ object ConnectionUi {
 
     fun render(state: MainUiState, dot: View, status: TextView, hint: TextView, button: MaterialButton) {
         val context = status.context
+        val targetDot: Int
+        val targetStatus: String
+        val targetHint: String
+        val targetBtnText: String
+        val targetBtnEnabled: Boolean
+
         when (state) {
             is MainUiState.Loading -> {
-                button.isEnabled = false
-                dot.setBackgroundResource(R.drawable.circle_gray)
-                status.text = "Conectando…"
-                hint.text = "Saludo seguro con la placa"
+                targetDot = R.drawable.circle_gray
+                targetStatus = "Conectando…"
+                targetHint = "Saludo seguro con la placa"
+                targetBtnText = context.getString(R.string.connect)
+                targetBtnEnabled = false
             }
             is MainUiState.Success -> {
-                button.isEnabled = true
+                targetBtnEnabled = true
                 when {
                     state.isConnected -> {
-                        dot.setBackgroundResource(R.drawable.circle_green)
-                        status.text = if (state.isDemo) "Demostración" else context.getString(R.string.status_connected)
-                        hint.text = state.lastUpdate?.let { "Última lectura $it" } ?: "Recibiendo datos"
-                        button.text = context.getString(R.string.disconnect_bluetooth)
+                        targetDot = R.drawable.circle_green
+                        targetStatus = if (state.isDemo) "Demostración" else context.getString(R.string.status_connected)
+                        targetHint = state.lastUpdate?.let { "Última lectura $it" } ?: "Recibiendo datos"
+                        targetBtnText = context.getString(R.string.disconnect_bluetooth)
                     }
                     state.linkStatus != null -> {
-                        dot.setBackgroundResource(R.drawable.circle_gray)
-                        status.text = "Sin señal"
-                        hint.text = state.linkStatus
-                        button.text = context.getString(R.string.disconnect_bluetooth)
+                        targetDot = R.drawable.circle_gray
+                        targetStatus = "Sin señal"
+                        targetHint = state.linkStatus
+                        targetBtnText = context.getString(R.string.disconnect_bluetooth)
                     }
                     else -> {
-                        dot.setBackgroundResource(R.drawable.circle_red)
-                        status.text = context.getString(R.string.status_disconnected)
-                        hint.text = "Conecta tu placa para ver datos en vivo"
-                        button.text = context.getString(R.string.connect)
+                        targetDot = R.drawable.circle_red
+                        targetStatus = context.getString(R.string.status_disconnected)
+                        targetHint = "Conecta tu placa para ver datos en vivo"
+                        targetBtnText = context.getString(R.string.connect)
                     }
                 }
             }
             is MainUiState.Error -> {
-                button.isEnabled = true
-                button.text = context.getString(R.string.connect)
-                dot.setBackgroundResource(R.drawable.circle_red)
-                status.text = "Error de conexión"
-                hint.text = state.message
+                targetDot = R.drawable.circle_red
+                targetStatus = "Error de conexión"
+                targetHint = state.message
+                targetBtnText = context.getString(R.string.connect)
+                targetBtnEnabled = true
             }
+        }
+
+        if (status.text != targetStatus) status.text = targetStatus
+        if (hint.text != targetHint) hint.text = targetHint
+        if (button.text != targetBtnText) button.text = targetBtnText
+        if (button.isEnabled != targetBtnEnabled) button.isEnabled = targetBtnEnabled
+        if ((dot.tag as? Int) != targetDot) {
+            dot.setBackgroundResource(targetDot)
+            dot.tag = targetDot
         }
     }
 }

@@ -88,7 +88,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         link = l
         linkJobs += viewModelScope.launch { l.state.collect { onLinkState(it) } }
         linkJobs += viewModelScope.launch { l.messages.collect { onDeviceMessage(it) } }
-        linkJobs += viewModelScope.launch { l.quality.collect { linkQuality = it; if (isConnected) updateSuccessState() } }
+        linkJobs += viewModelScope.launch {
+            l.quality.collect { q ->
+                val prev = linkQuality
+                linkQuality = q
+                if (isConnected && (prev == null || prev.label != q.label || prev.rttMs != q.rttMs || prev.reconnects != q.reconnects)) {
+                    updateSuccessState()
+                }
+            }
+        }
         _uiState.value = MainUiState.Loading
         l.connect()
     }
@@ -270,9 +278,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Modo automático: abre si hace calor o hay humedad alta (y hay presencia, si la regla lo pide). */
+    /** Modo automático: en demostración evalúa las reglas en la app. En la placa real, la placa evalúa sus sensores. */
     private fun evaluateAutomation() {
-        if (!isAutoMode || !isConnected) return
+        if (!isAutoMode || !isConnected || !isDemo) return
         val wanted = if (!isInsideSchedule()) {
             false
         } else {

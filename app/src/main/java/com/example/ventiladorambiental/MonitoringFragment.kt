@@ -40,36 +40,46 @@ class MonitoringFragment : Fragment() {
         UiFx.animateChildrenIn(binding.contentLayout)
     }
 
+    private var lastRenderedHistory: List<Reading>? = null
+
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
                 ConnectionUi.render(state, binding.viewStatusDot, binding.txtStatus, binding.txtStatusHint, binding.btnConnect)
                 if (state !is MainUiState.Success) return@collectLatest
 
-                binding.txtTemperature.text = state.temperature
-                binding.txtHumidity.text = state.humidity
+                if (binding.txtTemperature.text != state.temperature) binding.txtTemperature.text = state.temperature
+                if (binding.txtHumidity.text != state.humidity) binding.txtHumidity.text = state.humidity
 
                 val h = state.history
-                binding.txtTempRange.text = if (h.isEmpty()) "Mín -- · Máx --"
-                else "Mín ${h.minOf { it.temperature }} · Máx ${h.maxOf { it.temperature }}"
-                binding.txtHumRange.text = if (h.isEmpty()) "Mín -- · Máx --"
-                else "Mín ${h.minOf { it.humidity }} · Máx ${h.maxOf { it.humidity }}"
+                if (lastRenderedHistory != h) {
+                    lastRenderedHistory = h
+                    binding.txtTempRange.text = if (h.isEmpty()) "Mín -- · Máx --"
+                    else "Mín ${h.minOf { it.temperature }} · Máx ${h.maxOf { it.temperature }}"
+                    binding.txtHumRange.text = if (h.isEmpty()) "Mín -- · Máx --"
+                    else "Mín ${h.minOf { it.humidity }} · Máx ${h.maxOf { it.humidity }}"
 
-                binding.chartHistory.setReadings(h)
-                binding.txtChartEmpty.visibility = if (h.size < 2) View.VISIBLE else View.GONE
-                binding.txtChartEmpty.text = if (state.isConnected) "Esperando más lecturas…"
-                else "Conecta el dispositivo para ver las lecturas en vivo"
-                binding.txtReadingsCount.text = if (h.size == 1) "1 lectura" else "${h.size} lecturas"
+                    binding.chartHistory.setReadings(h)
+                    binding.txtChartEmpty.visibility = if (h.size < 2) View.VISIBLE else View.GONE
+                    binding.txtChartEmpty.text = if (state.isConnected) "Esperando más lecturas…"
+                    else "Conecta el dispositivo para ver las lecturas en vivo"
+                    binding.txtReadingsCount.text = if (h.size == 1) "1 lectura" else "${h.size} lecturas"
+                }
 
-                binding.txtPIRStatus.text = when {
+                val pirStr = when {
                     !state.isConnected -> "Sin conexión"
                     state.isMovementDetected -> if (state.isDemo) "Movimiento detectado · toca para simular" else "Movimiento detectado"
                     else -> if (state.isDemo) "Sin movimiento · toca para simular" else "Sin movimiento"
                 }
+                if (binding.txtPIRStatus.text != pirStr) binding.txtPIRStatus.text = pirStr
+
+                val targetLedRes = if (state.isMovementDetected) R.drawable.circle_green else R.drawable.circle_gray
+                if ((binding.viewLedPIR.tag as? Int) != targetLedRes) {
+                    binding.viewLedPIR.setBackgroundResource(targetLedRes)
+                    binding.viewLedPIR.tag = targetLedRes
+                }
+
                 renderLink(state)
-                binding.viewLedPIR.setBackgroundResource(
-                    if (state.isMovementDetected) R.drawable.circle_green else R.drawable.circle_gray
-                )
             }
         }
     }

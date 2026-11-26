@@ -90,24 +90,45 @@ class HomeFragment : Fragment() {
                 ConnectionUi.render(state, binding.viewStatusDot, binding.txtStatus, binding.txtStatusHint, binding.btnConnect)
                 if (state !is MainUiState.Success) return@collectLatest
 
-                binding.txtTemperature.text = state.temperature
-                binding.txtHumidity.text = state.humidity
-                binding.txtComfort.text = state.comfortLabel
-                binding.gaugeHumidity.setProgressCompat(state.humidityPct ?: 0, true)
-                binding.txtLastUpdate.text = state.lastUpdate?.let { "Actualizado a las $it" } ?: "Sin lecturas todavía"
+                val tempStr = state.temperature
+                if (binding.txtTemperature.text != tempStr) binding.txtTemperature.text = tempStr
 
-                binding.txtPIRStatus.text = if (state.isMovementDetected) "Movimiento detectado" else "Sin movimiento"
-                binding.viewLedPIR.setBackgroundResource(
-                    if (state.isMovementDetected) R.drawable.circle_green else R.drawable.circle_gray
-                )
+                val humStr = state.humidity
+                if (binding.txtHumidity.text != humStr) binding.txtHumidity.text = humStr
+
+                val comfortStr = state.comfortLabel
+                if (binding.txtComfort.text != comfortStr) binding.txtComfort.text = comfortStr
+
+                val targetProgress = state.humidityPct ?: 0
+                if (binding.gaugeHumidity.progress != targetProgress) {
+                    binding.gaugeHumidity.setProgressCompat(targetProgress, true)
+                }
+
+                val lastUpdateStr = state.lastUpdate?.let { "Actualizado a las $it" } ?: "Sin lecturas todavía"
+                if (binding.txtLastUpdate.text != lastUpdateStr) binding.txtLastUpdate.text = lastUpdateStr
+
+                val pirStr = if (state.isMovementDetected) "Movimiento detectado" else "Sin movimiento"
+                if (binding.txtPIRStatus.text != pirStr) binding.txtPIRStatus.text = pirStr
+
+                val targetLedRes = if (state.isMovementDetected) R.drawable.circle_green else R.drawable.circle_gray
+                if ((binding.viewLedPIR.tag as? Int) != targetLedRes) {
+                    binding.viewLedPIR.setBackgroundResource(targetLedRes)
+                    binding.viewLedPIR.tag = targetLedRes
+                }
 
                 if (binding.switchAutoMode.isChecked != state.isAutoMode) binding.switchAutoMode.isChecked = state.isAutoMode
-                binding.txtAutoStatus.text = if (state.isAutoMode) getString(R.string.auto_mode_desc) else "Modo manual activado"
 
-                binding.txtServoStatus.text = if (state.isVentOpen) "Abierta" else "Cerrada"
-                binding.btnVentToggle.setCardBackgroundColor(
-                    ContextCompat.getColor(requireContext(), if (state.isVentOpen) R.color.primary_container else R.color.card_bg)
-                )
+                val autoStr = if (state.isAutoMode) getString(R.string.auto_mode_desc) else "Modo manual activado"
+                if (binding.txtAutoStatus.text != autoStr) binding.txtAutoStatus.text = autoStr
+
+                val servoStr = if (state.isVentOpen) "Abierta" else "Cerrada"
+                if (binding.txtServoStatus.text != servoStr) binding.txtServoStatus.text = servoStr
+
+                val targetColor = ContextCompat.getColor(requireContext(), if (state.isVentOpen) R.color.primary_container else R.color.card_bg)
+                if ((binding.btnVentToggle.tag as? Int) != targetColor) {
+                    binding.btnVentToggle.setCardBackgroundColor(targetColor)
+                    binding.btnVentToggle.tag = targetColor
+                }
             }
         }
     }

@@ -1,26 +1,14 @@
 /*
  * AeroSmart Home - Wemos D1 mini (ESP8266)
  *
- * Sensores: DHT11 (temperatura y humedad) y PIR HC-SR501 (presencia).
- * Actuadores: servo SG90 (compuerta) y turbina (transistor o MOSFET en el pin RX).
- * Pantalla: LCD 16x2 en modo 4 bits.
+ * Sensores: DHT11 (temperatura y humedad en D5/GPIO14) y PIR HC-SR501 (presencia en D6/GPIO12).
+ * Actuadores: Servo SG90 (compuerta en D7/GPIO13) y Turbina (transistor/MOSFET en RX/GPIO3).
+ * Pantalla: LCD 16x2 en modo 4 bits (RS=D1, E=D2, D4=D3, D5=D4, D6=D0, D7=D8).
  *
- * Comunicación con la app: la placa crea su propia red Wi-Fi WPA2 (AP_SSID) y escucha en el puerto 3333.
- * Por ese canal serial viajan líneas de texto   SEQ|CUERPO|MAC
- *   MAC = HMAC-SHA256(clave, DIR|SESION|SEQ|CUERPO), primeros 8 bytes en hexadecimal.
- *   DIR = 'A' (app -> placa) o 'D' (placa -> app). SESION = nonceApp + noncePlaca (nuevos en cada conexión).
- *   SEQ siempre sube: un mensaje repetido o con MAC incorrecto se descarta.
- * Es el mismo protocolo de app/src/main/java/.../link/SecureChannel.kt.
- *
- * Órdenes que recibe:  HELLO:<nonce>  PING:<ms>  VENT:0|1  FAN:0-100  MODE:A|M
- * Mensajes que envía:  WELCOME:<nonce>  PONG:<ms>  ACK:<seq>  DATA:temp,hum,pir,compuerta,turbina  ERR:<código>
- *
- * Seguridad ante fallas: si la app deja de hablar por 15 s, la placa cierra la compuerta y apaga la turbina.
- *
- * Librerías (Arduino IDE > Herramientas > Administrar bibliotecas):
- *   - "DHT sensor library" de Adafruit (y "Adafruit Unified Sensor")
- *   - LiquidCrystal y Servo vienen con el core ESP8266. HMAC-SHA256 usa BearSSL, que también viene incluido.
+ * Comunicación con la app: La placa crea su propia red Wi-Fi WPA2 (AP_SSID) y escucha en el puerto 3333.
+ * Transmite seguridad mediante HMAC-SHA256 utilizando la clave en secrets.h.
  */
+
 #include <ESP8266WiFi.h>
 #include <Servo.h>
 #include <DHT.h>
@@ -28,18 +16,26 @@
 #include <bearssl/bearssl.h>
 #include "secrets.h"
 
-// ---------- Pines (cámbialos aquí si tu armado es distinto) ----------
-const uint8_t PIN_DHT   = D5;
-const uint8_t PIN_PIR   = D6;
-const uint8_t PIN_SERVO = D7;
-const uint8_t PIN_FAN   = 3;    // RX (GPIO3): libre porque el monitor serie se usa solo para enviar
-// LCD: RS, E, D4, D5, D6, D7
-LiquidCrystal lcd(D1, D2, D3, D4, D0, D8);
+// ---------- Pines ----------
+const uint8_t PIN_DHT   = 14;   // D5 (GPIO14)
+const uint8_t PIN_PIR   = 12;   // D6 (GPIO12)
+const uint8_t PIN_SERVO = 13;   // D7 (GPIO13)
+const uint8_t PIN_FAN   = 3;    // RX (GPIO3)
 
-// ---------- Ajustes ----------
+// LCD 16x2 paralelo modo 4 bits: RS=D1(5), E=D2(4), D4=D3(0), D5=D4(2), D6=D0(16), D7=D8(15)
+LiquidCrystal lcd(5, 4, 0, 2, 16, 15);
+
+// ---------- Umbrales de humedad y Servo ----------
+const float HUMEDAD_MAX = 65.0; // Abre compuerta en modo auto
+const float HUMEDAD_MIN = 55.0; // Cierra compuerta en modo auto
+
+const int SERVO_CLOSED = 0;     // Ángulo cerrado
+const int SERVO_OPEN   = 180;   // Ángulo abierto
+const int SERVO_PULSO_MIN = 500;   // µs
+const int SERVO_PULSO_MAX = 2400;  // µs
+
+// ---------- Ajustes de red y protocolo ----------
 const uint16_t PORT = 3333;
-const int SERVO_CLOSED = 0;
-const int SERVO_OPEN = 90;
 const unsigned long DATA_EVERY_MS = 2000;
 const unsigned long LINK_TIMEOUT_MS = 15000;
 const unsigned long LCD_EVERY_MS = 1000;
@@ -59,9 +55,10 @@ uint32_t txSeq = 0, rxSeq = 0;
 unsigned long lastRxMs = 0, lastDataMs = 0, lastLcdMs = 0;
 uint32_t rejected = 0;
 
+// ---------- Estado del sistema ----------
 bool ventOpen = false;
 bool movement = false;
-bool autoMode = true;
+bool autoMode = true; // Modo automático por defecto
 uint8_t fanPct = 60;
 int temperature = 0, humidity = 0;
 bool dhtOk = false;
@@ -70,7 +67,7 @@ char line[MAX_LINE + 1];
 size_t lineLen = 0;
 bool overflow = false;
 
-// ---------- Utilidades ----------
+// ---------- Utilidades de formato ----------
 
 bool isHexChar(char c) { return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); }
 
@@ -86,7 +83,6 @@ uint8_t hexVal(char c) {
   return c - 'A' + 10;
 }
 
-// CUERPO válido: MAYÚSCULAS ':' y hasta 60 caracteres [A-Za-z0-9,.-]
 bool isValidBody(const char *b) {
   const char *colon = strchr(b, ':');
   if (!colon || colon == b) return false;
@@ -100,7 +96,6 @@ bool isValidBody(const char *b) {
   return true;
 }
 
-// MAC = HMAC-SHA256(clave, dir|s1 s2|seq|cuerpo) -> 16 caracteres hex
 void computeMac(char dir, const char *s1, const char *s2, uint32_t seq, const char *body, char out[17]) {
   br_hmac_key_context kc;
   br_hmac_key_init(&kc, &br_sha256_vtable, key, keyLen);
@@ -122,7 +117,6 @@ void computeMac(char dir, const char *s1, const char *s2, uint32_t seq, const ch
   out[16] = '\0';
 }
 
-// Comparación en tiempo constante (no revela cuántos caracteres coinciden)
 bool macEquals(const char *a, const char *b) {
   uint8_t diff = 0;
   for (int i = 0; i < 16; i++) {
@@ -144,11 +138,11 @@ void sendFrame(uint32_t seq, const char *body) {
 
 void send(const char *body) { if (session) sendFrame(++txSeq, body); }
 
-// ---------- Actuadores ----------
+// ---------- Actuadores y Control Automático ----------
 
 void applyOutputs() {
   servo.write(ventOpen ? SERVO_OPEN : SERVO_CLOSED);
-  // La turbina solo gira con la compuerta abierta
+  // La turbina solo opera cuando la compuerta está abierta
   analogWrite(PIN_FAN, ventOpen ? map(fanPct, 0, 100, 0, 1023) : 0);
 }
 
@@ -159,8 +153,34 @@ void sendData() {
   send(body);
 }
 
+void processAutoMode() {
+  if (!autoMode) return;
+
+  bool changed = false;
+  if (movement) {
+    // Regla 1: Movimiento detectado -> cerrar compuerta inmediatamente
+    if (ventOpen) {
+      ventOpen = false;
+      changed = true;
+    }
+  } else if (dhtOk) {
+    // Regla 2: Sin movimiento -> controlar compuerta por humedad
+    if (humidity >= HUMEDAD_MAX && !ventOpen) {
+      ventOpen = true;
+      changed = true;
+    } else if (humidity <= HUMEDAD_MIN && ventOpen) {
+      ventOpen = false;
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    applyOutputs();
+    sendData();
+  }
+}
+
 void failSafe() {
-  // Sin comunicación: estado seguro
   ventOpen = false;
   applyOutputs();
   session = false;
@@ -168,10 +188,10 @@ void failSafe() {
   Serial.println(F("[enlace] sin datos de la app: compuerta cerrada"));
 }
 
-// ---------- Protocolo ----------
+// ---------- Procesamiento de Comandos ----------
 
 void handleHello(const char *body, uint32_t seq, const char *mac) {
-  const char *nonce = body + 6;  // después de "HELLO:"
+  const char *nonce = body + 6;
   if (seq != 0 || !isHexStr(nonce, 16)) { rejected++; return; }
   char expected[17];
   computeMac('A', nonce, "", 0, body, expected);
@@ -179,7 +199,7 @@ void handleHello(const char *body, uint32_t seq, const char *mac) {
 
   strncpy(appNonce, nonce, 16); appNonce[16] = '\0';
   uint8_t rnd[8];
-  ESP.random(rnd, sizeof(rnd));  // generador aleatorio por hardware del ESP8266
+  ESP.random(rnd, sizeof(rnd));
   for (int i = 0; i < 8; i++) sprintf(devNonce + 2 * i, "%02x", rnd[i]);
   devNonce[16] = '\0';
   txSeq = 0; rxSeq = 0;
@@ -189,40 +209,49 @@ void handleHello(const char *body, uint32_t seq, const char *mac) {
   char welcome[32];
   snprintf(welcome, sizeof(welcome), "WELCOME:%s", devNonce);
   sendFrame(0, welcome);
-  Serial.println(F("[enlace] sesión segura iniciada"));
+  Serial.println(F("[enlace] sesión segura iniciada con la app"));
   sendData();
 }
 
 void handleCommand(const char *body, uint32_t seq) {
   char ack[20];
-  snprintf(ack, sizeof(ack), "ACK:%lu", (unsigned long)seq);
+  snprintf(ack, sizeof(ack), "%lu", (unsigned long)seq);
 
   if (strncmp(body, "PING:", 5) == 0) {
     char pong[40];
     snprintf(pong, sizeof(pong), "PONG:%s", body + 5);
     send(pong);
   } else if (strcmp(body, "VENT:1") == 0 || strcmp(body, "VENT:0") == 0) {
-    ventOpen = body[5] == '1';
+    ventOpen = (body[5] == '1');
     applyOutputs();
-    send(ack);
+    char ackStr[32];
+    snprintf(ackStr, sizeof(ackStr), "ACK:%lu", (unsigned long)seq);
+    send(ackStr);
     sendData();
   } else if (strncmp(body, "FAN:", 4) == 0) {
     int v = atoi(body + 4);
     if (v < 0 || v > 100) { send("ERR:RANGO"); return; }
     fanPct = v;
     applyOutputs();
-    send(ack);
+    char ackStr[32];
+    snprintf(ackStr, sizeof(ackStr), "ACK:%lu", (unsigned long)seq);
+    send(ackStr);
     sendData();
   } else if (strcmp(body, "MODE:A") == 0 || strcmp(body, "MODE:M") == 0) {
-    autoMode = body[5] == 'A';
-    send(ack);
+    autoMode = (body[5] == 'A');
+    if (autoMode) {
+      processAutoMode();
+    }
+    char ackStr[32];
+    snprintf(ackStr, sizeof(ackStr), "ACK:%lu", (unsigned long)seq);
+    send(ackStr);
+    sendData();
   } else {
     send("ERR:CMD");
   }
 }
 
 void handleLine(char *l) {
-  // Separar SEQ|CUERPO|MAC
   char *p1 = strchr(l, '|');
   char *p2 = strrchr(l, '|');
   if (!p1 || p1 == p2) { rejected++; return; }
@@ -254,12 +283,12 @@ void readClient() {
     } else if (lineLen < MAX_LINE) {
       line[lineLen++] = c;
     } else {
-      overflow = true;  // línea demasiado larga: se descarta entera
+      overflow = true;
     }
   }
 }
 
-// ---------- Sensores y pantalla ----------
+// ---------- Sensores y pantalla LCD ----------
 
 void readSensors() {
   float t = dht.readTemperature();
@@ -272,7 +301,7 @@ void updateLcd() {
   char r0[17], r1[17];
   if (dhtOk) snprintf(r0, sizeof(r0), "T%2dC H%2d%% Mov:%s", temperature, humidity, movement ? "SI" : "NO");
   else snprintf(r0, sizeof(r0), "DHT11 sin datos ");
-  snprintf(r1, sizeof(r1), "%-7s %3d%% %s", ventOpen ? "ABIERTA" : "CERRADA", ventOpen ? fanPct : 0, session ? "APP" : "---");
+  snprintf(r1, sizeof(r1), "%-7s %s %s", ventOpen ? "ABIERTA" : "CERRADA", autoMode ? "AUTO" : "MAN ", session ? "APP" : "---");
   lcd.setCursor(0, 0); lcd.print(r0); for (size_t i = strlen(r0); i < 16; i++) lcd.print(' ');
   lcd.setCursor(0, 1); lcd.print(r1); for (size_t i = strlen(r1); i < 16; i++) lcd.print(' ');
 }
@@ -286,7 +315,7 @@ void halt(const __FlashStringHelper *msg) {
 // ---------- Arranque ----------
 
 void setup() {
-  Serial.begin(115200, SERIAL_8N1, SERIAL_TX_ONLY);  // deja el pin RX libre para la turbina
+  Serial.begin(115200, SERIAL_8N1, SERIAL_TX_ONLY);
   pinMode(PIN_FAN, FUNCTION_3);
   pinMode(PIN_FAN, OUTPUT);
   analogWriteRange(1023);
@@ -295,7 +324,8 @@ void setup() {
 
   lcd.begin(16, 2);
   lcd.print(F("AeroSmart Home"));
-  servo.attach(PIN_SERVO);
+
+  servo.attach(PIN_SERVO, SERVO_PULSO_MIN, SERVO_PULSO_MAX);
   servo.write(SERVO_CLOSED);
   dht.begin();
 
@@ -308,7 +338,6 @@ void setup() {
   if (strlen(AP_PASSWORD) < 8) halt(F("Clave WiFi < 8"));
 
   WiFi.mode(WIFI_AP);
-  // canal 6, red visible, máximo 1 teléfono conectado
   WiFi.softAP(AP_SSID, AP_PASSWORD, 6, false, 1);
   server.begin();
   server.setNoDelay(true);
@@ -320,16 +349,17 @@ void setup() {
 }
 
 void loop() {
-  // Nueva conexión: reemplaza a la anterior y obliga a un saludo nuevo
-  WiFiClient incoming = server.accept();
-  if (incoming) {
-    if (client) client.stop();
-    client = incoming;
-    client.setNoDelay(true);
-    session = false;
-    lineLen = 0; overflow = false;
-    lastRxMs = millis();
-    Serial.println(F("[enlace] teléfono conectado"));
+  if (!client || !client.connected()) {
+    WiFiClient incoming = server.accept();
+    if (incoming) {
+      if (client) client.stop();
+      client = incoming;
+      client.setNoDelay(true);
+      session = false;
+      lineLen = 0; overflow = false;
+      lastRxMs = millis();
+      Serial.println(F("[enlace] teléfono conectado"));
+    }
   }
 
   readClient();
@@ -339,13 +369,23 @@ void loop() {
   if (!session && ventOpen && now - lastRxMs > LINK_TIMEOUT_MS) failSafe();
 
   bool m = digitalRead(PIN_PIR) == HIGH;
-  if (m != movement) { movement = m; sendData(); }  // la presencia se informa al instante
+  if (m != movement) {
+    movement = m;
+    processAutoMode();
+    sendData();
+  }
 
   if (now - lastDataMs >= DATA_EVERY_MS) {
     lastDataMs = now;
     readSensors();
+    processAutoMode();
     sendData();
   }
-  if (now - lastLcdMs >= LCD_EVERY_MS) { lastLcdMs = now; updateLcd(); }
+
+  if (now - lastLcdMs >= LCD_EVERY_MS) {
+    lastLcdMs = now;
+    updateLcd();
+  }
+
   delay(5);
 }

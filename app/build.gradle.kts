@@ -29,7 +29,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "LINK_KEY_HEX", "\"${localProps.getProperty("aerosmart.linkKey", "")}\"")
+        buildConfigField("String", "LINK_KEY_HEX", "\"${localProps.getProperty("aerosmart.linkKey", "00000000000000000000000000000000")}\"")
         buildConfigField("String", "DEVICE_HOST", "\"${localProps.getProperty("aerosmart.host", "192.168.4.1")}\"")
         buildConfigField("int", "DEVICE_PORT", localProps.getProperty("aerosmart.port", "3333"))
     }
