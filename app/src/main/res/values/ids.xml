@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Etiquetas internas del esqueleto de carga (Skeleton.kt) -->
+    <item name="skeleton_original_fg" type="id" />
+    <item name="skeleton_state" type="id" />
+</resources>

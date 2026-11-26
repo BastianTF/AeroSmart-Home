@@ -60,18 +60,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestInitialPermissions() {
+        // Solo se pide lo que la app usa: notificaciones (Android 13+). Wi-Fi e Internet no requieren diálogo.
         val needed = mutableListOf<String>()
-
-        needed.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        needed.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            needed.add(Manifest.permission.BLUETOOTH_CONNECT)
-            needed.add(Manifest.permission.BLUETOOTH_SCAN)
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            needed.add(Manifest.permission.NEARBY_WIFI_DEVICES)
             needed.add(Manifest.permission.POST_NOTIFICATIONS)
         }
 

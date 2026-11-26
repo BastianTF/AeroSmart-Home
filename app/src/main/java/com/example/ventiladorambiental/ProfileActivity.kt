@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.ventiladorambiental.auth.GoogleAuth
 import com.example.ventiladorambiental.data.UserPreferences
 import com.example.ventiladorambiental.data.UserRepository
 import com.example.ventiladorambiental.databinding.ActivityProfileBinding
@@ -41,8 +42,8 @@ class ProfileActivity : AppCompatActivity() {
         userPreferences = UserPreferences(this)
 
         binding.btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        Skeleton.show(binding.contentLayout, setOf(binding.btnBack))
         loadData()
-        UiFx.animateChildrenIn(binding.contentLayout, 40)
     }
 
     private fun loadData() {
@@ -57,6 +58,7 @@ class ProfileActivity : AppCompatActivity() {
             binding.switchDarkMode.isChecked = settings.isDarkMode
             // Los listeners se conectan después de cargar, así no reaccionan a los valores iniciales.
             setupListeners()
+            Skeleton.hide(binding.contentLayout) // muestra los datos reales con la animación de entrada
         }
     }
 
@@ -141,6 +143,7 @@ class ProfileActivity : AppCompatActivity() {
             .setPositiveButton("Cerrar sesión") { _, _ ->
                 lifecycleScope.launch {
                     userPreferences.clearSession()
+                    GoogleAuth.signOut(this@ProfileActivity) // si entró con Google, cierra también esa sesión
                     val intent = Intent(this@ProfileActivity, LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)

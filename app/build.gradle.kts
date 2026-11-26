@@ -32,6 +32,8 @@ android {
         buildConfigField("String", "LINK_KEY_HEX", "\"${localProps.getProperty("aerosmart.linkKey", "00000000000000000000000000000000")}\"")
         buildConfigField("String", "DEVICE_HOST", "\"${localProps.getProperty("aerosmart.host", "192.168.4.1")}\"")
         buildConfigField("int", "DEVICE_PORT", localProps.getProperty("aerosmart.port", "3333"))
+        // Inicio con Google: "ID de cliente web" de OAuth (Firebase > Authentication > Google). Ver docs/GUIA_EQUIPO.md
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProps.getProperty("aerosmart.googleWebClientId", "")}\"")
     }
 
     buildTypes {
@@ -68,6 +70,11 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1") // await() de Firebase
+    // Inicio de sesión con Google (Credential Manager)
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

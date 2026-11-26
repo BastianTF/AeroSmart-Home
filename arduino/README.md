@@ -10,13 +10,11 @@ Sketch: `AeroSmartHome/AeroSmartHome.ino`
 | PIR HC-SR501 | VCC / OUT / GND | 5V / D6 / GND |
 | Servo SG90 | Rojo / Señal / Marrón | 5V / D7 / GND |
 | Turbina | Base o gate del transistor (con resistencia de 1 kΩ) | RX |
-| LCD 16x2 | RS / E / D4 / D5 / D6 / D7 | D1 / D2 / D3 / D4 / D0 / D8 |
-| LCD 16x2 | VSS, RW, K / VDD / V0 / A | GND / 5V / potenciómetro 10 kΩ / 5V con 220 Ω |
 
 Notas:
 - La turbina **no** se conecta directo al pin: usa un transistor o MOSFET (ej. 2N2222, IRLZ44N) y un diodo en paralelo al motor (1N4007).
 - Si la subida del sketch falla, desconecta un momento el cable del pin RX (la turbina) y vuelve a subir.
-- D3, D4 y D8 son pines de arranque del ESP8266. Con la LCD conectada así arranca normal; si no arranca, revisa que nada fuerce esos pines a un nivel distinto.
+- El firmware actual **no usa LCD**: los eventos se ven en el monitor serie (115200 baudios).
 
 ## Preparar el Arduino IDE
 
@@ -36,7 +34,14 @@ Notas:
 
 ## Probar
 
-1. Sube el sketch. La LCD muestra la IP `192.168.4.1`.
+1. Sube el sketch. El monitor serie muestra la red y la IP `192.168.4.1`.
 2. En el teléfono Android: **Ajustes > Wi-Fi > AeroSmart-Home**. Si avisa que no hay internet, elige **Mantener conexión**.
-3. En la app: **Conectar > Placa AeroSmart**. La LCD muestra `APP` en la segunda línea.
-4. Monitor serie (115200 baudios) muestra los eventos: sesión iniciada, mensajes descartados, etc.
+3. En la app: **Conectar > Placa AeroSmart**. El monitor serie dice "sesión segura iniciada".
+4. El monitor serie muestra los eventos: `[orden] VENT:1`, mensajes descartados, modo seguro, etc.
+
+## Sin conexión (búfer offline)
+
+- Sin app conectada la placa guarda **1 lectura cada 30 s** en RAM (hasta 120 = 1 hora; si se llena, se pisa la más antigua).
+- Al reconectar las reenvía como `HIST:edad_s,temp,hum,pir,compuerta` (firmadas igual que todo) y el monitor serie dice "[offline] lecturas por reenviar: N".
+- Si la app deja de hablar 15 s, la placa **cierra la compuerta y apaga la turbina** (modo seguro).
+- Se pierde si se corta la luz (está en RAM a propósito, para no gastar la flash).

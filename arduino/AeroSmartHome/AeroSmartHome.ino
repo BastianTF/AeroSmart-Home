@@ -6,6 +6,9 @@
  *
  * Comunicación con la app: La placa crea su propia red Wi-Fi WPA2 (AP_SSID) y escucha en el puerto 3333.
  * Transmite seguridad mediante HMAC-SHA256 utilizando la clave en secrets.h.
+ *
+ * Sin app conectada (3.1.1.4): guarda una lectura cada 30 s en un búfer circular en RAM (120 = 1 hora)
+ * y, cuando la app vuelve a conectarse, las reenvía una por una como "HIST:edad_s,temp,hum,pir,compuerta".
  */
 
 #include <ESP8266WiFi.h>
@@ -35,6 +38,15 @@ const unsigned long DATA_EVERY_MS = 3000;
 const unsigned long LINK_TIMEOUT_MS = 15000;
 const size_t MAX_LINE = 120;
 
+// ---------- Búfer offline (sin app conectada) ----------
+const unsigned long OFFLINE_EVERY_MS = 30000; // una lectura cada 30 s
+const uint8_t OFFLINE_SIZE = 120;             // 120 x 30 s = 1 hora; ~1 KB de RAM
+const unsigned long HIST_EVERY_MS = 50;       // ritmo de reenvío para no saturar el enlace
+
+// ---------- Energía ----------
+const unsigned long LOOP_DELAY_ACTIVE_MS = 5;  // con app conectada: respuesta rápida
+const unsigned long LOOP_DELAY_IDLE_MS   = 50; // sin app: el CPU descansa más (menos consumo)
+
 WiFiServer server(PORT);
 WiFiClient client;
 DHT dht(PIN_DHT, DHT11);
@@ -56,6 +68,12 @@ bool autoMode = true; // Modo automático por defecto
 uint8_t fanPct = 60;
 int temperature = 0, humidity = 0;
 bool dhtOk = false;
+
+struct OfflineReading { unsigned long ms; int8_t t; uint8_t h; uint8_t flags; };
+OfflineReading offline[OFFLINE_SIZE];
+uint8_t offHead = 0, offCount = 0;      // offHead = posición de la más antigua
+unsigned long lastOfflineMs = 0, lastHistMs = 0;
+uint32_t offDropped = 0;                // lecturas sobreescritas por búfer lleno
 
 char line[MAX_LINE + 1];
 size_t lineLen = 0;
@@ -149,6 +167,27 @@ void sendData() {
   send(body);
 }
 
+// ---------- Búfer offline ----------
+
+void storeOffline() {
+  if (!dhtOk) return;
+  uint8_t idx = (offHead + offCount) % OFFLINE_SIZE;
+  if (offCount == OFFLINE_SIZE) { offHead = (offHead + 1) % OFFLINE_SIZE; offDropped++; } else offCount++;
+  offline[idx] = { millis(), (int8_t)temperature, (uint8_t)humidity, (uint8_t)((movement ? 1 : 0) | (ventOpen ? 2 : 0)) };
+}
+
+/** Envía la lectura guardada más antigua. Se llama de a una por vuelta del loop. */
+void flushOneOffline() {
+  if (!session || offCount == 0) return;
+  OfflineReading &r = offline[offHead];
+  char body[48];
+  snprintf(body, sizeof(body), "HIST:%lu,%d,%d,%d,%d", (millis() - r.ms) / 1000UL, r.t, r.h, r.flags & 1, (r.flags >> 1) & 1);
+  send(body);
+  offHead = (offHead + 1) % OFFLINE_SIZE;
+  offCount--;
+  if (offCount == 0) Serial.println(F("[offline] historial reenviado a la app"));
+}
+
 void processAutoMode() {
   if (!autoMode) return;
 
@@ -207,6 +246,7 @@ void handleHello(const char *body, uint32_t seq, const char *mac) {
   sendFrame(0, welcome);
   Serial.println(F("[enlace] sesión segura iniciada con la app"));
   sendData();
+  if (offCount > 0) { Serial.print(F("[offline] lecturas por reenviar: ")); Serial.println(offCount); }
 }
 
 void handleCommand(const char *body, uint32_t seq) {
@@ -266,6 +306,7 @@ void handleLine(char *l) {
   if (seq <= rxSeq) { rejected++; Serial.println(F("[enlace] mensaje repetido descartado")); return; }
   rxSeq = seq;
   lastRxMs = millis();
+  if (strncmp(body, "PING:", 5) != 0) { Serial.print(F("[orden] ")); Serial.println(body); }
   handleCommand(body, seq);
 }
 
@@ -367,5 +408,9 @@ void loop() {
     sendData();
   }
 
-  delay(5);
+  // Sin app: guardar lecturas para reenviarlas después. Con app: reenviar las pendientes.
+  if (!session && now - lastOfflineMs >= OFFLINE_EVERY_MS) { lastOfflineMs = now; storeOffline(); }
+  if (session && offCount > 0 && now - lastHistMs >= HIST_EVERY_MS) { lastHistMs = now; flushOneOffline(); }
+
+  delay(session ? LOOP_DELAY_ACTIVE_MS : LOOP_DELAY_IDLE_MS);
 }

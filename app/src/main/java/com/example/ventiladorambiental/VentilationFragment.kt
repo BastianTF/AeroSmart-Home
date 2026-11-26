@@ -59,6 +59,8 @@ class VentilationFragment : Fragment() {
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
+                // Esqueleto de carga mientras se conecta o se lee el historial
+                Skeleton.set(binding.contentLayout, state is MainUiState.Loading, listOf(binding.headerLayout))
                 if (state !is MainUiState.Success) return@collectLatest
 
                 binding.txtServoStatus.text = if (state.isVentOpen) "Compuerta abierta" else "Compuerta cerrada"
@@ -89,6 +91,7 @@ class VentilationFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        Skeleton.hide(binding.contentLayout)
         fanAnimator?.cancel()
         fanAnimator = null
         fanAnimSpeed = -1

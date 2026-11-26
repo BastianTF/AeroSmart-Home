@@ -1,6 +1,7 @@
 package com.example.ventiladorambiental.data
 
 import android.content.Context
+import com.example.ventiladorambiental.security.KeystoreCipher
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -108,7 +109,7 @@ class UserPreferences(private val context: Context) {
     val profile: Flow<UserProfile> = context.dataStore.data.map { prefs ->
         UserProfile(
             name = prefs[PROFILE_NAME] ?: "",
-            phone = prefs[PROFILE_PHONE] ?: "",
+            phone = prefs[PROFILE_PHONE]?.let(::readPhone) ?: "",
             email = prefs[PROFILE_EMAIL] ?: ""
         )
     }
@@ -116,9 +117,14 @@ class UserPreferences(private val context: Context) {
     suspend fun saveProfile(name: String, phone: String) {
         context.dataStore.edit { prefs ->
             prefs[PROFILE_NAME] = name.trim().take(60)
-            prefs[PROFILE_PHONE] = phone.trim().take(20)
+            // El celular es dato personal: se guarda cifrado con AES-256-GCM (clave en Android Keystore)
+            prefs[PROFILE_PHONE] = KeystoreCipher.encrypt(phone.trim().take(20))
         }
     }
+
+    /** Descifra el celular. Versiones anteriores lo guardaban en claro: se acepta y se cifra al próximo guardado. */
+    private fun readPhone(stored: String): String =
+        KeystoreCipher.decrypt(stored) ?: stored.takeIf { s -> s.length <= 20 && s.all { it.isDigit() || it == '+' || it == ' ' } }.orEmpty()
 
     suspend fun saveEmail(email: String) {
         context.dataStore.edit { prefs -> prefs[PROFILE_EMAIL] = email.trim().lowercase().take(120) }

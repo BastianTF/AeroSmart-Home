@@ -25,14 +25,20 @@ class ReadingRepository(context: Context) {
     private val db = AeroDatabase.get(context)
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-    suspend fun insert(temperature: Int, humidity: Int, movement: Boolean, ventOpen: Boolean) = withContext(Dispatchers.IO) {
+    suspend fun insert(
+        temperature: Int,
+        humidity: Int,
+        movement: Boolean,
+        ventOpen: Boolean,
+        createdAt: Long = System.currentTimeMillis()
+    ) = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
             put("temperatura", temperature)
             put("humedad", humidity)
             put("movimiento", if (movement) 1 else 0)
             put("compuerta_abierta", if (ventOpen) 1 else 0)
             put("sincronizado", 0)
-            put("creado_en", System.currentTimeMillis())
+            put("creado_en", createdAt)
         }
         db.writableDatabase.insert(AeroDatabase.T_READINGS, null, values)
     }
@@ -61,11 +67,20 @@ class ReadingRepository(context: Context) {
         }
     }
 
+    /** Cuántas lecturas faltan por subir a la nube (se muestra en Monitoreo). */
+    suspend fun countUnsynced(): Int = withContext(Dispatchers.IO) {
+        db.readableDatabase.rawQuery("SELECT COUNT(*) FROM ${AeroDatabase.T_READINGS} WHERE sincronizado = 0", null)
+            .use { if (it.moveToFirst()) it.getInt(0) else 0 }
+    }
+
     /** Marca una lista de lecturas como ya sincronizadas con Firebase. */
     suspend fun markAsSynced(ids: List<Long>) = withContext(Dispatchers.IO) {
         if (ids.isEmpty()) return@withContext
-        val idList = ids.joinToString(",")
-        db.writableDatabase.execSQL("UPDATE ${AeroDatabase.T_READINGS} SET sincronizado = 1 WHERE id IN ($idList)")
+        val placeholders = ids.joinToString(",") { "?" }
+        db.writableDatabase.execSQL(
+            "UPDATE ${AeroDatabase.T_READINGS} SET sincronizado = 1 WHERE id IN ($placeholders)",
+            ids.map { it.toString() }.toTypedArray()
+        )
     }
 
     /** Las últimas [limit] lecturas, de la más antigua a la más nueva (para el gráfico). */
@@ -81,9 +96,18 @@ class ReadingRepository(context: Context) {
         }
     }
 
-    /** Borra lecturas de más de [days] días para que la base no crezca sin límite. */
-    suspend fun purgeOlderThan(days: Long) = withContext(Dispatchers.IO) {
-        val limit = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days)
-        db.writableDatabase.delete(AeroDatabase.T_READINGS, "creado_en < ?", arrayOf(limit.toString()))
+    /**
+     * Borra lecturas ya sincronizadas de más de [days] días para que la base no crezca sin límite.
+     * Las pendientes se conservan hasta [maxPendingDays] para no perder datos que aún no llegan a la nube.
+     */
+    suspend fun purgeOlderThan(days: Long, maxPendingDays: Long = 30) = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
+        val synced = now - TimeUnit.DAYS.toMillis(days)
+        val pending = now - TimeUnit.DAYS.toMillis(maxPendingDays)
+        db.writableDatabase.delete(
+            AeroDatabase.T_READINGS,
+            "(sincronizado = 1 AND creado_en < ?) OR creado_en < ?",
+            arrayOf(synced.toString(), pending.toString())
+        )
     }
 }

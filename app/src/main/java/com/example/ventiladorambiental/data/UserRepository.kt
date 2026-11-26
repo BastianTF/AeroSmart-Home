@@ -52,11 +52,40 @@ class UserRepository(context: Context) {
         user
     }
 
+    /**
+     * Cuenta local para un usuario que entró con Google. No tiene contraseña local: se guarda un
+     * marcador que nunca coincide con PasswordHasher.verify, así nadie puede entrar a esa cuenta
+     * con correo y contraseña. Si el correo ya estaba registrado, se reutiliza esa cuenta.
+     */
+    suspend fun ensureGoogleUser(name: String, email: String): LocalUser = withContext(Dispatchers.IO) {
+        val normalized = email.trim().lowercase()
+        val values = ContentValues().apply {
+            put("nombre", name.trim().take(60))
+            put("email", normalized)
+            put("telefono_cifrado", KeystoreCipher.encrypt(""))
+            put("password_hash", GOOGLE_ACCOUNT)
+            put("creado_en", System.currentTimeMillis())
+        }
+        db.writableDatabase.insertWithOnConflict(AeroDatabase.T_USERS, null, values, android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE)
+        db.readableDatabase.rawQuery(
+            "SELECT nombre, email, telefono_cifrado FROM ${AeroDatabase.T_USERS} WHERE email = ?",
+            arrayOf(normalized)
+        ).use {
+            if (it.moveToFirst()) LocalUser(it.getString(0), it.getString(1), KeystoreCipher.decrypt(it.getString(2)).orEmpty())
+            else LocalUser(name, normalized, "")
+        }
+    }
+
     suspend fun updateProfile(email: String, name: String, phone: String): Boolean = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
             put("nombre", name.trim())
             put("telefono_cifrado", KeystoreCipher.encrypt(phone))
         }
         db.writableDatabase.update(AeroDatabase.T_USERS, values, "email = ?", arrayOf(email.trim().lowercase())) > 0
+    }
+
+    companion object {
+        /** Marcador de cuenta Google (no es un hash válido: 1 sola parte). */
+        private const val GOOGLE_ACCOUNT = "GOOGLE"
     }
 }

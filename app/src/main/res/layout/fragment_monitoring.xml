@@ -557,6 +557,15 @@
                     android:text="Protegido: mensajes firmados con HMAC-SHA256, red Wi-Fi WPA2"
                     android:textColor="@color/success"
                     android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/txtSyncStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Nube: al día"
+                    android:textColor="@color/text_gray"
+                    android:textSize="12sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

@@ -9,6 +9,7 @@ import com.example.ventiladorambiental.data.Schedule
 import com.example.ventiladorambiental.data.SyncRepository
 import com.example.ventiladorambiental.link.Commands
 import com.example.ventiladorambiental.link.DeviceLink
+import com.example.ventiladorambiental.link.HistoryReading
 import com.example.ventiladorambiental.link.LinkQuality
 import com.example.ventiladorambiental.link.SecureChannel
 import com.example.ventiladorambiental.link.Telemetry
@@ -58,19 +59,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var link: DeviceLink? = null
     private val readings = ReadingRepository(application)
     private val syncRepository = SyncRepository(application)
+    private var pendingSync = 0
+    private var recoveredFromDevice = 0
+    private val stopNetworkWatch: () -> Unit
 
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
     init {
-        updateSuccessState()
+        // Queda en Loading (esqueleto en pantalla) hasta leer el historial guardado en SQLite
         viewModelScope.launch {
             readings.purgeOlderThan(HISTORY_DAYS)
             val saved = readings.latest(MAX_HISTORY)
             history.addAll(saved)
             saved.lastOrNull()?.let { temperature = it.temperature; humidity = it.humidity }
             updateSuccessState()
-            syncRepository.syncPendingReadings()
+            syncNow(force = true)
         }
+        // Al recuperar Internet se suben las lecturas guardadas sin conexión (almacenamiento temporal).
+        stopNetworkWatch = syncRepository.watchNetwork { viewModelScope.launch { syncNow(force = true) } }
+    }
+
+    private suspend fun syncNow(force: Boolean = false) {
+        syncRepository.syncPendingReadings(force)
+        val count = syncRepository.pendingCount()
+        if (count != pendingSync) { pendingSync = count; updateSuccessState() }
     }
 
     // ---------- Conexión con la placa real ----------
@@ -128,6 +140,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun onDeviceMessage(body: String) {
+        HistoryReading.parse(body)?.let { saveDeviceHistory(it); return }
         val t = Telemetry.parse(body) ?: return
         temperature = t.temperature
         humidity = t.humidity
@@ -138,6 +151,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         recordReading()
         evaluateAutomation()
         updateSuccessState()
+    }
+
+    /** Lectura que la placa guardó mientras la app no estaba conectada: se guarda con su hora real. */
+    private fun saveDeviceHistory(h: HistoryReading) {
+        val at = h.timestamp(System.currentTimeMillis())
+        recoveredFromDevice++
+        viewModelScope.launch {
+            readings.insert(h.temperature, h.humidity, h.movement, h.ventOpen, createdAt = at)
+            pendingSync = syncRepository.pendingCount()
+            updateSuccessState()
+        }
     }
 
     fun disconnectDevice() {
@@ -229,7 +253,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val t = temperature; val h = humidity; val m = isMovement; val v = isVentOpen
             viewModelScope.launch {
                 readings.insert(t, h, m, v)
-                syncRepository.syncPendingReadings()
+                syncNow()
             }
         }
     }
@@ -318,11 +342,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             lastUpdate = lastUpdate,
             isDemo = isDemo,
             linkStatus = linkStatus,
-            linkQuality = if (isConnected && !isDemo) linkQuality else null
+            linkQuality = if (isConnected && !isDemo) linkQuality else null,
+            pendingSync = pendingSync,
+            recoveredFromDevice = recoveredFromDevice
         )
     }
 
     override fun onCleared() {
+        stopNetworkWatch()
         releaseLink()
         super.onCleared()
     }
