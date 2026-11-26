@@ -19,6 +19,32 @@ Ver `arduino/README.md`: copiar `secrets.example.h` como `secrets.h`, poner la m
 2. **Realtime Database → Reglas** → pegar el contenido de `firebase/database.rules.json` → **Publicar**.
 3. Sin estos dos pasos, las lecturas quedan pendientes en el teléfono (no se pierden, pero no suben).
 
+### Inicio con Google (obligatorio)
+El código ya está hecho (`auth/GoogleAuth.kt`, botón G en Login y Registro). Falta configurar Firebase:
+
+1. Consola de Firebase → **Authentication → Sign-in method → Google → Habilitar**, elegir correo de asistencia y **Guardar**.
+2. En esa misma ventana, abrir **Configuración del SDK web** y copiar el **ID de cliente web** (termina en `.apps.googleusercontent.com`).
+3. Pegarlo en `local.properties`:
+   ```
+   aerosmart.googleWebClientId=XXXXXXXX.apps.googleusercontent.com
+   ```
+4. Sacar la huella **SHA-1** del PC donde se compila. En la terminal de Android Studio:
+   ```
+   ./gradlew signingReport
+   ```
+   (en Windows: `gradlew signingReport`) y copiar el `SHA1` de la variante `debug`.
+5. Firebase → ⚙️ **Configuración del proyecto → Tus apps → app Android → Agregar huella digital** → pegar el SHA-1.
+   **Cada PC del equipo tiene un SHA-1 distinto**: hay que agregar el de cada uno (o compilar siempre en el mismo PC).
+6. Descargar el `google-services.json` nuevo y reemplazar `app/google-services.json`.
+7. Probar en un teléfono o emulador **con Google Play** y una cuenta de Google agregada.
+
+Errores típicos:
+| Mensaje | Causa |
+|---|---|
+| "Falta configurar Google…" | No está `aerosmart.googleWebClientId` en `local.properties`. |
+| "No se pudo iniciar con Google: … [28444]" o similar | Falta el SHA-1 del PC en Firebase, o el ID de cliente no es el **web**. |
+| "No hay cuentas de Google en este teléfono" | Agregar una cuenta en Ajustes > Cuentas (el emulador debe tener Google Play). |
+
 ## 2. Lista de pruebas (marcar antes de presentar)
 
 | # | Prueba | Esperado | OK |
@@ -26,6 +52,7 @@ Ver `arduino/README.md`: copiar `secrets.example.h` como `secrets.h`, poner la m
 | 1 | Correr `SecureChannelTest` y `HistoryReadingTest` | 11 pruebas en verde | |
 | 2 | Registro con correo nuevo | Entra a la app | |
 | 3 | Login con contraseña mala 5 veces | Bloqueo de 30 s | |
+| 3b | Botón G "Continuar con Google" | Elige cuenta y entra; al cerrar sesión vuelve a preguntar | |
 | 4 | Conectar a la placa | Datos reales en Inicio y Monitoreo | |
 | 5 | Abrir/cerrar compuerta y cambiar velocidad | Servo y turbina responden, monitor serie muestra `[orden]` | |
 | 6 | Pasar la mano por el PIR | "Movimiento detectado" al instante + notificación | |
@@ -58,6 +85,7 @@ Plan B si falla el hardware: `tools/placa-simulada/placa_simulada.py` (mismo pro
 | ¿Está cifrado el enlace? | El Wi-Fi WPA2 cifra con AES-CCMP; encima, cada mensaje va firmado con HMAC-SHA256 para que no se pueda alterar ni falsificar. El contenido no se cifra dos veces (es telemetría, sin datos personales). |
 | ¿Qué pasa si alguien repite un mensaje? | Se rechaza por número de secuencia (antirepetición) y nonces nuevos en cada conexión. |
 | ¿Cómo guardan las contraseñas? | Nunca en claro: PBKDF2 con sal y 120.000 iteraciones. |
+| ¿Cómo funciona el login con Google? | Credential Manager pide la cuenta, Google entrega un ID token firmado y Firebase Auth lo valida. La app nunca ve la contraseña de Google y la cuenta local queda sin contraseña (no se puede entrar a ella con correo/clave). |
 | ¿Qué datos personales suben a la nube? | Ninguno: solo temperatura, humedad, presencia y compuerta, con un UID anónimo. |
 | ¿Qué pasa si se corta la conexión? | Placa: modo seguro a los 15 s y guarda 1 h de lecturas. App: reconecta sola y guarda todo en SQLite hasta que haya Internet. |
 | ¿Qué norma ISO aplican? | ISO/IEC 27400:2022 (IoT) como guía y controles de ISO/IEC 27001:2022 Anexo A (tabla en `docs/rubrica-u3.md`). |

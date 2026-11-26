@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.ventiladorambiental.auth.GoogleAuth
 import com.example.ventiladorambiental.data.UserPreferences
 import com.example.ventiladorambiental.data.UserRepository
 import com.example.ventiladorambiental.databinding.ActivityProfileBinding
@@ -141,6 +142,7 @@ class ProfileActivity : AppCompatActivity() {
             .setPositiveButton("Cerrar sesión") { _, _ ->
                 lifecycleScope.launch {
                     userPreferences.clearSession()
+                    GoogleAuth.signOut(this@ProfileActivity) // si entró con Google, cierra también esa sesión
                     val intent = Intent(this@ProfileActivity, LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)

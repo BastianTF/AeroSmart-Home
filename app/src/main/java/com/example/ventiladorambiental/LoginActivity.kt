@@ -42,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
             showForgotPasswordDialog()
         }
 
-        binding.btnGoogle.setOnClickListener { showComingSoon("Google") }
+        binding.btnGoogle.setOnClickListener { startGoogleLogin(it) }
         binding.btnFacebook.setOnClickListener { showComingSoon("Facebook") }
         binding.btnApple.setOnClickListener { showComingSoon("Apple") }
     }

@@ -65,7 +65,7 @@ class RegisterActivity : AppCompatActivity() {
             finish()
         }
 
-        binding.btnRegGoogle.setOnClickListener { showComingSoon("Google") }
+        binding.btnRegGoogle.setOnClickListener { startGoogleLogin(it) }
         binding.btnRegFacebook.setOnClickListener { showComingSoon("Facebook") }
         binding.btnRegApple.setOnClickListener { showComingSoon("Apple") }
     }
