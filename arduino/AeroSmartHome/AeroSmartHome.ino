@@ -152,11 +152,19 @@ void send(const char *body) { if (session) sendFrame(++txSeq, body); }
 
 // ---------- Actuadores y Control Automático ----------
 
+int servoPos = -1; // última posición enviada al servo (-1 = desconocida)
+
 void applyOutputs() {
-  servo.attach(PIN_SERVO, SERVO_PULSO_MIN, SERVO_PULSO_MAX);
-  servo.write(ventOpen ? SERVO_OPEN : SERVO_CLOSED);
-  delay(350);
-  servo.detach(); // Detener impulsos PWM para ahorrar energía cuando el servo no está moviéndose
+  // El servo solo se mueve si cambia de posición: moverlo en cada orden (FAN, MODE) produce picos
+  // de corriente que pueden reiniciar la Wemos cuando se alimenta por USB.
+  int target = ventOpen ? SERVO_OPEN : SERVO_CLOSED;
+  if (target != servoPos) {
+    servo.attach(PIN_SERVO, SERVO_PULSO_MIN, SERVO_PULSO_MAX);
+    servo.write(target);
+    delay(350);
+    servo.detach(); // Detener impulsos PWM para ahorrar energía cuando el servo no está moviéndose
+    servoPos = target;
+  }
   analogWrite(PIN_FAN, ventOpen ? map(fanPct, 0, 100, 0, 1023) : 0);
 }
 
@@ -369,6 +377,7 @@ void setup() {
   servo.write(SERVO_CLOSED);
   delay(350);
   servo.detach();
+  servoPos = SERVO_CLOSED;
   dht.begin();
 
   // Clave compartida desde secrets.h
@@ -385,6 +394,7 @@ void setup() {
   server.begin();
   server.setNoDelay(true);
 
+  Serial.print(F("Motivo del último reinicio: ")); Serial.println(ESP.getResetReason());
   Serial.print(F("Red: ")); Serial.print(AP_SSID); Serial.print(F("  IP: ")); Serial.println(WiFi.softAPIP());
   delay(1500);
   readSensors();
