@@ -39,6 +39,7 @@ class AeroDatabase private constructor(context: Context) :
                 humedad INTEGER NOT NULL,
                 movimiento INTEGER NOT NULL,
                 compuerta_abierta INTEGER NOT NULL,
+                sincronizado INTEGER NOT NULL DEFAULT 0,
                 creado_en INTEGER NOT NULL
             )
             """.trimIndent()
@@ -47,13 +48,14 @@ class AeroDatabase private constructor(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Versión 1: todavía no hay migraciones. Cuando se cambie una tabla,
-        // subir VERSION y agregar aquí un ALTER TABLE (no borrar datos del usuario).
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE $T_READINGS ADD COLUMN sincronizado INTEGER NOT NULL DEFAULT 0")
+        }
     }
 
     companion object {
         const val NAME = "aerosmart.db"
-        const val VERSION = 1
+        const val VERSION = 2
         const val T_USERS = "usuarios"
         const val T_READINGS = "lecturas"
 

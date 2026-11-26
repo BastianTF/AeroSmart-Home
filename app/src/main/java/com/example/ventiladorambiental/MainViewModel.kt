@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ventiladorambiental.data.AutomationRules
 import com.example.ventiladorambiental.data.ReadingRepository
 import com.example.ventiladorambiental.data.Schedule
+import com.example.ventiladorambiental.data.SyncRepository
 import com.example.ventiladorambiental.link.Commands
 import com.example.ventiladorambiental.link.DeviceLink
 import com.example.ventiladorambiental.link.LinkQuality
@@ -56,6 +57,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val linkJobs = mutableListOf<Job>()
     private var link: DeviceLink? = null
     private val readings = ReadingRepository(application)
+    private val syncRepository = SyncRepository(application)
 
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
@@ -67,6 +69,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             history.addAll(saved)
             saved.lastOrNull()?.let { temperature = it.temperature; humidity = it.humidity }
             updateSuccessState()
+            syncRepository.syncPendingReadings()
         }
     }
 
@@ -224,7 +227,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (now - lastDbWriteMs >= 30_000L) { // Guardar en base de datos máximo cada 30 s para ahorrar batería
             lastDbWriteMs = now
             val t = temperature; val h = humidity; val m = isMovement; val v = isVentOpen
-            viewModelScope.launch { readings.insert(t, h, m, v) }
+            viewModelScope.launch {
+                readings.insert(t, h, m, v)
+                syncRepository.syncPendingReadings()
+            }
         }
     }
 
