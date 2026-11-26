@@ -19,7 +19,7 @@ Rutas cortas: `app/` = `app/src/main/java/com/example/ventiladorambiental/`.
 | Ind. | Evidencia |
 |---|---|
 | **2.1.2.5** Método inalámbrico justificado | **Wi-Fi** (punto de acceso WPA2 en la placa + socket TCP). Ver la tabla de abajo. |
-| **2.1.2.6** Mockup de la UI | `mockup/index.html` (abrir en el navegador) y vista previa de los layouts reales en `tools/preview` (3 tamaños de teléfono). Navegación: Splash → Onboarding → Login/Registro → 4 pestañas (Inicio, Monitoreo, Automatización, Ventilación) → Perfil. |
+| **2.1.2.6** Mockup de la UI | `mockup/index.html` (abrir en el navegador) y vista previa de los layouts reales en `tools/preview` (3 tamaños de teléfono). Mientras se conecta o carga el historial cada pantalla muestra un **esqueleto de carga** (`Skeleton.kt`). Navegación: Splash → Onboarding → Login/Registro → 4 pestañas (Inicio, Monitoreo, Automatización, Ventilación) → Perfil. |
 | **2.1.2.7** Validación con el docente | Registrar aquí los cambios pedidos por el profe y qué se ajustó (ej.: "pidió X → se hizo Y en commit Z"). |
 
 ### ¿Por qué Wi-Fi y no Bluetooth o MQTT?

@@ -66,7 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
     init {
-        updateSuccessState()
+        // Queda en Loading (esqueleto en pantalla) hasta leer el historial guardado en SQLite
         viewModelScope.launch {
             readings.purgeOlderThan(HISTORY_DAYS)
             val saved = readings.latest(MAX_HISTORY)

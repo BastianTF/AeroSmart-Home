@@ -42,8 +42,8 @@ class ProfileActivity : AppCompatActivity() {
         userPreferences = UserPreferences(this)
 
         binding.btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        Skeleton.show(binding.contentLayout, setOf(binding.btnBack))
         loadData()
-        UiFx.animateChildrenIn(binding.contentLayout, 40)
     }
 
     private fun loadData() {
@@ -58,6 +58,7 @@ class ProfileActivity : AppCompatActivity() {
             binding.switchDarkMode.isChecked = settings.isDarkMode
             // Los listeners se conectan después de cargar, así no reaccionan a los valores iniciales.
             setupListeners()
+            Skeleton.hide(binding.contentLayout) // muestra los datos reales con la animación de entrada
         }
     }
 

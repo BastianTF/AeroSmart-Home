@@ -87,6 +87,8 @@ class HomeFragment : Fragment() {
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
+                // Esqueleto de carga mientras se conecta o se lee el historial
+                Skeleton.set(binding.contentLayout, state is MainUiState.Loading, listOf(binding.headerLayout, binding.cardConnection))
                 ConnectionUi.render(state, binding.viewStatusDot, binding.txtStatus, binding.txtStatusHint, binding.btnConnect)
                 if (state !is MainUiState.Success) return@collectLatest
 
@@ -134,6 +136,7 @@ class HomeFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        Skeleton.hide(binding.contentLayout)
         super.onDestroyView()
         _binding = null
     }

@@ -29,6 +29,7 @@ Estado al 26-11-2026. Punto de partida: commit `31cf7bb "ns"` (sincronización S
 | 13 | Docs: eva3, contingencia, energía, compatibilidad, guía del equipo | 3.1.3.10, 3.1.4.13, 3.1.4.14 | ✅ Hecho |
 | 14 | Corregir README, U2, U3, Arduino README, JSON del mockup (decían BLE/ESP32/LCD/MQTT/Argon2) | 2.1.4.13–15 | ✅ Hecho |
 | 14b | Inicio de sesión con cuenta de Google (Credential Manager + Firebase Auth) | 2.1.1.2, 2.1.3.10 | ✅ Código hecho · ⏳ Equipo: habilitar Google en Firebase + SHA-1 + ID de cliente web |
+| 14c | Esqueletos de carga (skeleton) en Inicio, Monitoreo, Automatización, Ventilación y Perfil (`Skeleton.kt`) | 2.1.2.6, 2.1.3.8 | ✅ Hecho |
 | 15 | Compilar app y probar en emuladores API 24 y 34+ | 3.1.4.14 | ⏳ Equipo (en el entorno de Claude no hay Android SDK) |
 | 16 | Compilar y cargar el sketch en la Wemos | todos 3.1.3 | ⏳ Equipo |
 | 17 | Medir consumo con medidor USB y llenar tabla | 3.1.3.10 | ⏳ Equipo (opcional, suma) |
@@ -36,5 +37,6 @@ Estado al 26-11-2026. Punto de partida: commit `31cf7bb "ns"` (sincronización S
 
 ## Bitácora
 
+- **26-11-2026:** agregado skeleton de carga en toda la app.
 - **26-11-2026:** agregado inicio con Google.
 - **26-11-2026:** revisión contra las 3 rúbricas; tareas 1–14 implementadas. Ver `docs/GUIA_EQUIPO.md` para probar.
