@@ -30,7 +30,9 @@ sealed class MainUiState {
         /** Lecturas guardadas en el teléfono que aún no se suben a la nube. */
         val pendingSync: Int = 0,
         /** Lecturas que la placa guardó sin conexión y reenvió al reconectar (en esta sesión de la app). */
-        val recoveredFromDevice: Int = 0
+        val recoveredFromDevice: Int = 0,
+        /** La placa está conectada pero el DHT11 no responde (revisar cable en D5). */
+        val sensorError: Boolean = false
     ) : MainUiState() {
         val temperature: String get() = temperatureC?.let { "$it °C" } ?: "-- °C"
         val humidity: String get() = humidityPct?.let { "$it %" } ?: "-- %"
@@ -38,7 +40,9 @@ sealed class MainUiState {
         /** Texto corto de confort térmico según la temperatura. */
         val comfortLabel: String
             get() = when {
-                temperatureC == null -> "Sin conexión"
+                sensorError -> "Sensor DHT11 sin lectura"
+                !isConnected -> "Sin conexión"
+                temperatureC == null -> "Esperando lectura…"
                 temperatureC >= rules.tempThreshold -> "Caluroso"
                 temperatureC <= 18 -> "Frío"
                 else -> "Confort ideal"

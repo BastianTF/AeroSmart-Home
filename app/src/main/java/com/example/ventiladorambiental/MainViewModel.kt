@@ -61,6 +61,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val syncRepository = SyncRepository(application)
     private var pendingSync = 0
     private var recoveredFromDevice = 0
+    /** true si la placa avisó que el DHT11 no entrega lecturas (ERR:DHT). */
+    private var sensorError = false
+    /** true cuando llegó al menos una lectura real (DATA) en esta conexión. */
+    private var hasReading = false
     private val stopNetworkWatch: () -> Unit
 
     private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -99,6 +103,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         stopDemo()
         isDemo = false
+        hasReading = false
+        sensorError = false
         val l = DeviceLink(getApplication(), key, BuildConfig.DEVICE_HOST, BuildConfig.DEVICE_PORT, viewModelScope)
         link = l
         linkJobs += viewModelScope.launch { l.state.collect { onLinkState(it) } }
@@ -141,7 +147,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun onDeviceMessage(body: String) {
         HistoryReading.parse(body)?.let { saveDeviceHistory(it); return }
+        if (body == "ERR:DHT") {
+            if (!sensorError) { sensorError = true; updateSuccessState() }
+            return
+        }
         val t = Telemetry.parse(body) ?: return
+        sensorError = false
+        hasReading = true
         temperature = t.temperature
         humidity = t.humidity
         isMovement = t.movement
@@ -165,6 +177,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun disconnectDevice() {
+        sensorError = false
+        hasReading = false
         stopDemo()
         releaseLink()
         isConnected = false
@@ -330,8 +344,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun updateSuccessState() {
         _uiState.value = MainUiState.Success(
             isConnected = isConnected,
-            temperatureC = if (isConnected) temperature else null,
-            humidityPct = if (isConnected) humidity else null,
+            // Con la placa real solo se muestran valores que de verdad llegaron (no los de partida)
+            temperatureC = if (isConnected && (isDemo || hasReading) && !sensorError) temperature else null,
+            humidityPct = if (isConnected && (isDemo || hasReading) && !sensorError) humidity else null,
             isMovementDetected = isConnected && isMovement,
             isVentOpen = isVentOpen,
             isAutoMode = isAutoMode,
@@ -344,6 +359,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             linkStatus = linkStatus,
             linkQuality = if (isConnected && !isDemo) linkQuality else null,
             pendingSync = pendingSync,
+            sensorError = isConnected && !isDemo && sensorError,
             recoveredFromDevice = recoveredFromDevice
         )
     }

@@ -330,8 +330,24 @@ void readClient() {
 void readSensors() {
   float t = dht.readTemperature();
   float h = dht.readHumidity();
-  dhtOk = !(isnan(t) || isnan(h));
-  if (dhtOk) { temperature = (int)lround(t); humidity = (int)lround(h); }
+  bool ok = !(isnan(t) || isnan(h));
+  if (ok != dhtOk || !ok) {
+    static unsigned long lastLog = 0;
+    if (ok != dhtOk || millis() - lastLog > 10000) {
+      lastLog = millis();
+      if (ok) Serial.println(F("[sensor] DHT11 OK"));
+      else Serial.println(F("[sensor] DHT11 sin lectura: revisa VCC=3V3, DATA=D5, GND (y resistencia 10k si es el sensor suelto)"));
+    }
+  }
+  dhtOk = ok;
+  if (dhtOk) {
+    temperature = (int)lround(t); humidity = (int)lround(h);
+    static unsigned long lastPrint = 0;
+    if (millis() - lastPrint > 10000) {
+      lastPrint = millis();
+      Serial.print(F("[sensor] ")); Serial.print(temperature); Serial.print(F(" C, ")); Serial.print(humidity); Serial.println(F(" %"));
+    }
+  }
 }
 
 void halt(const __FlashStringHelper *msg) {
