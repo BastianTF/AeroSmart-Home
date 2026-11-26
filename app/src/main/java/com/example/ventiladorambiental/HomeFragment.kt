@@ -32,7 +32,6 @@ class HomeFragment : Fragment() {
         setupListeners()
         observeUiState()
         observeName()
-        UiFx.animateChildrenIn(binding.contentLayout)
     }
 
     private fun setupListeners() {
@@ -133,6 +132,12 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    /** Animación de entrada cada vez que la pestaña se muestra (ViewPager2 deja RESUMED solo a la visible). */
+    override fun onResume() {
+        super.onResume()
+        UiFx.enterScreen(binding.root, binding.contentLayout, binding.headerLayout)
     }
 
     override fun onDestroyView() {

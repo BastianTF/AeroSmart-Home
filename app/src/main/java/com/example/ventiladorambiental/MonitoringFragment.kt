@@ -37,7 +37,6 @@ class MonitoringFragment : Fragment() {
             startActivity(Intent(requireContext(), ProfileActivity::class.java))
         }
         observeUiState()
-        UiFx.animateChildrenIn(binding.contentLayout)
     }
 
     private var lastRenderedHistory: List<Reading>? = null
@@ -105,6 +104,12 @@ class MonitoringFragment : Fragment() {
         binding.txtLinkLoss.text = "${q.lossPercent} %"
         binding.txtLinkReconnects.text = q.reconnects.toString()
         binding.txtLinkRejected.text = q.rejected.toString()
+    }
+
+    /** Animación de entrada cada vez que la pestaña se muestra (ViewPager2 deja RESUMED solo a la visible). */
+    override fun onResume() {
+        super.onResume()
+        UiFx.enterScreen(binding.root, binding.contentLayout, binding.headerLayout)
     }
 
     override fun onDestroyView() {

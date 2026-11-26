@@ -13,8 +13,11 @@ import kotlinx.coroutines.launch
 /** Botón "Continuar con Google" de Login y Registro: inicia sesión y abre el panel principal. */
 fun AppCompatActivity.startGoogleLogin(button: View) {
     button.isEnabled = false
+    val pulse = UiFx.pulse(button) // latido mientras se espera a Google
     lifecycleScope.launch {
-        when (val r = GoogleAuth.signIn(this@startGoogleLogin)) {
+        val result = GoogleAuth.signIn(this@startGoogleLogin)
+        UiFx.stopPulse(button, pulse)
+        when (val r = result) {
             is GoogleAuth.Result.Success -> {
                 val user = UserRepository(this@startGoogleLogin).ensureGoogleUser(r.name, r.email)
                 val prefs = UserPreferences(this@startGoogleLogin)

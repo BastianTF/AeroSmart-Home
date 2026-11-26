@@ -4,6 +4,10 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.animation.ObjectAnimator
+import android.view.HapticFeedbackConstants
+import android.view.View
+import android.view.animation.OvershootInterpolator
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -87,13 +91,49 @@ class MainActivity : AppCompatActivity() {
         binding.viewPagerMain.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 binding.bottomNav.menu.findItem(tabs[position]).isChecked = true
+                moveNavPill(tabs[position], animate = true)
             }
         })
         binding.bottomNav.setOnItemSelectedListener { item ->
             val index = tabs.indexOf(item.itemId)
-            if (index >= 0) binding.viewPagerMain.setCurrentItem(index, true)
+            if (index >= 0) {
+                binding.bottomNav.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                binding.viewPagerMain.setCurrentItem(index, true)
+            }
             index >= 0
         }
+        // La píldora reemplaza el indicador de Material; se ubica al medir la barra (y al rotar)
+        binding.bottomNav.isItemActiveIndicatorEnabled = false
+        binding.bottomNav.addOnLayoutChangeListener { _, l, t, r, b, oldL, oldT, oldR, oldB ->
+            // Solo cuando cambia el tamaño (primer dibujo o rotación); así no corta la animación
+            if (r - l != oldR - oldL || b - t != oldB - oldT || binding.navPill.alpha == 0f) {
+                binding.bottomNav.post { moveNavPill(tabs[binding.viewPagerMain.currentItem], animate = false) }
+            }
+        }
+    }
+
+    /** Desliza la píldora negra hasta el ícono de la pestaña [itemId], estirándose en el camino. */
+    private fun moveNavPill(itemId: Int, animate: Boolean) {
+        val item = binding.bottomNav.findViewById<View>(itemId) ?: return
+        val icon = item.findViewById<View>(com.google.android.material.R.id.navigation_bar_item_icon_view) ?: item
+        if (icon.width == 0) return
+        val pill = binding.navPill
+        val iconLoc = IntArray(2).also { icon.getLocationInWindow(it) }
+        val baseLoc = IntArray(2).also { binding.navContainer.getLocationInWindow(it) }
+        val x = iconLoc[0] - baseLoc[0] + icon.width / 2f - pill.width / 2f
+        val y = iconLoc[1] - baseLoc[1] + icon.height / 2f - pill.height / 2f
+        if (!animate || pill.alpha == 0f) {
+            pill.animate().cancel()
+            pill.translationX = x
+            pill.translationY = y
+            pill.animate().alpha(1f).setDuration(200).start()
+            return
+        }
+        pill.animate().translationX(x).translationY(y).setDuration(420)
+            .setInterpolator(OvershootInterpolator(1.2f)).start()
+        ObjectAnimator.ofFloat(pill, View.SCALE_X, 1f, 1.45f, 1f).setDuration(420).start()
+        ObjectAnimator.ofFloat(icon, View.SCALE_Y, 1f, 1.2f, 1f).setDuration(320).start()
+        ObjectAnimator.ofFloat(icon, View.SCALE_X, 1f, 1.2f, 1f).setDuration(320).start()
     }
 
     /** Horario, reglas, modo oscuro y "pantalla encendida" guardados por el usuario llegan al ViewModel. */

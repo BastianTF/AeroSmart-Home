@@ -3,4 +3,10 @@
     <!-- Etiquetas internas del esqueleto de carga (Skeleton.kt) -->
     <item name="skeleton_original_fg" type="id" />
     <item name="skeleton_state" type="id" />
+    <!-- Animaciones de UiFx -->
+    <item name="ui_pending_reveal" type="id" />
+    <item name="ui_letter_spacing" type="id" />
+    <item name="ui_text_anim" type="id" />
+    <item name="ui_button_text" type="id" />
+    <item name="ui_button_icon" type="id" />
 </resources>
